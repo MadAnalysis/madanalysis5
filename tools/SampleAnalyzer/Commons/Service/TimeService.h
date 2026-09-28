@@ -22,6 +22,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file TimeService.h
+ * @brief Measurement of the time spent in portions of code (START_TIMER/STOP_TIMER, active with TIMER_MODE).
+ */
+
+// FIXME: same include guard as CompilationService.h (TIMER_SERVICE_H).
 #ifndef TIMER_SERVICE_H
 #define TIMER_SERVICE_H
 
@@ -40,10 +46,10 @@
 
 #ifdef TIMER_MODE
 
-  // ShortCut for starting the chronometer 
+  /** @brief Start the chronometer called name (TIMER_MODE only). */
   #define START_TIMER(name) TimeService::GetInstance()->StartTime(name);
 
-  // ShortCut for stopping the chronometer 
+  /** @brief Stop the chronometer called name (TIMER_MODE only). */
   #define STOP_TIMER(name)  TimeService::GetInstance()->StopTime(name);
 
 #else
@@ -57,18 +63,12 @@
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class TimeService allows to determine the time budget of the program
-/// and stores information in a table.
-///
-/// TimeService is a singleton-pattern-based class : only one instance.
-/// Getting the only one instance : TimeService::GetInstance()
-//////////////////////////////////////////////////////////////////////////////
+/** @brief Singleton measuring the CPU time spent in named portions of code. */
 class TimeService
 {
  private:
 
-  // ShortCuts
+  /** @brief Table of the measurements, by name. */
   typedef std::map<std::string,TimeMeasureType> TimeCollection;
   typedef std::map<std::string,TimeMeasureType>::const_iterator TimeConstIterator;
   typedef std::map<std::string,TimeMeasureType>::iterator TimeIterator;
@@ -79,10 +79,10 @@ class TimeService
   // -------------------------------------------------------------
  private:
 
-  /// Pointer to the unique instance of TimeService
+  /** @brief Unique instance. */
   static TimeService* service_;
 
-  // Table containing stats about each measure
+  /** @brief Measurements, by name. */
   TimeCollection MeasureTable_;
 
 
@@ -91,20 +91,31 @@ class TimeService
   // -------------------------------------------------------------
  private:
 
-  /// Constructor without arguments
+  /** @brief Constructor. */
   TimeService()
   {}
 
-  /// Destructor
+  /** @brief Destructor. */
   ~TimeService()
   {}
 
-  /// Order relation for sorting the table according to timing
+  /**
+   * @brief Order the measurements by decreasing average time.
+   *
+   * @param a first measurement.
+   * @param b second measurement.
+   * @return true if a comes first.
+   */
   static MAbool timingOrder(const std::pair<const std::string,TimeMeasureType>* a,
                           const std::pair<const std::string,TimeMeasureType>* b)
   { return (a->second.GetAverage()>b->second.GetAverage()); }
 
-  /// Getting an iterator to a given entry in the table
+  /**
+   * @brief Get the measurement of a name (created if needed).
+   *
+   * @param name name.
+   * @return an iterator to the measurement.
+   */
   TimeIterator GetIterator(const std::string& name)
   {
     TimeIterator it = MeasureTable_.find(name);
@@ -126,21 +137,29 @@ class TimeService
 
  public:
 
-  /// Getting the unique instance of TimeService
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static TimeService* GetInstance()
   {
     if (service_==0) service_ = new TimeService;
     return service_;
   }
 
-  /// Deleting the unique instance of TimeService
+  /** @brief Delete the unique instance. */
   static void Kill()
   {
     if (service_!=0) delete service_;
     service_=0;
   }
 
-  /// Start a timing measure
+  /**
+   * @brief Start a measurement.
+   *
+   * @param name name of the measurement.
+   */
   void StartTime(const std::string& name)
   {
     TimeIterator it = GetIterator(name);
@@ -150,7 +169,11 @@ class TimeService
     it->second.SetStart(std::clock());
   }
 
-  /// Stop a timing measure
+  /**
+   * @brief Stop a measurement.
+   *
+   * @param name name of the measurement.
+   */
   void StopTime(const std::string& name)
   {
     // Take time measure
@@ -164,13 +187,21 @@ class TimeService
     it->second.SetStop(timing);
   }
 
-  /// Display the measure table
+  /**
+   * @brief Print the table of the measurements.
+   *
+   * @param os logger.
+   */
   void Print(LogStream& os=INFO) const
   {
     WriteGenericReport(os);
   }
 
-  /// Display the measure table
+  /**
+   * @brief Print the table of the measurements (TIMER_MODE only).
+   *
+   * @param os logger.
+   */
   void WriteGenericReport(LogStream& os=INFO) const;
 
 };

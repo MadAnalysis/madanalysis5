@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file SmearerBase.h
+ * @brief Base class of the SFS smearers and of the particle propagator.
+ */
+
 #ifndef SMEARERBASE_H
 #define SMEARERBASE_H
 
@@ -36,36 +41,46 @@
 namespace MA5
 {
 
+    /**
+     * @brief Base class of the Simplified Fast Simulation (SFS) smearers.
+     *
+     * The default methods return the input particle unchanged. MadAnalysis 5 generates
+     * the class NewSmearer (new_smearer_reco.h/cpp) from the `define smearer`,
+     * `define reco_efficiency` and `define jes|scaling` commands; it overrides
+     * SetParameters() and the object-specific smearing methods.
+     *
+     * Lengths are in mm, the magnetic field in tesla.
+     */
     class SmearerBase
     {
         //---------------------------------------------------------------------------------
         //                              private data members
         //---------------------------------------------------------------------------------
     private:
-        // Set constants: speed of light & pi
+        /** @brief Speed of light [m/s] (c_) and pi (pi_), set by Initialize(). */
         MAdouble64 c_;
         MAdouble64 pi_;
 
-        /// Lenght unit mm=1 cm=0.1
+        /** @brief Length unit (mm = 1, cm = 0.1). */
         MAfloat32 length_unit_;
 
         //---------------------------------------------------------------------------------
         //                            protected data members
         //---------------------------------------------------------------------------------
     protected:
-        // Creating a container for the smeared output
+        /** @brief Output of the last smearing (reset for each object). */
         MCParticleFormat output_;
 
-        // Magnetic field along beam axis
+        /** @brief Magnetic field along the beam axis [T]. */
         MAdouble64 Bz_;
 
-        // Tracker cylinder radius
+        /** @brief Radius of the tracker cylinder (currently unused). */
         MAdouble64 Radius_;
 
-        // Tracker half length
+        /** @brief Half-length of the tracker cylinder (currently unused). */
         MAdouble64 HalfLength_;
 
-        // To optimise the code running time
+        /** @brief Flags switching on the smearing of each object type and the particle propagator. */
         MAbool MuonSmearer_;
         MAbool ElectronSmearer_;
         MAbool PhotonSmearer_;
@@ -80,22 +95,35 @@ namespace MA5
         //---------------------------------------------------------------------------------
         //                                method members
         //---------------------------------------------------------------------------------
-        /// Constructor without argument
+        /** @brief Constructor. */
         SmearerBase() {}
 
-        /// Destructor
+        /** @brief Destructor. */
         virtual ~SmearerBase() {}
 
-        /// Accessors
+        /**
+         * @brief Accessor to the magnetic field.
+         *
+         * @return the magnetic field along the beam axis [T].
+         */
         const MAdouble64 Bz() const { return Bz_; }
 
-        /// Length unit setter
+        /**
+         * @brief Set the length unit.
+         *
+         * @param val length unit (mm = 1, cm = 0.1).
+         */
         void SetLengthUnit(MAfloat32 val) { length_unit_ = val; }
 
-        /// Initialisation
+        /**
+         * @brief Initialise the smearer (parameters, banner, constants).
+         *
+         * @param base true for the default (no-smearing) smearer: the SFS banner is not printed.
+         */
         void Initialize(MAbool base = false)
         {
             SetParameters();
+            // NOTE: any length unit set before with SetLengthUnit() is overwritten here.
             length_unit_ = 1.0;
             if (!base)
             {
@@ -107,7 +135,14 @@ namespace MA5
             pi_ = 3.14159265;
         }
 
-        /// Matching general method
+        /**
+         * @brief Smear a particle with the method corresponding to its type.
+         *
+         * @param part particle to smear.
+         * @param smearerID type of smearing: 21 jet, 15 hadronic tau, 13 muon, 11 electron, 22 photon,
+         *        0 jet constituent, -1 track (any other value: no smearing).
+         * @return the smeared particle.
+         */
         MCParticleFormat Execute(const MCParticleFormat *part, MAint32 smearerID)
         {
             // Clearing the output vector
@@ -136,7 +171,15 @@ namespace MA5
             return output_;
         }
 
-        // Copy part to output
+        /**
+         * @brief Copy a particle (momentum, decay vertex and displacement observables) to an output object.
+         *
+         * If the propagator is off and the particle has a mother, the displacement
+         * observables are recomputed with SetDisplacementObservables().
+         *
+         * @param part input particle.
+         * @param output output object (reset first).
+         */
         void SetDefaultOutput(const MCParticleFormat *part, MCParticleFormat &output)
         {
             output.Reset();
@@ -154,10 +197,15 @@ namespace MA5
             }
         }
 
-        // Calculate displacement observables without magnetic field
+        /**
+         * @brief Compute the displacement observables (d0, dz, closest approach) for a straight-line trajectory.
+         *
+         * @param part input particle (its first mother gives the production vertex).
+         * @param output output object to fill.
+         */
         void SetDisplacementObservables(const MCParticleFormat *, MCParticleFormat &);
 
-        // Set parameters
+        /** @brief Set the parameters of the smearer (overridden by NewSmearer; by default nothing is smeared). */
         virtual void SetParameters()
         {
             Bz_ = 1.0e-9;
@@ -174,60 +222,115 @@ namespace MA5
         // For all methods below, the only relevant part of the output object is the momentum
         // The reset allows to clear the left-over from the previous object
 
-        // Electron smearing method
+        /**
+         * @brief Smear an electron (default: no smearing).
+         *
+         * @param part electron to smear.
+         * @return the smeared electron (only the kinematics and displacement are relevant).
+         */
         virtual MCParticleFormat ElectronSmearer(const MCParticleFormat *part)
         {
             SetDefaultOutput(part, output_);
             return output_;
         }
-        // Check whether electron smearing is on (code-efficiency-related)
+        /**
+         * @brief Is the electron smearing switched on?
+         *
+         * @return true if it is on.
+         */
         MAbool isElectronSmearerOn() { return ElectronSmearer_; }
 
-        // Muon smearing method
+        /**
+         * @brief Smear a muon (default: no smearing).
+         *
+         * @param part muon to smear.
+         * @return the smeared muon (only the kinematics and displacement are relevant).
+         */
         virtual MCParticleFormat MuonSmearer(const MCParticleFormat *part)
         {
             SetDefaultOutput(part, output_);
             return output_;
         }
-        // Check whether muon smearing is on (code-efficiency-related)
+        /**
+         * @brief Is the muon smearing switched on?
+         *
+         * @return true if it is on.
+         */
         MAbool isMuonSmearerOn() { return MuonSmearer_; }
 
-        // Hadronic Tau smearing method
+        /**
+         * @brief Smear a hadronic tau (default: no smearing).
+         *
+         * @param part hadronic tau to smear.
+         * @return the smeared hadronic tau (only the kinematics and displacement are relevant).
+         */
         virtual MCParticleFormat TauSmearer(const MCParticleFormat *part)
         {
             SetDefaultOutput(part, output_);
             return output_;
         }
-        // Check whether tau smearing is on (code-efficiency-related)
+        /**
+         * @brief Is the hadronic tau smearing switched on?
+         *
+         * @return true if it is on.
+         */
         MAbool isTauSmearerOn() { return TauSmearer_; }
 
-        // Photon smearing method
+        /**
+         * @brief Smear a photon (default: no smearing).
+         *
+         * @param part photon to smear.
+         * @return the smeared photon (only the kinematics and displacement are relevant).
+         */
         virtual MCParticleFormat PhotonSmearer(const MCParticleFormat *part)
         {
             SetDefaultOutput(part, output_);
             return output_;
         }
-        // Check whether photon smearing is on (code-efficiency-related)
+        /**
+         * @brief Is the photon smearing switched on?
+         *
+         * @return true if it is on.
+         */
         MAbool isPhotonSmearerOn() { return PhotonSmearer_; }
 
-        // Jet smearing method
+        /**
+         * @brief Smear a jet (default: no smearing).
+         *
+         * @param part jet to smear.
+         * @return the smeared jet (only the kinematics and displacement are relevant).
+         */
         virtual MCParticleFormat JetSmearer(const MCParticleFormat *part)
         {
             SetDefaultOutput(part, output_);
             return output_;
         }
 
-        // Check whether jet smearing is on (code-efficiency-related)
+        /**
+         * @brief Is the jet smearing switched on?
+         *
+         * @return true if it is on.
+         */
         MAbool isJetSmearerOn() { return JetSmearer_; }
 
-        // Jet Constituent smearing method
+        /**
+         * @brief Smear a jet constituent (default: no smearing).
+         *
+         * @param part constituent to smear.
+         * @return the smeared constituent.
+         */
         virtual MCParticleFormat ConstituentSmearer(const MCParticleFormat *part)
         {
             SetDefaultOutput(part, output_);
             return output_;
         }
 
-        // Track smearing method
+        /**
+         * @brief Smear a track (default: no smearing).
+         *
+         * @param part track to smear.
+         * @return the smeared track.
+         */
         virtual MCParticleFormat TrackSmearer(const MCParticleFormat *part)
         {
             SetDefaultOutput(part, output_);
@@ -238,15 +341,33 @@ namespace MA5
         //   Particle Propagator Method   //
         //================================//
 
-        // Check whether particle propagator is on (code-efficiency-related)
+        /**
+         * @brief Is the particle propagator switched on?
+         *
+         * @return true if it is on.
+         */
         MAbool isPropagatorOn() { return ParticlePropagator_; }
 
-        // Particle propagator method
+        /**
+         * @brief Propagate a particle from the decay vertex of its mother (helix in the magnetic field).
+         *
+         * The momentum is rotated like the mother's, and the displacement observables and the
+         * decay vertex are updated.
+         *
+         * @param part particle to propagate (modified in place).
+         */
         void ParticlePropagator(MCParticleFormat *part);
 
-        /// Smearer Gaussian function
+        /**
+         * @brief Smear a value with a Gaussian distribution.
+         *
+         * @param sigma standard deviation (the comment in the source says 'variance').
+         * @param property central value.
+         * @return the smeared value.
+         */
         MAdouble64 Gaussian(MAdouble64, MAdouble64);
 
+        /** @brief Print the parameters of the smearer (debug level). */
         void PrintDebug()
         {
             DEBUG << "   -> Smearer Input Values:" << endmsg;
@@ -273,6 +394,7 @@ namespace MA5
             DEBUG << "      * Jet Smearer        = " << module << endmsg;
         }
 
+        /** @brief Print the SFS banner with the references to cite. */
         void PrintHeader()
         {
             INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;

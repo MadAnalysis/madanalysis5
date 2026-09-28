@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file Terminate.h
+ * @brief Handler of abnormal terminations (reports printed before aborting).
+ */
+
 #ifndef TERMINATE_H
 #define TERMINATE_H
 
@@ -39,9 +44,7 @@
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class Terminate tunes the display when the main program crash.
-//////////////////////////////////////////////////////////////////////////////
+/** @brief Handler of abnormal terminations. */
 class Terminate
 {
   // -------------------------------------------------------------
@@ -49,11 +52,11 @@ class Terminate
   // -------------------------------------------------------------
  public:
 
-  // Setting the function called when abnormal termination
+  /** @brief Install TerminateAndDisplayReport() as std::terminate handler. */
   static void Initialize()
   { std::set_terminate(Terminate::TerminateAndDisplayReport); }
 
-  // Function Terminate : displaying report, killing singleton services, exit
+  /** @brief Print the timing and exception reports, kill the services and abort. */
   static void TerminateAndDisplayReport()
   {
     // Warning

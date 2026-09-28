@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file WeightCollection.h
+ * @brief Collection of the weights of an event (multiweight support).
+ */
+
 #ifndef WEIGHT_COLLECTION_H
 #define WEIGHT_COLLECTION_H
 
@@ -38,6 +43,11 @@
 
 namespace MA5
 {
+    /**
+     * @brief Weights of an event, indexed from 0 (index 0 is the nominal weight).
+     *
+     * Arithmetic operators act element-wise on all the weights.
+     */
     class WeightCollection
     {
 
@@ -45,44 +55,73 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     private:
+        /** @brief Weights. */
         std::vector<MAfloat64> weights_;
+        /** @brief Value returned for an undefined weight (0). */
         static const MAfloat64 emptyvalue_;
 
         // -------------------------------------------------------------
         //                      method members
         // -------------------------------------------------------------
     public:
-        /// Constructor withtout arguments
+        /** @brief Constructor (empty collection). */
         WeightCollection() {}
 
-        // copy constructor
+        /**
+         * @brief Copy constructor.
+         *
+         * @param rhs collection to copy.
+         */
         WeightCollection(const WeightCollection &rhs)
         {
             weights_.clear();
             weights_ = rhs.weights_;
         }
 
-        /// @brief Initialise weights with a certain size and default value
-        /// @param size number of weights
-        /// @param default_value default value for each weight
+        /**
+         * @brief Constructor with a given number of weights.
+         *
+         * @param size number of weights.
+         * @param default_value initial value of each weight.
+         */
         explicit WeightCollection(const MAuint32 &size, MAdouble64 default_value = 0.0) : weights_(size, default_value) {}
 
-        /// Destructor
+        /** @brief Destructor. */
         ~WeightCollection() {}
 
-        /// Clear all the content
+        /** @brief Remove all the weights. */
         void Reset() { weights_.clear(); }
+        /** @brief Remove all the weights (alias of Reset()). */
         void clear() { Reset(); }
 
-        /// Size
+        /**
+         * @brief Number of weights.
+         *
+         * @return the number of weights.
+         */
         MAuint32 size() const { return weights_.size(); }
 
-        /// Size
+        /**
+         * @brief Number of weights.
+         *
+         * @return the number of weights.
+         */
         MAuint32 size() { return weights_.size(); }
 
+        /**
+         * @brief Change the number of weights.
+         *
+         * @param n new size.
+         */
         void resize(MAuint32 n) { weights_.resize(n); }
 
-        /// Add a new weight group
+        /**
+         * @brief Set an existing weight.
+         *
+         * @param id index of the weight.
+         * @param value weight.
+         * @return false (with an error) if the index does not exist.
+         */
         MAbool Add(MAuint32 id, MAfloat64 value)
         {
             if (id < size())
@@ -98,6 +137,7 @@ namespace MA5
                     str << id;
                     std::string idname;
                     str >> idname;
+                    // NOTE: the message ('A null value is returned') is copied from Get().
                     throw EXCEPTION_ERROR("The Weight '" + idname +
                                               "' is not defined. A null value is returned.",
                                           "", 0);
@@ -110,13 +150,26 @@ namespace MA5
             }
         }
 
-        /// Get all the Weight Collection
+        /**
+         * @brief Accessor to all the weights.
+         *
+         * @return the weights.
+         */
         const std::vector<MAfloat64> &GetWeights() const { return weights_; }
 
-        /// Get all the Weights
+        /**
+         * @brief Accessor to all the weights.
+         *
+         * @return the weights.
+         */
         const std::vector<MAfloat64> &values() const { return weights_; }
 
-        /// Get a weight
+        /**
+         * @brief Accessor to one weight.
+         *
+         * @param id index.
+         * @return the weight, or 0 (with an error) if the index does not exist.
+         */
         const MAfloat64 &Get(MAuint32 id) const
         {
             if (id >= 0 && id < size())
@@ -139,10 +192,15 @@ namespace MA5
             }
         }
 
-        /// Get a weight
+        /**
+         * @brief Accessor to one weight.
+         *
+         * @param id index.
+         * @return the weight (see Get()).
+         */
         const MAfloat64 &operator[](MAuint32 id) const { return Get(id); }
 
-        /// @brief Print weight information
+        /** @brief Print the weights. */
         void Print() const
         {
             if (!weights_.empty())
@@ -150,16 +208,27 @@ namespace MA5
                     INFO << "ID=" << i << " : " << weights_[i] << endmsg;
         }
 
-        /// @brief add weight to specific location
-        /// @param idx location
-        /// @param weight weight value
+        /**
+         * @brief Add a value to one weight (no bound check).
+         *
+         * @param idx index.
+         * @param weight value to add.
+         */
         void add_weight_to(MAint32 idx, MAdouble64 weight) { weights_[idx] += weight; }
 
-        // explicit setter from same-typed vector (if you need it)
+        /**
+         * @brief Replace all the weights.
+         *
+         * @param v new weights.
+         */
         void SetWeights(const std::vector<MAfloat64> &v) { weights_ = v; }
 
-        /// @brief multiply operator
-        /// @param multiple
+        /**
+         * @brief Multiply all the weights.
+         *
+         * @param multiple factor.
+         * @return this collection.
+         */
         WeightCollection &operator*=(const MAdouble64 &multiple)
         {
             for (auto &x : weights_)
@@ -167,6 +236,12 @@ namespace MA5
             return *this;
         }
 
+        /**
+         * @brief Multiply all the weights.
+         *
+         * @param multiple factor.
+         * @return a scaled copy.
+         */
         WeightCollection operator*(const MAdouble64 &multiple) const
         {
             WeightCollection result(*this); // copy
@@ -175,6 +250,12 @@ namespace MA5
             return result;
         }
 
+        /**
+         * @brief Divide all the weights.
+         *
+         * @param multiple divisor.
+         * @return a scaled copy.
+         */
         WeightCollection operator/(const MAdouble64 &multiple) const
         {
             WeightCollection result(*this); // copy
@@ -183,6 +264,12 @@ namespace MA5
             return result;
         }
 
+        /**
+         * @brief Add a value to all the weights.
+         *
+         * @param multiple value.
+         * @return a shifted copy.
+         */
         WeightCollection operator+(const MAdouble64 &multiple) const
         {
             WeightCollection result(*this); // copy
@@ -191,6 +278,12 @@ namespace MA5
             return result;
         }
 
+        /**
+         * @brief Subtract a value from all the weights.
+         *
+         * @param multiple value.
+         * @return a shifted copy.
+         */
         WeightCollection operator-(const MAdouble64 &multiple) const
         {
             WeightCollection result(*this); // copy
@@ -199,8 +292,12 @@ namespace MA5
             return result;
         }
 
-        /// @brief add operator
-        /// @param input
+        /**
+         * @brief Add a value to all the weights.
+         *
+         * @param input value.
+         * @return this collection.
+         */
         WeightCollection &operator+=(const MAfloat64 &input)
         {
             for (auto &x : weights_)
@@ -208,8 +305,12 @@ namespace MA5
             return *this;
         }
 
-        /// @brief add operator
-        /// @param input
+        /**
+         * @brief Add a vector of values element-wise.
+         *
+         * @param input values (same size as the collection).
+         * @return this collection.
+         */
         WeightCollection &operator+=(const std::vector<MAdouble64> &input)
         {
             if (size() != input.size())
@@ -220,8 +321,12 @@ namespace MA5
             return *this;
         }
 
-        /// @brief subtract operator
-        /// @param input
+        /**
+         * @brief Subtract a value from all the weights.
+         *
+         * @param input value.
+         * @return this collection.
+         */
         WeightCollection &operator-=(const MAfloat64 &input)
         {
             for (auto &x : weights_)
@@ -229,8 +334,12 @@ namespace MA5
             return *this;
         }
 
-        /// @brief divide operator
-        /// @param input
+        /**
+         * @brief Divide all the weights.
+         *
+         * @param input divisor.
+         * @return this collection.
+         */
         WeightCollection &operator/=(const MAfloat64 &input)
         {
             for (auto &x : weights_)
@@ -238,8 +347,12 @@ namespace MA5
             return *this;
         }
 
-        /// @brief assignment operator
-        /// @param input
+        /**
+         * @brief Set all the weights to a value.
+         *
+         * @param input value.
+         * @return this collection.
+         */
         WeightCollection &operator=(const MAfloat64 &input)
         {
             for (auto &x : weights_)
@@ -247,8 +360,12 @@ namespace MA5
             return *this;
         }
 
-        /// @brief assignment operator
-        /// @param input
+        /**
+         * @brief Copy assignment.
+         *
+         * @param w collection to copy.
+         * @return this collection.
+         */
         WeightCollection &operator=(const WeightCollection &w)
         {
             if (this == &w)
@@ -258,23 +375,53 @@ namespace MA5
         }
     };
 
+    /**
+     * @brief Multiply all the weights (scalar on the left).
+     *
+     * @param multiple factor.
+     * @param w collection.
+     * @return a scaled copy.
+     */
     inline WeightCollection operator*(const MAdouble64 &multiple, const WeightCollection &w)
     {
         return w * multiple;
     }
 
+    /**
+     * @brief Scalar divided by a collection (see the FIXME).
+     *
+     * @param multiple scalar.
+     * @param w collection.
+     * @return w / multiple.
+     */
     inline WeightCollection operator/(const MAdouble64 &multiple, const WeightCollection &w)
     {
+        // FIXME: returns w / multiple instead of multiple / w (element-wise).
         return w / multiple;
     }
 
+    /**
+     * @brief Add a value to all the weights (scalar on the left).
+     *
+     * @param multiple value.
+     * @param w collection.
+     * @return a shifted copy.
+     */
     inline WeightCollection operator+(const MAdouble64 &multiple, const WeightCollection &w)
     {
         return w + multiple;
     }
 
+    /**
+     * @brief Scalar minus a collection (see the FIXME).
+     *
+     * @param multiple scalar.
+     * @param w collection.
+     * @return w - multiple.
+     */
     inline WeightCollection operator-(const MAdouble64 &multiple, const WeightCollection &w)
     {
+        // FIXME: returns w - multiple instead of multiple - w (element-wise).
         return w - multiple;
     }
 }

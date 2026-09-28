@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /// STL headers
+/**
+ * @file Test.cpp
+ * @brief Test of the HEPTopTagger interface.
+ */
+
 #include <iostream>
 #include <cassert>
 
@@ -39,6 +44,16 @@ using namespace MA5;
 // -----------------------------------------------------------------------
 // main program
 // -----------------------------------------------------------------------
+/**
+ * @brief Cluster the particles of Substructure/input.dat into C/A (R=1.5) jets and run the HEPTopTagger on the second jet.
+ *
+ * The markers BEGIN-SAMPLEANALYZER-TEST / END-SAMPLEANALYZER-TEST are checked by the
+ * Python front-end (LibraryWriter, madanalysis/IOinterface/library_writer.py) to validate the build.
+ *
+ * @param argc number of command-line arguments.
+ * @param argv command-line arguments.
+ * @return 0 (assert aborts on failure).
+ */
 int main(int argc, char *argv[])
 {
     std::cout << "BEGIN-SAMPLEANALYZER-TEST" << std::endl;
@@ -84,6 +99,7 @@ int main(int argc, char *argv[])
     tagger.get_settings();
 
     tagger.Execute(Ma5Jet[1]);
+    // NOTE: the reference mass is only checked if the jet is tagged; otherwise the test passes silently.
     if (tagger.is_tagged()){
         std::cout << "    * Input fatjet: pT = " << Ma5Jet[1]->pt() << std::endl;
         std::cout << "    * Output: pT = " << tagger.top()->pt()

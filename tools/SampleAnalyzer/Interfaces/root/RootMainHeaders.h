@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file RootMainHeaders.h
+ * @brief Common ROOT headers and conversion helpers.
+ */
+
 #ifndef ROOT_MAIN_HEADERS_h
 #define ROOT_MAIN_HEADERS_h
 
@@ -46,7 +51,12 @@
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 
 
-// Relations between TLorentzVector & MALorentzVector
+/**
+ * @brief Convert a MadAnalysis 5 four-vector into a ROOT TLorentzVector.
+ *
+ * @param a four-vector.
+ * @return the TLorentzVector.
+ */
 TLorentzVector ToTLorentzVector(const MA5::MALorentzVector& a);
 
 #endif

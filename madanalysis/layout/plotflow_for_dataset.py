@@ -22,7 +22,15 @@
 ################################################################################
 
 
+"""Histograms of one dataset and their normalisation."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.dataset.dataset import Dataset
 from madanalysis.enumeration.uncertainty_type import UncertaintyType
 from madanalysis.enumeration.normalize_type import NormalizeType
 from madanalysis.enumeration.report_format_type import ReportFormatType
@@ -38,7 +46,23 @@ from six.moves import range
 
 
 class PlotFlowForDataset:
-    def __init__(self, main, dataset):
+    """Histograms of one dataset, in the order of the selection.
+
+    Attributes:
+        histos (``list[Any]``): ``Histogram``, ``HistogramLogX`` or ``HistogramFrequency``
+            objects.
+        main (``Main``): session state.
+        dataset (``Dataset``): dataset.
+        xsection (``float``): cross section used for the normalisation (user value if
+            set, measured value otherwise).
+    """
+    def __init__(self, main: Main, dataset: Dataset) -> None:
+        """Initialise an empty collection.
+
+        Args:
+            main (``Main``): session state.
+            dataset (``Dataset``): dataset.
+        """
         self.histos = []
         self.main = main
         self.dataset = dataset
@@ -48,14 +72,30 @@ class PlotFlowForDataset:
         if self.dataset.xsection != 0.0:
             self.xsection = self.dataset.xsection
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Get the number of histograms.
+
+        Returns:
+            ``int``:
+            Number of histograms.
+        """
         return len(self.histos)
 
-    def __getitem__(self, i):
+    def __getitem__(self, i: int) -> Any:
+        """Get a histogram.
+
+        Args:
+            i (``int``): index among the histograms.
+
+        Returns:
+            ``Any``:
+            The histogram.
+        """
         return self.histos[i]
 
     # Computing integral
-    def FinalizeReading(self):
+    def FinalizeReading(self) -> None:
+        """Finalise the reading of the histograms and update the cross section."""
 
         for histo in self.histos:
             histo.FinalizeReading(self.main, self.dataset)
@@ -65,7 +105,8 @@ class PlotFlowForDataset:
             self.xsection = self.dataset.xsection
 
     # Computing integral
-    def CreateHistogram(self):
+    def CreateHistogram(self) -> None:
+        """Finalise the binning/labels of every histogram."""
 
         iplot = 0
 
@@ -87,7 +128,15 @@ class PlotFlowForDataset:
             iplot += 1
 
     # Computing scales
-    def ComputeScale(self):
+    def ComputeScale(self) -> None:
+        """Compute the normalisation factor of every histogram.
+
+        * ``normalize2one`` stacking: ``1 / integral``;
+        * ``main.normalize = none``: ``1``;
+        * ``lumi``/``lumi_weight``: ``xsection * lumi * 1000 * eff * sumw/sumwentries /
+          integral``, with ``eff`` the fraction of events reaching the histogram (and the
+          dataset weight for ``lumi_weight``).
+        """
 
         iplot = 0
 

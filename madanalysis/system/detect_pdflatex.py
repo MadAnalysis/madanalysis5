@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Detection of ``pdflatex`` (PDF reports)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 import glob
 import os
@@ -34,8 +38,28 @@ from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectPdflatex:
+    """Detector of ``pdflatex`` (PDF reports).
 
-    def __init__(self, archi_info, user_info, session_info, debug):
+    The methods are called by
+    :meth:`madanalysis.system.detect_manager.DetectManager.Execute` in the following
+    order (only when defined): ``IsItVetoed``, ``AreDependenciesInstalled``,
+    ``ManualDetection``, ``ToolsDetection``, ``AutoDetection``, ``ExtractInfo`` and
+    ``SaveInfo``.
+
+    Attributes:
+        name (``str``): name displayed in the configuration check.
+        mandatory (``bool``): whether MadAnalysis 5 can run without the package.
+    """
+
+    def __init__(self, archi_info: Any, user_info: Any, session_info: Any, debug: bool) -> None:
+        """Create the detector of ``pdflatex`` (PDF reports).
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration, filled by :meth:`SaveInfo`.
+            user_info (``UserInfo``): user options (vetoes, forced paths).
+            session_info (``SessionInfo``): session information, filled by :meth:`SaveInfo`.
+            debug (``bool``): print detailed information.
+        """
         # mandatory options
         self.archi_info   = archi_info
         self.user_info    = user_info
@@ -49,11 +73,18 @@ class DetectPdflatex:
         # adding what you want here
 
 
-    def PrintDisableMessage(self):
+    def PrintDisableMessage(self) -> None:
+        """Log the consequences of ``pdflatex`` (PDF reports) being unavailable."""
         self.logger.warning("pdflatex disabled. Reports under the pdf format will not be compiled.")
         
 
-    def IsItVetoed(self):
+    def IsItVetoed(self) -> bool:
+        """Check whether ``pdflatex`` (PDF reports) has been vetoed by the user (``installation_options.dat``).
+
+        Returns:
+            ``bool``:
+            ``True`` if vetoed.
+        """
         if self.user_info.pdflatex_veto:
             self.logger.debug("user setting: veto on pdflatex")
             return True
@@ -62,7 +93,14 @@ class DetectPdflatex:
             return False
 
         
-    def AutoDetection(self):
+    def AutoDetection(self) -> tuple[int, str]:
+        """Look for ``pdflatex`` (PDF reports) on the system.
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         # Which
         result = ShellCommand.Which('pdflatex',all=False,mute=True)
         if len(result)==0:
@@ -74,7 +112,13 @@ class DetectPdflatex:
         return DetectStatusType.FOUND,''
 
 
-    def ExtractInfo(self):
+    def ExtractInfo(self) -> bool:
+        """Extract detailed information about the detected ``pdflatex`` (PDF reports) (version, paths, ...).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Which all
         if self.debug:
             result = ShellCommand.Which('pdflatex',all=True,mute=True)
@@ -88,7 +132,13 @@ class DetectPdflatex:
         return True
 
 
-    def SaveInfo(self):
+    def SaveInfo(self) -> bool:
+        """Store the information about ``pdflatex`` (PDF reports) in the architecture/session information.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         self.session_info.has_pdflatex = True
         return True
 

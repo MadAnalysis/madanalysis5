@@ -22,14 +22,22 @@
 ################################################################################
 
 
-"""A user friendly command line interface to access MadAnalysis features.
-   Uses the cmd package for command interpretation and tab completion.
+"""Command-line interpreter of the normal mode (``ma5>`` prompt).
+
+Each command ``<cmd>`` is implemented by a ``do_<cmd>`` method (execution),
+``help_<cmd>`` (help) and ``complete_<cmd>`` (tab completion), all delegating to the
+command objects of the ``cmd_*`` modules.
 """
 
 
 # Import Interpreter core
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.interpreter.interpreter_base import InterpreterBase
 
 # Import MadAnalysis main class
@@ -69,9 +77,22 @@ from six.moves import input
 # Interpreter
 #===============================================================================
 class Interpreter(InterpreterBase):
-    """Particularisation of the cmd command for MA5"""
+    """MadAnalysis 5 command-line interpreter (:class:`cmd.Cmd` subclass).
 
-    def __init__(self, main,*arg, **opt):
+    Attributes:
+        main (``Main``): session state.
+        cmd_<name>: command objects (e.g. :attr:`cmd_set`, :attr:`cmd_plot`,
+            :attr:`cmd_select`/:attr:`cmd_reject`, :attr:`cmd_submit`/:attr:`cmd_resubmit`).
+    """
+
+    def __init__(self, main: Main,*arg, **opt) -> None:
+        """Create the interpreter, its command objects and load the default (multi)particles.
+
+        Args:
+            main (``Main``): session state.
+            *arg: arguments of :class:`cmd.Cmd`.
+            **opt: keyword arguments of :class:`cmd.Cmd`.
+        """
 
         # Calling constructor from InterpreterBase
         InterpreterBase.__init__(self, *arg, **opt)
@@ -105,7 +126,8 @@ class Interpreter(InterpreterBase):
         self.InitializeMultiparticle()
 
 
-    def InitializeHistory(self):
+    def InitializeHistory(self) -> None:
+        """Load the ``readline`` history from ``<ma5dir>/.ma5history``."""
         # Importing history
         self.history_file = os.path.normpath(self.main.archi_info.ma5dir + '/.ma5history')
         logging.getLogger('MA5').debug("Importing history from: "+self.history_file+" ...")
@@ -118,7 +140,9 @@ class Interpreter(InterpreterBase):
         logging.getLogger('MA5').debug("-> Success!")
 
 
-    def FinalizeHistory(self):
+    def FinalizeHistory(self) -> None:
+        """Save the ``readline`` history (500 lines at most) into ``<ma5dir>/.ma5history``.
+        """
         # Importing history
         logging.getLogger('MA5').debug("Exporting the history to: "+self.history_file+" ...")
         readline.set_history_length(500)
@@ -129,90 +153,261 @@ class Interpreter(InterpreterBase):
         logging.getLogger('MA5').debug("-> Success!")
 
 
-    def do_set(self,line):
+    def do_set(self,line: str) -> None:
+        """Execute the ``set`` command (delegated to :class:`~madanalysis.interpreter.cmd_set.CmdSet`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_set.do(self.split_arg(line),line)
 
-    def help_set(self):
+    def help_set(self) -> None:
+        """Display the help of the ``set`` command."""
         self.cmd_set.help()
 
-    def complete_set(self,text,line,begidx,endidx):
+    def complete_set(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``set`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_set.complete(text,line,begidx,endidx)
 
-    def do_define(self,line):
+    def do_define(self,line: str) -> None:
+        """Execute the ``define`` command (delegated to :class:`~madanalysis.interpreter.cmd_define.CmdDefine`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_define.do(self.split_arg(line))
 
-    def do_define_region(self,line):
+    def do_define_region(self,line: str) -> None:
+        """Execute the ``define_region`` command (delegated to :class:`~madanalysis.interpreter.cmd_define_region.CmdDefineRegion`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_define_region.do(self.split_arg(line))
 
-    def help_define(self):
+    def help_define(self) -> None:
+        """Display the help of the ``define`` command."""
         self.cmd_define.help()
 
-    def help_define_region(self):
+    def help_define_region(self) -> None:
+        """Display the help of the ``define_region`` command."""
         self.cmd_define_region.help()
 
-    def complete_define(self,text,line,begidx,endidx):
+    def complete_define(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``define`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_define.complete(text,line,begidx,endidx)
 
-    def complete_define_region(self,text,line,begidx,endidx):
+    def complete_define_region(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``define_region`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_define_region.complete(text,line,begidx,endidx)
 
-    def do_display(self,line):
+    def do_display(self,line: str) -> None:
+        """Execute the ``display`` command (delegated to :class:`~madanalysis.interpreter.cmd_display.CmdDisplay`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_display.do(self.split_arg(line))
 
-    def help_display(self):
+    def help_display(self) -> None:
+        """Display the help of the ``display`` command."""
         self.cmd_display.help()
 
-    def complete_display(self,text,line,begidx,endidx):
+    def complete_display(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``display`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_display.complete(text,line,begidx,endidx)
 
-    def do_display_particles(self,line):
+    def do_display_particles(self,line: str) -> None:
+        """Execute the ``display_particles`` command (delegated to :class:`~madanalysis.interpreter.cmd_display_particles.CmdDisplayParticles`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_display_particles.do(self.split_arg(line))
 
-    def help_display_particles(self):
+    def help_display_particles(self) -> None:
+        """Display the help of the ``display_particles`` command."""
         self.cmd_display_particles.help()
 
-    def complete_display_particles(self,text,line,begidx,endidx):
+    def complete_display_particles(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``display_particles`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_display_particles.complete(text,line,begidx,endidx)
 
-    def do_display_multiparticles(self,line):
+    def do_display_multiparticles(self,line: str) -> None:
+        """Execute the ``display_multiparticles`` command (delegated to :class:`~madanalysis.interpreter.cmd_display_multiparticles.CmdDisplayMultiparticles`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_display_multiparticles.do(self.split_arg(line))
 
-    def help_display_multiparticles(self):
+    def help_display_multiparticles(self) -> None:
+        """Display the help of the ``display_multiparticles`` command."""
         self.cmd_display_multiparticles.help()
 
-    def complete_display_multiparticles(self,text,line,begidx,endidx):
+    def complete_display_multiparticles(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``display_multiparticles`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_display_multiparticles.complete(text,line,begidx,endidx)
 
-    def do_display_datasets(self,line):
+    def do_display_datasets(self,line: str) -> None:
+        """Execute the ``display_datasets`` command (delegated to :class:`~madanalysis.interpreter.cmd_display_datasets.CmdDisplayDatasets`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_display_datasets.do(self.split_arg(line))
 
-    def do_display_regions(self,line):
+    def do_display_regions(self,line: str) -> None:
+        """Execute the ``display_regions`` command (delegated to :class:`~madanalysis.interpreter.cmd_display_regions.CmdDisplayRegions`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_display_regions.do(self.split_arg(line))
 
-    def help_display_datasets(self):
+    def help_display_datasets(self) -> None:
+        """Display the help of the ``display_datasets`` command."""
         self.cmd_display_datasets.help()
 
-    def help_display_regions(self):
+    def help_display_regions(self) -> None:
+        """Display the help of the ``display_regions`` command."""
         self.cmd_display_regions.help()
 
-    def complete_display_datasets(self,text,line,begidx,endidx):
+    def complete_display_datasets(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``display_datasets`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_display_datasets.complete(text,line,begidx,endidx)
 
-    def complete_display_regions(self,text,line,begidx,endidx):
+    def complete_display_regions(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``display_regions`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_display_regions.complete(text,line,begidx,endidx)
 
-    def do_import(self,line):
+    def do_import(self,line: str) -> None:
+        """Execute the ``import`` command (delegated to :class:`~madanalysis.interpreter.cmd_import.CmdImport`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_import.do(self.split_arg(line),self,self.history)
 
-    def help_import(self):
+    def help_import(self) -> None:
+        """Display the help of the ``import`` command."""
         self.cmd_import.help()
 
-    def complete_import(self,text,line,begidx,endidx):
+    def complete_import(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``import`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_import.complete(text,line,begidx,endidx)
 
      # Restart
-    def do_restart(self, line):
-        """ sending a signal allowing to restart the interpreter """
+    def do_restart(self, line: str) -> bool | None:
+        """Request a restart of the session (after confirmation, unless in forced mode).
+
+        Args:
+            line (``str``): ignored.
+
+        Returns:
+            ``bool | None``:
+            ``True`` (stops the command loop and sets ``main.repeatSession``) if the restart
+            is accepted, ``None`` otherwise.
+        """
 
         # Note: Restart is available in script mode
         # Asking the safety question
@@ -238,85 +433,234 @@ class Interpreter(InterpreterBase):
         else:
             return None
 
-    def help_restart(self):
+    def help_restart(self) -> None:
+        """Display the help of the ``restart`` command."""
         logging.getLogger('MA5').info("   Syntax: restart ")
         logging.getLogger('MA5').info("   Quit the current MadAnalysis sessiona and open a new one.")
         logging.getLogger('MA5').info("   All the information will be discarded.")
 
-    def do_remove(self,line):
+    def do_remove(self,line: str) -> None:
+        """Execute the ``remove`` command (delegated to :class:`~madanalysis.interpreter.cmd_remove.CmdRemove`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_remove.do(self.split_arg(line))
 
-    def help_remove(self):
+    def help_remove(self) -> None:
+        """Display the help of the ``remove`` command."""
         self.cmd_remove.help()
 
-    def complete_remove(self,text,line,begidx,endidx):
+    def complete_remove(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``remove`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_remove.complete(text,line,begidx,endidx)
 
-    def do_swap(self,line):
+    def do_swap(self,line: str) -> None:
+        """Execute the ``swap`` command (delegated to :class:`~madanalysis.interpreter.cmd_swap.CmdSwap`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_swap.do(self.split_arg(line))
 
-    def help_swap(self):
+    def help_swap(self) -> None:
+        """Display the help of the ``swap`` command."""
         self.cmd_swap.help()
 
-    def complete_swap(self,text,line,begidx,endidx):
+    def complete_swap(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``swap`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_swap.complete(text,line,begidx,endidx)
 
-    def do_install(self,line):
+    def do_install(self,line: str) -> bool | None:
+        """Execute the ``install`` command (delegated to :class:`~madanalysis.interpreter.cmd_install.CmdInstall`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+
+        Returns:
+            ``bool | None``:
+            ``True`` if a restart has been accepted after the installation, ``None`` otherwise.
+        """
         result = self.cmd_install.do(self.split_arg(line))
         if result=='restart':
             logging.getLogger('MA5').info(" ")
             logging.getLogger('MA5').info("MadAnalysis 5 must be restarted for taking into account the present installation.")
             return self.do_restart('restart')
 
-    def help_install(self):
+    def help_install(self) -> None:
+        """Display the help of the ``install`` command."""
         self.cmd_install.help()
 
-    def complete_install(self,text,line,begidx,endidx):
+    def complete_install(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``install`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_install.complete(text,self.split_arg(line),begidx,endidx)
 
-    def do_open(self,line):
+    def do_open(self,line: str) -> None:
+        """Execute the ``open`` command (delegated to :class:`~madanalysis.interpreter.cmd_open.CmdOpen`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_open.do(self.split_arg(line))
 
-    def help_open(self):
+    def help_open(self) -> None:
+        """Display the help of the ``open`` command."""
         self.cmd_open.help()
 
-    def complete_open(self,text,line,begidx,endidx):
+    def complete_open(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``open`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_open.complete(text,line,begidx,endidx)
 
-    def do_reset(self,line):
+    def do_reset(self,line: str) -> None:
+        """Execute the ``reset`` command (delegated to :class:`~madanalysis.interpreter.cmd_reset.CmdReset`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_reset.do(self.split_arg(line),self)
 
-    def help_reset(self):
+    def help_reset(self) -> None:
+        """Display the help of the ``reset`` command."""
         self.cmd_reset.help()
 
-    def complete_reset(self,text,line,begidx,endidx):
+    def complete_reset(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``reset`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_reset.complete(text,line,begidx,endidx)
 
-    def do_submit(self,line):
+    def do_submit(self,line: str) -> None:
+        """Execute the ``submit`` command (delegated to :class:`~madanalysis.interpreter.cmd_submit.CmdSubmit`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_submit.do(self.split_arg(line),self.history)
 
-    def help_submit(self):
+    def help_submit(self) -> None:
+        """Display the help of the ``submit`` command."""
         self.cmd_submit.help()
 
-    def complete_submit(self,text,line,begidx,endidx):
+    def complete_submit(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``submit`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_submit.complete(text,line,begidx,endidx)
 
-    def do_resubmit(self,line):
+    def do_resubmit(self,line: str) -> None:
+        """Execute the ``resubmit`` command (delegated to :class:`~madanalysis.interpreter.cmd_submit.CmdSubmit`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_resubmit.do(self.split_arg(line),self.history)
 
-    def help_resubmit(self):
+    def help_resubmit(self) -> None:
+        """Display the help of the ``resubmit`` command."""
         self.cmd_resubmit.help()
 
-    def complete_resubmit(self,text,line,begidx,endidx):
+    def complete_resubmit(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``resubmit`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         return self.cmd_resubmit.complete(text,line,begidx,endidx)
 
-    def do_plot(self,line):
+    def do_plot(self,line: str) -> None:
+        """Execute the ``plot`` command (delegated to :class:`~madanalysis.interpreter.cmd_plot.CmdPlot`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_plot.do(self.split_arg(line))
 
-    def help_plot(self):
+    def help_plot(self) -> None:
+        """Display the help of the ``plot`` command."""
         self.cmd_plot.help()
 
-    def complete_plot(self,text,line,begidx,endidx):
+    def complete_plot(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``plot`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         tmp = line.replace("["," [ ")
         tmp = tmp.replace("]"," ] ")
         tmp = tmp.replace(")"," ) ")
@@ -326,13 +670,31 @@ class Interpreter(InterpreterBase):
         tmp = tmp.replace("}"," } ")
         return self.cmd_plot.complete(text,self.split_arg(tmp),begidx,endidx)
 
-    def do_reject(self,line):
+    def do_reject(self,line: str) -> None:
+        """Execute the ``reject`` command (delegated to :class:`~madanalysis.interpreter.cmd_cut.CmdCut`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_reject.do(self.split_arg(line))
 
-    def help_reject(self):
+    def help_reject(self) -> None:
+        """Display the help of the ``reject`` command."""
         self.cmd_reject.help()
 
-    def complete_reject(self,text,line,begidx,endidx):
+    def complete_reject(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``reject`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         tmp = line.replace("["," [ ")
         tmp = tmp.replace("]"," ] ")
         tmp = tmp.replace("("," ( ")
@@ -341,13 +703,31 @@ class Interpreter(InterpreterBase):
         tmp = tmp.replace("}"," } ")
         return self.cmd_reject.complete(text,self.split_arg(tmp),begidx,endidx)
 
-    def do_select(self,line):
+    def do_select(self,line: str) -> None:
+        """Execute the ``select`` command (delegated to :class:`~madanalysis.interpreter.cmd_cut.CmdCut`).
+
+        Args:
+            line (``str``): arguments typed after the command name.
+        """
         self.cmd_select.do(self.split_arg(line))
 
-    def help_select(self):
+    def help_select(self) -> None:
+        """Display the help of the ``select`` command."""
         self.cmd_select.help()
 
-    def complete_select(self,text,line,begidx,endidx):
+    def complete_select(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``select`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions.
+        """
         tmp = line.replace("["," [ ")
         tmp = tmp.replace("]"," ] ")
         tmp = tmp.replace("("," ( ")
@@ -356,24 +736,33 @@ class Interpreter(InterpreterBase):
         tmp = tmp.replace("}"," } ")
         return self.cmd_select.complete(text,self.split_arg(tmp),begidx,endidx)
 
-    def InitializeParticle(self):
+    def InitializeParticle(self) -> None:
+        """Load the default particle labels of the running mode."""
         input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
 
-    def InitializeMultiparticle(self):
+    def InitializeMultiparticle(self) -> None:
+        """Load the default multiparticle labels of the running mode."""
         input = MultiparticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
 
     # PreLoop
-    def preloop(self):
-        """Initializing before starting the main loop"""
+    def preloop(self) -> None:
+        """Set the prompt (``ma5>``) before entering the command loop."""
         self.prompt = 'ma5>'
 #        if readline and not 'libedit' in readline.__doc__:
 #            readline.set_completion_display_matches_hook(self.print_suggestions)
 
-    def deal_multiple_categories(self, dico):
-        """convert the multiple category in a formatted list understand by our
-        specific readline parser"""
+    def deal_multiple_categories(self, dico: dict[str, list[str]]) -> list[str]:
+        """Format completions grouped by category for the custom ``readline`` display.
+
+        Args:
+            dico (``dict[str, list[str]]``): completions per category.
+
+        Returns:
+            ``list[str]``:
+            Completions with ``@@<category>@@`` markers (plain list with libedit).
+        """
 
         if 'libedit' in readline.__doc__:
             # No parser in this case, just send all the valid options
@@ -405,8 +794,14 @@ class Interpreter(InterpreterBase):
             out = out[1:]
         return out
     
-    def print_suggestions(self, substitution, matches, longest_match_length) :
-        """print auto-completions by category"""
+    def print_suggestions(self, substitution: str, matches: list[str], longest_match_length: int)  -> None:
+        """Display the completions (grouped by category) below the prompt.
+
+        Args:
+            substitution (``str``): text being completed (unused).
+            matches (``list[str]``): completions.
+            longest_match_length (``int``): length of the longest completion.
+        """
         longest_match_length += len(self.completion_prefix)
         try:
             if len(matches) == 1:
@@ -447,8 +842,23 @@ class Interpreter(InterpreterBase):
             if __debug__:
                  print(error)
 
-    def getTerminalSize(self):
-        def ioctl_GWINSZ(fd):
+    def getTerminalSize(self) -> int:
+        """Get the width of the terminal.
+
+        Returns:
+            ``int``:
+            Number of columns (80 if it cannot be determined).
+        """
+        def ioctl_GWINSZ(fd: int) -> tuple[int, int] | None:
+            """Query the terminal size through ``ioctl``.
+
+            Args:
+                fd (``int``): file descriptor.
+
+            Returns:
+                ``tuple[int, int] | None``:
+                ``(rows, columns)``, or ``None`` on failure.
+            """
             try:
                 import fcntl, termios, struct, os
                 cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ,
@@ -472,10 +882,20 @@ class Interpreter(InterpreterBase):
         return int(cr[1])
 
     #def complete(self, text, state):
-    def complete2(self,text,state):
-        """Return the next possible completion for 'text'.
-         If a command has not been entered, then complete against command list.
-         Otherwise try to call complete_<command> to get list of completions.
+    def complete2(self,text: str,state: int) -> str | None:
+        """Legacy ``readline`` completion function (not installed as the completer).
+
+        If no command has been typed yet, the command names are completed; otherwise
+        ``complete_<command>`` is used. Commands separated by ``;`` and escaped spaces are
+        supported.
+
+        Args:
+            text (``str``): word being completed.
+            state (``int``): index of the requested completion.
+
+        Returns:
+            ``str | None``:
+            The ``state``-th completion, or ``None`` when exhausted.
         """
                 
         if state == 0:
@@ -506,6 +926,8 @@ class Interpreter(InterpreterBase):
                 compfunc = self.completenames
                 
             # correct wrong splittion with '\ '
+            # NOTE: the literal backslash-space below is an invalid escape sequence (SyntaxWarning with
+            # recent Python versions); it evaluates to a backslash followed by a space.
             if line and begidx > 2 and line[begidx-2:begidx] == '\ ':
                 Ntext = line.split(os.path.sep)[-1]
                 self.completion_prefix = Ntext.rsplit('\ ', 1)[0] + '\ '

@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ClusterAlgoCDFMidpoint.h
+ * @brief CDF midpoint cone algorithm (FastJet).
+ */
+
 #ifndef JETCLUSTERINGCDFMIDPOINT_H
 #define JETCLUSTERINGCDFMIDPOINT_H
 
@@ -32,6 +37,7 @@
 namespace MA5
 {
 
+/** @brief Jet clustering with the CDF midpoint cone algorithm. */
 class ClusterAlgoCDFMidpoint: public ClusterAlgoPlugin
 {
 //---------------------------------------------------------------------------------
@@ -39,16 +45,16 @@ class ClusterAlgoCDFMidpoint: public ClusterAlgoPlugin
 //---------------------------------------------------------------------------------
   private :
 
-    /// Radius
+    /** @brief Cone radius. */
     MAfloat64 R_;
 
-    /// Overlap Threshold
+    /** @brief Overlap threshold. */
     MAfloat64 OverlapThreshold_;
 
-    /// Seed Threshold
+    /** @brief Seed threshold. */
     MAfloat64 SeedThreshold_;
 
-    /// Cone Area Fraction
+    /** @brief Cone area fraction. */
     MAfloat64 ConeAreaFraction_;
 
 //---------------------------------------------------------------------------------
@@ -56,25 +62,43 @@ class ClusterAlgoCDFMidpoint: public ClusterAlgoPlugin
 //---------------------------------------------------------------------------------
   public :
 
-    /// Constructor without argument
+    /** @brief Constructor (default parameters). */
     ClusterAlgoCDFMidpoint() {R_=0.5; OverlapThreshold_=0.75; SeedThreshold_=1.0; ConeAreaFraction_=1.0;}
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~ClusterAlgoCDFMidpoint() {}
 
-    /// Initialization
+    /**
+     * @brief Create the FastJet jet definition.
+     *
+     * @return true.
+     */
     virtual MAbool Initialize();
 
-    /// Set parameter
+    /**
+     * @brief Set a parameter (`r`, `ptmin`, `overlapthreshold`, `seedthreshold` and `conearea`).
+     *
+     * @param key parameter name (lower case).
+     * @param value value.
+     * @return false for an unknown parameter.
+     */
     virtual MAbool SetParameter(const std::string& key, const std::string& value);
 
-    /// Print parameters
+    /** @brief Print the parameters. */
     virtual void PrintParam();
 
-    /// Accessor to the jet clusterer name
+    /**
+     * @brief Accessor to the name of the algorithm.
+     *
+     * @return the name.
+     */
     virtual std::string GetName();
 
-    /// Accessor to the jet clusterer parameters
+    /**
+     * @brief Accessor to the parameters.
+     *
+     * @return a printable summary.
+     */
     virtual std::string GetParameters();
 };
 

@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers for merging plots (requires fastjet)
+/**
+ * @file AnalyzerManager.cpp
+ * @brief Implementation of MA5::AnalyzerManager.
+ */
+
 #ifdef FASTJET_USE
   #include "SampleAnalyzer/Process/Analyzer/MergingPlots.h"
 #endif

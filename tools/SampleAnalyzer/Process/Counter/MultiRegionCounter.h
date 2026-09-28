@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MultiRegionCounter.h
+ * @brief Cut shared by several signal regions.
+ */
+
 #ifndef __MULTIREGIONCOUNTER_H
 #define __MULTIREGIONCOUNTER_H
 
@@ -37,40 +42,64 @@
 namespace MA5
 {
 
+/** @brief Cut shared by several signal regions. */
 class MultiRegionCounter
 {
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
  private:
+  /** @brief Name of the cut. */
   std::string name_;
+  /** @brief Regions to which the cut applies. */
   std::vector<RegionSelection*> regions_;
 
   // -------------------------------------------------------------
   //                      method members
   // -------------------------------------------------------------
  public:
-  /// constructor without argument
+  /** @brief Constructor. */
   MultiRegionCounter() {name_="";};
 
-  /// Constructor with argument
+  /**
+   * @brief Constructor.
+   *
+   * @param name name of the cut.
+   */
   MultiRegionCounter(const std::string& name) { name_=name; };
 
-  /// Destructor
+  /** @brief Destructor. */
   ~MultiRegionCounter() {};
 
-  /// Get methods
+  /**
+   * @brief Accessor to the name of the cut.
+   *
+   * @return the name.
+   */
   std::string GetName()
     { return name_; }
 
+  /**
+   * @brief Accessor to the regions of the cut.
+   *
+   * @return a copy of the regions.
+   */
   std::vector<RegionSelection *> Regions()
     { return regions_; }
 
-  /// Set methods
+  /**
+   * @brief Set the name of the cut.
+   *
+   * @param ThisName name.
+   */
   void SetName(std::string ThisName)
     { name_=ThisName; }
 
-  /// methods to associate a vector of regions to this cut
+  /**
+   * @brief Attach the cut to regions (the cut is added to their cut-flows).
+   *
+   * @param RSVector regions.
+   */
   void AddRegionSelection(std::vector<RegionSelection*> RSVector)
   {
     for (MAuint32 i=0; i<RSVector.size(); i++)

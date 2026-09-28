@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // STL headers
+/**
+ * @file RegionSelectionManager.cpp
+ * @brief Implementation of MA5::RegionSelectionManager.
+ */
+
 #include <iostream>
 
 // SampleAnalyzer headers
@@ -123,6 +128,8 @@ void RegionSelectionManager::FillHisto(std::string const &histname, MAfloat64 va
                     MANAGE_EXCEPTION(e);
                 }
                 // Filling the histo
+                // NOTE: the histograms are filled with the event weights: the region-specific weights
+                // (SetRegionWeight) only affect the cut-flows.
                 if (myhistof->FreshEvent())
                     myhistof->IncrementNEvents(weight_);
                 myhistof->Fill(val, weight_);

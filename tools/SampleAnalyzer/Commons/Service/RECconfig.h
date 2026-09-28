@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file RECconfig.h
+ * @brief Reconstruction configuration: muon isolation algorithm.
+ */
+
 #ifndef RECTOOLCONFIG_h
 #define RECTOOLCONFIG_h
 
@@ -36,6 +41,7 @@ namespace MA5
 
 class Tools;
 
+/** @brief Configuration of the muon isolation used by Identification::IsIsolatedMuon. */
 struct RECconfig
 {
   friend class PhysicsService;
@@ -45,16 +51,16 @@ struct RECconfig
   // -------------------------------------------------------------
   protected:
 
-  /// Muon isolation algorithm
+  /** @brief Use the DeltaR algorithm (true) or the SumPT algorithm (false). */
   MAbool deltaRalgo_;
 
-  /// Parameter : deltaR
+  /** @brief DeltaR algorithm: minimum distance to the jets. */
   MAfloat32 deltaR_;
 
-  /// Parameter : sumPT
+  /** @brief SumPT algorithm: maximum sum of the track transverse momenta. */
   MAfloat32 sumPT_;
 
-  /// Parameter : ET_PT
+  /** @brief SumPT algorithm: maximum ratio sumET/sumPT. */
   MAfloat32 ET_PT_;
 
   // -------------------------------------------------------------
@@ -62,25 +68,34 @@ struct RECconfig
   // -------------------------------------------------------------
   public:
 
-  /// Constructor without argument
+  /** @brief Constructor (DeltaR algorithm with DeltaR = 0.5). */
   RECconfig()
   { deltaRalgo_=true; deltaR_=0.5; sumPT_=1.; ET_PT_=1.; }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~RECconfig()
   { }
 
-  /// Reset
+  /** @brief Reset to the DeltaR algorithm with DeltaR = 0.5. */
   void Reset()
   { deltaRalgo_=true; deltaR_=0.5; sumPT_=1.; ET_PT_=1.; }
 
-  /// Specify algo DeltaR
+  /**
+   * @brief Use the DeltaR isolation algorithm.
+   *
+   * @param deltaR minimum distance between the muon and the jets.
+   */
   void UseDeltaRIsolation(MAfloat32 deltaR=0.5)
   {
     deltaRalgo_=true; deltaR_=deltaR;
   } 
 
-  /// Specify algo SumPT
+  /**
+   * @brief Use the SumPT isolation algorithm.
+   *
+   * @param sumPT maximum sum of track pT.
+   * @param ET_PT maximum ratio sumET/sumPT.
+   */
   void UseSumPTIsolation(MAfloat32 sumPT, MAfloat32 ET_PT)
   {
     deltaRalgo_=false; sumPT_=sumPT; ET_PT_=ET_PT;

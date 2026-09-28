@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file Histo.h
+ * @brief Histogram with a linear binning.
+ */
+
 #ifndef HISTO_H
 #define HISTO_H
 
@@ -37,6 +42,12 @@
 namespace MA5
 {
 
+    /**
+     * @brief Histogram with a linear binning, attached to signal regions.
+     *
+     * Each bin, the underflow and the overflow store, for each event weight, the sums of
+     * positive and of absolute negative weights.
+     */
     class Histo : public PlotBase
     {
 
@@ -44,41 +55,37 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     protected:
-        /// Each variable is defined with WEIGHTS object which includes positive and negative accessors
-        /// these are for positive and negative bins. std::map<MAint32,WEIGHTS> contains a map of
-        /// different PDF and their corresponding positive and negative weights.
-
-        /// Histogram arrays
+        /** @brief Bin contents, underflow and overflow. */
         std::vector<std::vector<WEIGHTS>> histo_;
         std::vector<WEIGHTS> underflow_;
         std::vector<WEIGHTS> overflow_;
 
-        /// Histogram description
+        /** @brief Number of bins, bounds and bin width. */
         MAuint32 nbins_;
         MAfloat64 xmin_;
         MAfloat64 xmax_;
         MAfloat64 step_;
 
-        /// Sum of event-weights over entries
+        /** @brief Sum of the weights of the entries. */
         std::vector<WEIGHTS> sum_w_;
 
-        /// Sum of squared weights
+        /** @brief Sum of the squared weights. */
         std::vector<WEIGHTS> sum_ww_;
 
-        /// Sum of value * weight
+        /** @brief Sum of value * weight. */
         std::vector<WEIGHTS> sum_xw_;
 
-        /// Sum of value * value * weight
+        /** @brief Sum of value^2 * weight. */
         std::vector<WEIGHTS> sum_xxw_;
 
-        /// RegionSelections attached to the histo
+        /** @brief Regions to which the histogram is attached. */
         std::vector<RegionSelection *> regions_;
 
         // -------------------------------------------------------------
         //                       method members
         // -------------------------------------------------------------
     public:
-        /// Constructor without argument
+        /** @brief Constructor (100 bins between 0 and 100; the bin containers are not sized). */
         Histo() : PlotBase()
         {
             nbins_ = 100;
@@ -87,10 +94,21 @@ namespace MA5
             step_ = (xmax_ - xmin_) / static_cast<MAfloat64>(nbins_);
         }
 
-        /// Constructor with argument
+        /**
+         * @brief Constructor (the binning is left uninitialised: used by derived classes).
+         *
+         * @param name name.
+         */
         Histo(const std::string &name) : PlotBase(name) {}
 
-        /// Constructor with argument
+        /**
+         * @brief Constructor.
+         *
+         * @param name name.
+         * @param nbins number of bins (100 if 0).
+         * @param xmin lower bound.
+         * @param xmax upper bound (0-100 if xmin >= xmax).
+         */
         Histo(const std::string &name, MAuint32 nbins, MAfloat64 xmin, MAfloat64 xmax) : PlotBase(name)
         {
             // Setting the description: nbins
@@ -127,19 +145,24 @@ namespace MA5
             histo_.resize(nbins_);
         }
 
-        /// Destructor
+        /** @brief Destructor. */
         virtual ~Histo() {}
 
-        /// Setting the linked regions
+        /**
+         * @brief Attach the histogram to regions.
+         *
+         * @param myregions regions.
+         */
         void SetSelectionRegions(std::vector<RegionSelection *> myregions)
         {
             regions_.insert(regions_.end(), myregions.begin(), myregions.end());
         }
 
-        /// Checking that all regions of the histo are surviving
-        /// Returns 0 if all regions are failing (includes te case with 0 SR)
-        /// Returns 1 if all regions are passing
-        // returns -1 otherwise
+        /**
+         * @brief Check the status of the attached regions.
+         *
+         * @return 1 if all the regions survive, 0 if all fail (or no region), -1 otherwise.
+         */
         MAint32 AllSurviving()
         {
             if (regions_.size() == 0)
@@ -154,19 +177,34 @@ namespace MA5
                 return 0;
         }
 
-        /// Initialise the class
-        /// @brief Initialise the containers
-        /// @param weights weight collection
+        /**
+         * @brief Size the containers for the event weights.
+         *
+         * @param multiweight weights of an event (only the size is used).
+         */
         virtual void _initialize(const WeightCollection &multiweight);
 
-        /// Filling histogram
+        /**
+         * @brief Fill the histogram.
+         *
+         * @param value value of the observable.
+         * @param weights weights of the event.
+         */
         void Fill(MAfloat64 value, const WeightCollection &weights);
 
-        /// Write the plot in a text file
+        /**
+         * @brief Write the histogram in the SAF format.
+         *
+         * @param output output stream.
+         */
         virtual void Write_TextFormat(std::ostream *output);
 
     protected:
-        /// Write the plot in a text file
+        /**
+         * @brief Write the description, statistics and data blocks of the histogram.
+         *
+         * @param output output stream.
+         */
         virtual void Write_TextFormatBody(std::ostream *output);
     };
 

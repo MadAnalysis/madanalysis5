@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file PlotManager.cpp
+ * @brief Implementation of MA5::PlotManager.
+ */
+
 #include "SampleAnalyzer/Process/Plot/PlotManager.h"
 
 // STL headers

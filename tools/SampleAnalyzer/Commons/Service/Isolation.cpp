@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file Isolation.cpp
+ * @brief Implementation of the jet cleaning of MA5::Isolation.
+ */
+
 #include "SampleAnalyzer/Commons/Service/Isolation.h"
 
 

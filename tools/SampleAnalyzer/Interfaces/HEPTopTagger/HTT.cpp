@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file HTT.cpp
+ * @brief Implementation of MA5::Substructure::HTT.
+ */
+
 #include "HEPTopTagger/HEPTopTagger.hh"
 
 // SampleAnalyser headers
@@ -83,6 +88,8 @@ namespace MA5 {
 
             // MassDrop
             _tagger->set_mass_drop_threshold(param.mass_drop);
+            // FIXME: the mass-drop threshold is set twice, whereas InputParameters::max_subjet (the maximum subjet
+            //   mass) is never passed to the tagger.
             _tagger->set_mass_drop_threshold(param.mass_drop);
 
             // Pruning

@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyzer headers
+/**
+ * @file IsolationBase.cpp
+ * @brief Sums of transverse momenta in isolation cones.
+ */
+
 #include "SampleAnalyzer/Commons/Service/IsolationBase.h"
 
 using namespace MA5;

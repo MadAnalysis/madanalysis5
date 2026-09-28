@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file TimeService.cpp
+ * @brief Printing of the TimeService report.
+ */
+
 #include <iomanip>
 #include <algorithm>
 

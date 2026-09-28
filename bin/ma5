@@ -28,9 +28,22 @@
 # MAIN PROGRAM
 ################################################################################
 
-"""
-This is the main executable, a simple frontend to set up the PYTHONPATH
-and call immediately the command line interface scripts
+"""Main executable of MadAnalysis 5.
+
+This script is a thin front-end that:
+
+1. checks the Python release and the presence of the ``six`` module;
+2. determines the MadAnalysis 5 installation folder (parent of ``bin/``) and exports
+   it as the ``MA5_BASE`` environment variable;
+3. prepends the installation folder and ``tools/ReportGenerator/Services`` (helper
+   modules imported without package prefix, e.g. ``string_tools``) to ``sys.path``;
+4. calls :func:`madanalysis.core.launcher.LaunchMA5` with the release number and date.
+
+Usage: ``./bin/ma5 [options] [scripts]`` (``./bin/ma5 -h`` for the list of options).
+
+.. note::
+    The release number and date defined below must be kept consistent with
+    ``tools/SampleAnalyzer/Commons/Base/Configuration.cpp``.
 """
 
 from importlib import util
@@ -38,6 +51,8 @@ import os
 import sys
 
 # Checking if the correct release of Python is installed
+# FIXME: the test rejects Python 3.6 (minor <= 6) while the message below claims that 3.6 is
+# supported; the README requires Python >= 3.8.
 if sys.version_info[0] != 3 or sys.version_info[1] <= 6:
     sys.exit(
         "Python release "

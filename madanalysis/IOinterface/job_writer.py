@@ -22,7 +22,29 @@
 ################################################################################
 
 
+"""Writer of the SampleAnalyzer jobs of the normal mode.
+
+A job directory has the following structure::
+
+    <job>/Input/                    dataset lists (<ds>.list), Delphes/recasting cards
+    <job>/Build/Main/main.cpp       main program (CreateMainFct)
+    <job>/Build/SampleAnalyzer/User/Analyzer/
+                                    user.h/.cpp (analysis), analysisList.h,
+                                    SFS modules (new_smearer_reco.*, new_tagger.*, ...)
+    <job>/Build/Makefile, setup.sh, setup.csh, Log/
+    <job>/Output/{SAF,Histos,HTML,PDF,DVI}/
+    <job>/history.ma5               commands of the session
+
+The job is compiled with ``make`` against the SampleAnalyzer libraries of the
+MadAnalysis 5 installation and run once per dataset.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import IO, TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.selection.instance_name import InstanceName
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from shell_command import ShellCommand
@@ -38,7 +60,23 @@ from madanalysis.selection.instance_name import InstanceName
 
 
 class JobWriter(object):
-    def __init__(self, main, jobdir, resubmit=False):
+    """Creator, compiler and runner of a SampleAnalyzer job.
+
+    Attributes:
+        main (``Main``): session state.
+        path (``str``): job directory.
+        resubmit (``bool``): ``True`` when an existing job is updated (``resubmit``).
+        output (``str``): event output file requested by the user.
+        fastsim / merging: shortcuts to ``main.fastsim`` and ``main.merging``.
+    """
+    def __init__(self, main: Main, jobdir: str, resubmit: bool = False) -> None:
+        """Create the writer.
+
+        Args:
+            main (``Main``): session state.
+            jobdir (``str``): job directory.
+            resubmit (``bool``, default ``False``): update an existing job.
+        """
         self.main = main
         self.path = jobdir
         self.resubmit = resubmit
@@ -47,7 +85,19 @@ class JobWriter(object):
         self.merging = self.main.merging
 
     @staticmethod
-    def CheckJobStructureMute(session_info, path, recastflag):
+    def CheckJobStructureMute(session_info: Any, path: str, recastflag: bool) -> bool:
+        """Silently check the structure of a job directory.
+
+        Args:
+            session_info (``SessionInfo``): session information (PDF/DVI folders are expected
+                when LaTeX is available).
+            path (``str``): job directory.
+            recastflag (``bool``): recasting job (no ``Build`` folder).
+
+        Returns:
+            ``bool``:
+            ``True`` if all expected folders exist.
+        """
         if not os.path.isdir(path):
             return False
         if not recastflag:
@@ -77,6 +127,8 @@ class JobWriter(object):
         if session_info.has_latex:
             if not os.path.isdir(path + "/Output/DVI"):
                 return False
+        # FIXME: this 'elif' belongs to the LaTeX test above: the Input folder and history.ma5 are
+        # only checked when LaTeX is not available.
         elif not os.path.isdir(path + "/Input"):
             return False
         elif not os.path.isfile(path + "/history.ma5"):
@@ -84,7 +136,17 @@ class JobWriter(object):
         return True
 
     @staticmethod
-    def CreateJobStructure(path, recastflag):
+    def CreateJobStructure(path: str, recastflag: bool) -> bool:
+        """Create the sub-folders of a job directory (the directory itself must exist).
+
+        Args:
+            path (``str``): job directory.
+            recastflag (``bool``): recasting job (no ``Build`` folder).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if not os.path.isdir(path):
             return False
         elif not recastflag:
@@ -144,6 +206,7 @@ class JobWriter(object):
             os.mkdir(path + "/Output/SAF")
         except:
             logging.getLogger("MA5").error("Impossible to create the folder 'Output/SAF'")
+        # NOTE: no 'return False' after this error (unlike the other folders).
         try:
             os.mkdir(path + "/Output/HTML")
         except:
@@ -176,7 +239,16 @@ class JobWriter(object):
 
         return True
 
-    def CheckJobStructure(self, recastflag):
+    def CheckJobStructure(self, recastflag: bool) -> bool:
+        """Check the structure of the job directory (errors are logged).
+
+        Args:
+            recastflag (``bool``): recasting job (no ``Build`` folder).
+
+        Returns:
+            ``bool``:
+            ``True`` if the structure is complete.
+        """
         if not os.path.isdir(self.path):
             logging.getLogger("MA5").error("folder '" + self.path + "' is not found")
             return False
@@ -231,7 +303,16 @@ class JobWriter(object):
         else:
             return True
 
-    def Open(self):
+    def Open(self) -> bool:
+        """Create the job directory (or check it when resubmitting).
+
+        A new job clears the :class:`~madanalysis.selection.instance_name.InstanceName`
+        registry and asks before removing an existing directory.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if not self.resubmit:
             InstanceName.Clear()
             return FolderWriter.CreateDirectory(self.path, question=True)
@@ -239,7 +320,18 @@ class JobWriter(object):
             recast = self.main.recasting.status == "on"
             return self.CheckJobStructure(recast)
 
-    def CopyDelphesCard(self, input, output, cfg, theFile):
+    def CopyDelphesCard(self, input: IO[str], output: IO[str], cfg: Any, theFile: str) -> None:
+        """Copy a Delphes card, applying the user options.
+
+        The pile-up file is substituted, and the ``MA5GenParticleFilter`` module and the
+        skimming of the track/tower/eflow branches are added according to the options.
+
+        Args:
+            input (``IO[str]``): original card.
+            output (``IO[str]``): copied card.
+            cfg (``DelphesConfiguration``): Delphes options.
+            theFile (``str``): absolute path of the pile-up file (empty if none).
+        """
         TagTreeWriter = False
         TagExecutionPath = False
 
@@ -310,7 +402,15 @@ class JobWriter(object):
             # Enter TreeWriter
             output.write(line)
 
-    def CopyDelphesMA5Card(self, input, output, cfg, theFile):
+    def CopyDelphesMA5Card(self, input: IO[str], output: IO[str], cfg: Any, theFile: str) -> None:
+        """Copy a Delphes-MA5tune card, substituting the pile-up file.
+
+        Args:
+            input (``IO[str]``): original card.
+            output (``IO[str]``): copied card.
+            cfg (``DelphesMA5tuneConfiguration``): Delphes-MA5tune options.
+            theFile (``str``): absolute path of the pile-up file (empty if none).
+        """
         TagTreeWriter = False
         TagExecutionPath = False
 
@@ -324,7 +424,13 @@ class JobWriter(object):
             # Enter TreeWriter
             output.write(line)
 
-    def CreateDelphesCard(self):
+    def CreateDelphesCard(self) -> bool:
+        """Copy the selected Delphes card into ``<job>/Input``.
+
+        Returns:
+            ``bool``:
+            ``False`` if the original card is not found.
+        """
 
         if self.main.fastsim.package == "delphes":
             cardname = self.main.fastsim.delphes.card
@@ -352,6 +458,7 @@ class JobWriter(object):
                 )
         except:
             logging.getLogger("MA5").error(
+                # NOTE: the message always mentions the delphes folder.
                 "impossible to find "
                 + self.main.archi_info.ma5dir
                 + "/tools/SampleAnalyzer/Interfaces/delphes/"
@@ -364,6 +471,7 @@ class JobWriter(object):
         try:
             output = open(self.path + "/Input/" + cardname, "w")
         except:
+            # FIXME: if the output card cannot be opened, 'output' is undefined below (NameError).
             pass
 
         theFile = ""
@@ -394,7 +502,16 @@ class JobWriter(object):
 
         return True
 
-    def CopyLHEAnalysis(self):
+    def CopyLHEAnalysis(self) -> bool:
+        """Create the job structure and copy the auxiliary files.
+
+        ``newAnalyzer.py`` is copied (not for recasting), the Delphes card is copied if a
+        Delphes package is used, and the recasting card is created in recasting mode.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         recast = self.main.recasting.status == "on"
         if not JobWriter.CreateJobStructure(self.path, recast):
             return False
@@ -427,7 +544,12 @@ class JobWriter(object):
 
         return True
 
-    def CreateHeader(self, file):
+    def CreateHeader(self, file: IO[str]) -> None:
+        """Write the license banner of a generated C++ file.
+
+        Args:
+            file (``IO[str]``): output file.
+        """
         file.write(
             "////////////////////////////////////////////////////////////////////////////////\n"
         )
@@ -444,14 +566,33 @@ class JobWriter(object):
         )
         return
 
-    def PrintIncludes(self, file):
+    def PrintIncludes(self, file: IO[str]) -> None:
+        """Write the ``#include`` directives of ``main.cpp``.
+
+        Args:
+            file (``IO[str]``): output file.
+        """
         file.write("// SampleHeader header\n")
         file.write('#include "SampleAnalyzer/Process/Core/SampleAnalyzer.h"\n')
         file.write('#include "SampleAnalyzer/User/Analyzer/analysisList.h"\n')
         file.write("using namespace MA5;\n\n")
         return
 
-    def CreateMainFct(self, file, analysisName, outputName):
+    def CreateMainFct(self, file: IO[str], analysisName: str, outputName: str) -> None:
+        """Write the ``main`` function of the job.
+
+        The generated program initialises the SampleAnalyzer manager, the analysis (and the
+        merging-plot analysis), the event writer, the jet clusterer (with the extra jet
+        collections, SFS smearer and tagger) or the Delphes detector, the random seed and the
+        invisible/hadronic particle lists, then loops over the files and events of the
+        dataset list given on the command line and finalises all components. ``--info``
+        prints the list of analyses.
+
+        Args:
+            file (``IO[str]``): output file (``main.cpp``).
+            analysisName (``str``): name of the analysis to instantiate.
+            outputName (``str``): name of its SAF output file.
+        """
 
         # Info function
         file.write(
@@ -678,6 +819,7 @@ class JobWriter(object):
 
         # Add default hadrons and invisible particles for RECO and HADRON mode
         # The invisible container may also be changed when runnign the code in HADRON mode.
+        # NOTE: always true (all running modes are listed).
         if self.main.mode in [
             MA5RunningType.RECO,
             MA5RunningType.HADRON,
@@ -759,8 +901,18 @@ class JobWriter(object):
         return
 
     def CreateBldDir(
-        self, analysisName="MadAnalysis5job", outputName="MadAnalysis5job.saf"
-    ):
+        self, analysisName: str = "MadAnalysis5job", outputName: str = "MadAnalysis5job.saf"
+    ) -> bool:
+        """Write ``Build/Main/main.cpp``.
+
+        Args:
+            analysisName (``str``, default ``"MadAnalysis5job"``): name of the analysis.
+            outputName (``str``, default ``"MadAnalysis5job.saf"``): name of its SAF file.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         file = open(self.path + "/Build/Main/main.cpp", "w")
         self.CreateHeader(file)
         self.PrintIncludes(file)
@@ -768,7 +920,16 @@ class JobWriter(object):
         file.close()
         return True
 
-    def WriteSelectionHeader(self, main):
+    def WriteSelectionHeader(self, main: Main) -> bool:
+        """Write the headers of the analysis (``user.h``) and of the SFS modules.
+
+        Args:
+            main (``Main``): session state.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         main.selection.RefreshStat()
         file = open(self.path + "/Build/SampleAnalyzer/User/Analyzer/user.h", "w")
         import madanalysis.job.job_main as JobMain
@@ -821,7 +982,17 @@ class JobWriter(object):
             file.close()
         return True
 
-    def WriteSelectionSource(self, main):
+    def WriteSelectionSource(self, main: Main) -> bool:
+        """Write the sources of the analysis (``user.cpp``), of the SFS modules and
+        ``analysisList.h``.
+
+        Args:
+            main (``Main``): session state.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         main.selection.RefreshStat()
         file = open(self.path + "/Build/SampleAnalyzer/User/Analyzer/user.cpp", "w")
         import madanalysis.job.job_main as JobMain
@@ -879,7 +1050,19 @@ class JobWriter(object):
         file.close()
         return True
 
-    def WriteMakefiles(self, option="", **kwargs):
+    def WriteMakefiles(self, option: str = "", **kwargs) -> bool:
+        """Write the Makefile and the setup scripts of the job.
+
+        Args:
+            option (``str``, default ``""``): unused.
+            **kwargs: ``ma5_fastjet_mode`` (``bool``, default ``True``); when ``False``, the
+                Delphes libraries are linked and the FastJet libraries are not (Delphes
+                recasting runs).
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         # kwargs: keyword arguments regarding additional mode options such as `ma5_fastjet_mode`
         # this will protect Delphes based analyses in PAD
         from madanalysis.build.makefile_writer import MakefileWriter
@@ -915,6 +1098,7 @@ class JobWriter(object):
             and self.main.archi_info.has_heptoptagger
         )
 
+        # NOTE: by default (ma5_fastjet_mode=True) the Delphes libraries are not linked.
         options.has_delphes_ma5lib = self.main.archi_info.has_delphes and not kwargs.get("ma5_fastjet_mode", True)
         options.has_delphes_lib = self.main.archi_info.has_delphes and not kwargs.get("ma5_fastjet_mode", True)
         options.has_delphesMA5tune_ma5lib = (self.main.archi_info.has_delphesMA5tune and not kwargs.get("ma5_fastjet_mode", True))
@@ -972,7 +1156,16 @@ class JobWriter(object):
         return True
 
     @staticmethod
-    def CleanPath(thestring):
+    def CleanPath(thestring: str) -> str:
+        """Normalise a ``:``-separated path list and remove duplicates and empty entries.
+
+        Args:
+            thestring (``str``): path list.
+
+        Returns:
+            ``str``:
+            The cleaned path list.
+        """
 
         # Cleaning the string
         thestring = thestring.lstrip()
@@ -1000,7 +1193,13 @@ class JobWriter(object):
         # Return the string
         return ":".join(newpaths)
 
-    def CompileJob(self):
+    def CompileJob(self) -> bool:
+        """Run ``make compile`` in the ``Build`` folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # folder
         folder = self.path + "/Build"
@@ -1023,7 +1222,13 @@ class JobWriter(object):
 
         return result
 
-    def MrproperJob(self):
+    def MrproperJob(self) -> bool:
+        """Run ``make mrproper`` in the ``Build`` folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # folder
         folder = self.path + "/Build"
@@ -1046,7 +1251,13 @@ class JobWriter(object):
 
         return result
 
-    def LinkJob(self):
+    def LinkJob(self) -> bool:
+        """Run ``make link`` in the ``Build`` folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # folder
         folder = self.path + "/Build"
@@ -1069,7 +1280,16 @@ class JobWriter(object):
 
         return result
 
-    def WriteHistory(self, history, firstdir):
+    def WriteHistory(self, history: Any, firstdir: str) -> None:
+        """Write ``history.ma5`` (commands that define the analysis).
+
+        Informative commands (``help``, ``display``, ``history``, ``open``, ``shell``, ...) and
+        ``submit``/``resubmit`` are skipped.
+
+        Args:
+            history (``History``): command history of the interpreter.
+            firstdir (``str``): initial working directory (written as ``set main.currentdir``).
+        """
         file = open(self.path + "/history.ma5", "w")
         file.write("set main.currentdir = " + firstdir + "\n")
         for line in history.history:
@@ -1091,7 +1311,12 @@ class JobWriter(object):
                     file.write("\n")
         file.close()
 
-    def WriteDatasetList(self, dataset):
+    def WriteDatasetList(self, dataset: Any) -> None:
+        """Write the list of event files of a dataset (``Input/<ds>.list``).
+
+        Args:
+            dataset (``Dataset``): the dataset.
+        """
         name = InstanceName.Get(dataset.name)
         file = open(self.path + "/Input/" + name + ".list", "w")
         for item in dataset:
@@ -1099,7 +1324,16 @@ class JobWriter(object):
             file.write("\n")
         file.close()
 
-    def RunJob(self, dataset):
+    def RunJob(self, dataset: Any) -> bool:
+        """Run the job on a dataset.
+
+        Args:
+            dataset (``Dataset``): the dataset.
+
+        Returns:
+            ``bool``:
+            ``True`` if the program succeeded.
+        """
 
         # Getting the dataset name
         name = InstanceName.Get(dataset.name)
@@ -1120,6 +1354,7 @@ class JobWriter(object):
 
         # Release
         commands.append(
+            # NOTE: no shell is used, so the quotes are passed to the program as part of the value.
             '--ma5_version="'
             + self.main.archi_info.ma5_version
             + ";"

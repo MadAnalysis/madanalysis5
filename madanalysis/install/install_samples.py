@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Installation of the example event samples (``install samples``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 
 import logging
 import os
@@ -31,8 +38,23 @@ from madanalysis.install.install_service import InstallService
 
 
 class InstallSamples:
+    """Installer of the example event samples (``install samples``).
 
-    def __init__(self,main):
+    The methods are called by
+    :meth:`madanalysis.install.install_manager.InstallManager.Execute` in the following
+    order (only when defined): ``Detect``/``Remove``, ``GetNcores``,
+    ``CreatePackageFolder``, ``CreateTmpFolder``, ``Download``, ``Unpack``, ``Configure``,
+    ``Build``, ``PreCheck``, ``Clean``, ``Install``, ``Check`` and ``NeedToRestart``.
+
+    The samples are downloaded into ``<ma5dir>/samples``.
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Prepare the installation of the example event samples (folders, download URLs).
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main       = main
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/samples')
         self.files = {
@@ -50,23 +72,52 @@ class InstallSamples:
         }
 
 
-    def Detect(self):
+    def Detect(self) -> bool:
+        """Check whether the example event samples is already installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the installation folder exists.
+        """
         if not os.path.isdir(self.installdir):
             logging.getLogger('MA5').debug("The folder "+self.installdir+"' is not found")
             return False
         return True
 
 
-    def Remove(self,question=True):
+    def Remove(self,question: bool = True) -> tuple[bool, bool]:
+        """Remove the previous installation of the example event samples.
+
+        Args:
+            question (``bool``, default ``True``): ask the user for confirmation.
+
+        Returns:
+            ``tuple[bool, bool]``:
+            Result of :meth:`~madanalysis.IOinterface.folder_writer.FolderWriter.RemoveDirectory`:
+            whether the operation succeeded and whether the folder was removed/kept on the
+            user's request.
+        """
         from madanalysis.IOinterface.folder_writer import FolderWriter
         return FolderWriter.RemoveDirectory(self.installdir,question)
 
 
-    def CreatePackageFolder(self):
+    def CreatePackageFolder(self) -> bool:
+        """Create the installation folder of the example event samples.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         return InstallService.create_package_folder(self.main.archi_info.ma5dir,'samples')
 
 
-    def Download(self):
+    def Download(self) -> bool:
+        """Download the source files of the example event samples.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
             return False
@@ -78,7 +129,13 @@ class InstallSamples:
         return True
 
 
-    def Check(self):
+    def Check(self) -> bool:
+        """Check that the example event samples has been properly installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the expected files are present.
+        """
 
         filesToCheck = list(self.files.keys())
         ok=True
@@ -90,7 +147,13 @@ class InstallSamples:
                 ok=False
         return ok
 
-    def NeedToRestart(self):
+    def NeedToRestart(self) -> bool:
+        """Tell whether MadAnalysis 5 must be restarted after the installation.
+
+        Returns:
+            ``bool``:
+            ``True`` if a restart (new configuration check and library build) is needed.
+        """
         return False
     
         

@@ -22,27 +22,54 @@
 ################################################################################
 
 
+"""Definition of a signal region."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 class Region:
+    """A signal region (``define_region`` command).
 
-    def __init__(self,name):
+    Attributes:
+        name (``str``): name of the region (lower case).
+        selections (``list[str]``): cuts attached to the region.
+        histos (``list[str]``): histograms attached to the region.
+    """
+
+    def __init__(self,name: str) -> None:
+        """Create an empty region.
+
+        Args:
+            name (``str``): name of the region (converted to lower case).
+        """
         self.logger       = logging.getLogger('MA5')
         self.name              = name.lower()
         self.selections        = []
         self.histos            = []
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log the region with its cuts and histograms."""
         self.logger.info(" *******************************************" )
         self.logger.info(" ** name = "+self.name)
         self.user_DisplayParameter("selections")
         self.user_DisplayParameter("histos")
         self.logger.info(" ********************************************" )
 
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the displayable attributes.
+
+        Returns:
+            ``list[str]``:
+            ``['histos', 'selections']``.
+        """
         return ['histos', 'selections']
 
-    def user_DisplayParameter(self,parameter):
+    def user_DisplayParameter(self,parameter: str) -> None:
+        """Log the cuts (``selections``) or histograms (``histos``) of the region.
+
+        Args:
+            parameter (``str``): ``"selections"`` or ``"histos"``.
+        """
         if parameter=="selections":
             if len(self.selections)>0:
                 self.logger.info(" ** List of cuts")

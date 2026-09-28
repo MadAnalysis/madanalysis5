@@ -22,12 +22,39 @@
 ################################################################################
 
 
+"""Node (leaf) of the abstract syntax tree used to parse SFS formulas."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.fastsim.ast import AST
 import logging
 class Leaf:
+    """Node of an :class:`~madanalysis.fastsim.ast.AST`.
+
+    Attributes:
+        id (``int``): identifier of the leaf in its tree.
+        type (``str``): ``'cst'`` (constant), ``'var'`` (observable), ``'bool'``,
+            ``'un_op'`` (unary function), ``'bin1_op'`` (infix binary operator) or
+            ``'bin2_op'`` (binary function such as ``pow``).
+        name (``str``): value, observable name or operator.
+        mother (``list[int]``): identifier of the mother leaf (empty for the root).
+        daughters (``list[int]``): identifiers of the daughter leaves.
+    """
 
     # Initialization
-    def __init__(self, id_, type_, name_, id_mother, id_daughters):
+    def __init__(self, id_: int, type_: str, name_: str, id_mother: list[int], id_daughters: list[int]) -> None:
+        """Create a leaf.
+
+        Args:
+            id_ (``int``): identifier of the leaf.
+            type_ (``str``): type of the leaf (see the class documentation).
+            name_ (``str``): value or operator.
+            id_mother (``list[int]``): mother identifier (empty list if none).
+            id_daughters (``list[int]``): daughter identifiers.
+        """
         self.logger    = logging.getLogger('MA5')
         self.id        = id_
         self.type      = type_
@@ -37,7 +64,13 @@ class Leaf:
 
 
     # Leaf representation as a string
-    def __repr__(self):
+    def __repr__(self) -> str | None:
+        """Short representation of the leaf.
+
+        Returns:
+            ``str | None``:
+            ``LEAF[...]`` for constants/variables, ``OP[...]`` for operators, ``None`` otherwise.
+        """
         if self.type in ['var', 'cst']:
             return 'LEAF[ ' + self.name+': { id:' + str(self.id) + ' }]'
         elif self.type in ['bin2_op', 'bin1_op', 'un_op', 'bool']:
@@ -45,7 +78,8 @@ class Leaf:
 
 
     # Printing all the info on a leaf
-    def info(self):
+    def info(self) -> None:
+        """Log the properties of the leaf."""
         self.logger.info('  ** Leaf nr. ' + str(self.id))
         self.logger.info('    -> type/name = ' + self.type + ' ('+ self.name +')')
         self.logger.info('    -> mother: ' + str(self.mother))
@@ -53,7 +87,12 @@ class Leaf:
 
 
     ## Connecting leaves as mother and daughters
-    def connect(self, daughter_leafs):
+    def connect(self, daughter_leafs: list[Leaf]) -> None:
+        """Attach daughter leaves to this leaf.
+
+        Args:
+            daughter_leafs (``list[Leaf]``): leaves to attach (they must not have a mother yet).
+        """
         for daughter in daughter_leafs:
             if daughter.mother==[]:
                 daughter.mother = [self.id]
@@ -64,7 +103,16 @@ class Leaf:
             self.daughters.append(daughter.id)
 
     ## Method to get a string out of an ast leaf
-    def write(self, tree):
+    def write(self, tree: AST) -> str | None:
+        """Write the sub-tree starting at this leaf as a human-readable formula.
+
+        Args:
+            tree (``AST``): tree containing the leaf.
+
+        Returns:
+            ``str | None``:
+            The formula, or ``None`` if the leaf is inconsistent.
+        """
         if self.type in ['cst', 'var', 'bool']:
             return self.name
         elif self.type == 'un_op' and len(self.daughters)==1:
@@ -78,12 +126,25 @@ class Leaf:
                self.name + ' ' + tree.get(self.daughters[1]).write(tree) + ')'
         else:
             self.logger.warning('cannot write this ast')
+            # FIXME: 'self.info' is not called (missing parentheses).
             self.info
             return
 
 
     ## From AT to c++
-    def write_cpp(self, tree):
+    def write_cpp(self, tree: AST) -> str | None:
+        """Write the sub-tree starting at this leaf as a C++ expression.
+
+        Functions are prefixed with ``std::`` (``gamma`` becomes ``std::tgamma``), ``^`` is
+        converted into ``pow`` and ``and``/``or`` into ``&&``/``||``.
+
+        Args:
+            tree (``AST``): tree containing the leaf.
+
+        Returns:
+            ``str | None``:
+            The C++ expression, or ``None`` if the leaf is inconsistent.
+        """
         if self.type == 'cst':
             return str(float(self.name))
         elif self.type in ['var', 'bool']:
@@ -107,6 +168,7 @@ class Leaf:
                tree.get(self.daughters[1]).write_cpp(tree) + ')'
         else:
             self.logger.warning('cannot write this ast')
+            # FIXME: 'self.info' is not called (missing parentheses).
             self.info
             return
 

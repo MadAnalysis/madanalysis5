@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyzer headers
+/**
+ * @file Histo.cpp
+ * @brief Implementation of MA5::Histo.
+ */
+
 #include "SampleAnalyzer/Process/Plot/Histo.h"
 
 using namespace MA5;
@@ -209,6 +214,8 @@ void Histo::_initialize(const WeightCollection &weights)
 void Histo::Fill(MAfloat64 value, const WeightCollection &weights)
 {
     // Safety : nan or isinf
+    // FIXME: the NaN/Inf value is only reported: the function goes on and fills the histogram (for NaN
+    // the bin index is undefined).
     try
     {
         if (std::isnan(value))
@@ -237,6 +244,7 @@ void Histo::Fill(MAfloat64 value, const WeightCollection &weights)
             else if (value >= xmax_)
                 overflow_[idx].positive += weight;
             else
+                // NOTE: a value just below xmax can give a bin index equal to nbins because of rounding.
                 histo_[std::floor((value - xmin_) / step_)][idx].positive += weight;
         }
 

@@ -22,6 +22,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file PortableDatatypes.h
+ * @brief Portable fixed-size types used throughout SampleAnalyzer (MAbool, MAint32, MAfloat64, ...).
+ *
+ * The sizes of int and long are checked by Configuration/PortabilityCheckup, which
+ * defines INT_4BYTES and LONG_8BYTES in PortabilityTags.h.
+ */
+
 #ifndef PORTABLE_DATATYPE_H
 #define PORTABLE_DATATYPE_H
 

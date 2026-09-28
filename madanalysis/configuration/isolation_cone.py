@@ -22,42 +22,78 @@
 ################################################################################
 
 
+"""Cone-based lepton isolation settings (legacy ``set main.isolation`` interface)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 class IsolationCone():
+    """Isolation defined by a cone of radius :attr:`radius` around the lepton."""
 
     default_radius  = 0.5
 
     userVariables = { "radius" : [str(default_radius)] }
 
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise the cone radius to its default value."""
         self.radius  = IsolationCone.default_radius
 
         
-    def Display(self):
+    def Display(self) -> None:
+        """Log all parameters of the cone isolation."""
         self.user_DisplayParameter("radius")
 
 
-    def user_DisplayParameter(self,parameter):
+    def user_DisplayParameter(self,parameter: str) -> None:
+        """Log the value of one parameter.
+
+        Args:
+            parameter (``str``): name of the parameter.
+        """
         if parameter=="radius":
             logging.getLogger('MA5').info("  + cone radius = "+str(self.radius))
         else:
             logging.getLogger('MA5').error("'isolation' has no parameter called '"+parameter+"'")
 
         
-    def user_GetValues(self,variable):
+    def user_GetValues(self,variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            Suggested values, or an empty list.
+        """
         try:
             return IsolationCone.userVariables[variable]
         except:
             return []
 
     
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the settable parameters.
+
+        Returns:
+            ``list[str]``:
+            Parameter names.
+        """
         return list(IsolationCone.userVariables.keys())
 
 
-    def user_SetParameter(self,parameter,value):
+    def user_SetParameter(self,parameter: str,value: str) -> bool | None:
+        """Set a parameter (``set main.isolation.radius = <value>``).
+
+        Args:
+            parameter (``str``): ``radius``.
+            value (``str``): strictly positive cone radius.
+
+        Returns:
+            ``bool | None``:
+            ``False`` for invalid values, ``None`` otherwise.
+        """
         # radius
         if parameter=="radius":
             try:

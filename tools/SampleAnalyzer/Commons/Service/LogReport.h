@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LogReport.h
+ * @brief Counter of the WARNING/ERROR messages, with display thresholds.
+ */
+
 #ifndef LOG_REPORT_H
 #define LOG_REPORT_H
 
@@ -44,16 +49,18 @@
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class LogReport counts the occurence of WARNING or ERROR message.
-/// It is possible to apply a veto on the message display by two possible
-/// options : one threshold for each message or a global threshold
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Counts the occurrences of the WARNING or ERROR messages.
+ *
+ * A message is displayed only while its number of occurrences is below the message
+ * threshold (5 by default) and the total number of messages is below the global
+ * threshold (1000000 by default). A summary table is printed at the end of the run.
+ */
 class LogReport
 {
  protected:
 
-  // ShortCuts
+  /** @brief Table of the messages: key (file, line, text) and occurrences. */
   typedef std::map<LogMsgKey,LogMsgValue> MsgCollection;
   typedef std::map<LogMsgKey,LogMsgValue>::const_iterator MsgConstIterator;
   typedef std::map<LogMsgKey,LogMsgValue>::iterator MsgIterator;
@@ -62,19 +69,19 @@ class LogReport
   //                        data members
   // -------------------------------------------------------------
 
-  /// Name of the Report
+  /** @brief Name of the report. */
   std::string Name_;
 
-  /// Message table 
+  /** @brief Table of the messages. */
   MsgCollection MsgTable_;
 
-  /// Total number of occurences
+  /** @brief Total number of messages. */
   MAuint32 GeneralCounter_;
 
-  /// Threshold applied on the total number of occurences
+  /** @brief Threshold on the total number of messages. */
   MAint32 GlobalThreshold_;
 
-  /// Threshold applied on the number of a message occurence
+  /** @brief Threshold on the number of occurrences of each message. */
   MAint32 MsgThreshold_;
 
 
@@ -83,15 +90,15 @@ class LogReport
   // -------------------------------------------------------------
  public:
 
-  /// Constructor withtout argument
+  /** @brief Constructor (default thresholds). */
   LogReport() : GeneralCounter_(0), GlobalThreshold_(1000000), MsgThreshold_(5)
   {}
 
-  /// Destructor
+  /** @brief Destructor. */
   ~LogReport()
   {}
 
-  /// Clearing the content
+  /** @brief Reset the thresholds and the table. */
   void Reset()
   { 
     GlobalThreshold_ = 1000000;
@@ -101,31 +108,60 @@ class LogReport
     Name_="";
   }
 
-  /// Accessor to the name of the report
+  /**
+   * @brief Accessor to the name of the report.
+   *
+   * @return the name.
+   */
   const std::string& GetName() const 
   { return Name_; }
 
-  /// Mutator related to the name of the report
+  /**
+   * @brief Set the name of the report.
+   *
+   * @param Name name.
+   */
   void SetName(const std::string& Name)
   { Name_=Name; }
 
-  /// Accessor to the global threshold
+  /**
+   * @brief Accessor to the global threshold.
+   *
+   * @return the threshold.
+   */
   MAint32 GetGlobalThreshold() const
   { return GlobalThreshold_; }
 
-  /// Mutator related to the global threshold
+  /**
+   * @brief Set the global threshold.
+   *
+   * @param value threshold.
+   */
   void SetGlobalThreshold(const MAint32& value)
   { GlobalThreshold_=value; }
 
-  /// Accessor to the message threshold
+  /**
+   * @brief Accessor to the message threshold.
+   *
+   * @return the threshold.
+   */
   MAint32 GetMsgThreshold() const
   { return MsgThreshold_; }
 
-  /// Mutator related to the message threshold 
+  /**
+   * @brief Set the message threshold.
+   *
+   * @param value threshold.
+   */
   void SetMsgThreshold(const MAint32& value)
   { MsgThreshold_=value; }
 
-  /// Getting an iterator to an entry in the report table
+  /**
+   * @brief Get the entry of a message (created if needed).
+   *
+   * @param key key of the message.
+   * @return an iterator to the entry.
+   */
   MsgIterator GetIterator(const LogMsgKey& key)
   {
     MsgIterator it = MsgTable_.find(key);
@@ -144,7 +180,15 @@ class LogReport
     return it;
   }
 
-  /// Adding an occurence in the report table
+  /**
+   * @brief Count an occurrence of a message.
+   *
+   * @param filename file name.
+   * @param line line number.
+   * @param msg text.
+   * @param function function name.
+   * @return true if the message must be displayed (thresholds not reached).
+   */
   MAbool Add(const std::string& filename, 
              const MAuint32& line, 
              const std::string& msg,
@@ -169,14 +213,28 @@ class LogReport
     else return true;
   } 
 
-  /// Displaying the table
+  /**
+   * @brief Print the summary table.
+   *
+   * @param os logger.
+   */
   void Print(LogStream& os=INFO) const
   { WriteGenericReport(os); }
 
-  /// Displaying the table
+  /**
+   * @brief Print the summary table, sorted by number of occurrences.
+   *
+   * @param os logger.
+   */
   void WriteGenericReport(LogStream& os=INFO) const;
 
-  /// Order relation for sorting entries in the table
+  /**
+   * @brief Order the entries by decreasing number of occurrences.
+   *
+   * @param a first entry.
+   * @param b second entry.
+   * @return true if a comes first.
+   */
   static MAbool OccurencyOrder(const std::pair<const LogMsgKey, LogMsgValue>* a,
                                const std::pair<const LogMsgKey, LogMsgValue>* b)
   { return a->second.GetCounter() > b->second.GetCounter(); }

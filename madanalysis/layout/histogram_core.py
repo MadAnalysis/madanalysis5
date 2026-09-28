@@ -22,15 +22,36 @@
 ################################################################################
 
 
+"""Content of a histogram for one sign of the event weights."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 from math import sqrt
 from six.moves import range
 
 
 class HistogramCore:
+    """Statistics and content of a histogram.
 
-    def __init__(self):
+    Attributes:
+        nevents (``int``): number of events.
+        nentries (``int``): number of entries.
+        integral (``float``): sum of the bin contents (including under/overflow).
+        sumwentries (``float``): sum of the weights of the entries.
+        sumw (``float``): sum of the weights.
+        sumw2 (``float``): sum of the squared weights.
+        sumwx (``float``): sum of ``weight * x``.
+        sumw2x (``float``): sum of ``weight * x**2``.
+        underflow (``float``): underflow content.
+        overflow (``float``): overflow content.
+        nan (``float``): content of NaN entries.
+        inf (``float``): content of infinite entries.
+        array (``list[float]``): bin contents.
+    """
+
+    def __init__(self) -> None:
+        """Initialise an empty histogram."""
 
         # statistics
         # - int
@@ -52,7 +73,8 @@ class HistogramCore:
         self.array       = []
 
 
-    def ComputeIntegral(self):
+    def ComputeIntegral(self) -> None:
+        """Compute :attr:`integral` from the bins, the underflow and the overflow."""
         self.integral = 0
         for i in range(0,len(self.array)):
             self.integral+=self.array[i]
@@ -60,8 +82,10 @@ class HistogramCore:
         self.integral += self.underflow
         
 
-    def Print(self):
+    def Print(self) -> None:
+        """Log the statistics."""
 
+        # FIXME: 'self.entries' does not exist (AttributeError); probably 'self.nentries'.
         logging.getLogger('MA5').info('nevents='+str(self.nevents)+\
                      ' entries='+str(self.entries))
 
@@ -74,7 +98,13 @@ class HistogramCore:
                      ' overflow='+str(self.overflow))
         
 
-    def GetMean(self):
+    def GetMean(self) -> float:
+        """Get the weighted mean of the distribution.
+
+        Returns:
+            ``float``:
+            ``sumwx / sumw`` (0 if ``sumw`` is 0).
+        """
 
         if self.sumw==0:
             return 0.
@@ -82,7 +112,13 @@ class HistogramCore:
             return self.sumwx / self.sumw
 
 
-    def GetRMS(self):
+    def GetRMS(self) -> float:
+        """Get the weighted RMS of the distribution.
+
+        Returns:
+            ``float``:
+            ``sqrt(|sumw2x/sumw - mean**2|)`` (0 if ``sumw`` is 0).
+        """
 
         if self.sumw==0:
             return 0.

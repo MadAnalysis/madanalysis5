@@ -22,8 +22,19 @@
 ################################################################################
 
 
+"""Abstract syntax tree (AST) of the formulas used in SFS definitions.
+
+Efficiencies, resolutions and domains of validity of the SFS commands
+(``define tagger/smearer/reco_efficiency/...``) are written as mathematical formulas
+of observables (e.g. ``0.8*tanh(0.003*pt) [abseta < 2.5]``). They are parsed into an
+:class:`AST` that can be written back as a string (:meth:`AST.tostring`) or converted
+into a C++ function (:meth:`AST.tocpp`) inserted in the generated SFS code.
+"""
+
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import annotations
+from typing import Any
 import logging
 import re
 from madanalysis.fastsim.ast_leaf import Leaf
@@ -32,9 +43,26 @@ from six.moves import range
 
 
 class AST:
+    """Tree of :class:`~madanalysis.fastsim.ast_leaf.Leaf` objects representing a formula.
+
+    Operator precedence of the infix operators (lower = evaluated first): ``^`` (1),
+    ``*``/``/`` (2), ``+``/``-`` (3), comparisons (4), ``and``/``or`` (5).
+
+    Attributes:
+        id (``int``): identifier of the tree.
+        leaves (``list[Leaf]``): all leaves of the tree.
+        variables (``list[str]``): names of the observables allowed in the formula.
+        boolean / unary_ops / binary2_ops / binary1_ops: recognised keywords.
+    """
 
     # Initialization
-    def __init__(self, id_, vars_):
+    def __init__(self, id_: int, vars_: list[str]) -> None:
+        """Create an empty tree.
+
+        Args:
+            id_ (``int``): identifier of the tree.
+            vars_ (``list[str]``): observables allowed as variables.
+        """
         self.logger     = logging.getLogger('MA5')
         self.id         = id_
         self.leaves     = []
@@ -49,23 +77,40 @@ class AST:
 
 
     # Number of leaves
-    def size(self):
+    def size(self) -> int:
+        """Get the number of leaves.
+
+        Returns:
+            ``int``:
+            Number of leaves.
+        """
         return len(self.leaves)
 
 
     # Number of leaves
-    def reset(self):
+    def reset(self) -> None:
+        """Remove all leaves."""
         self.leaves=[]
 
     # printing all the info on an ast
-    def info(self):
+    def info(self) -> None:
+        """Log the tree and all its leaves."""
         self.logger.info("ast nr. "+str(self.id))
         self.logger.info("leaves = " + str(self.size()))
         for leaf in self.leaves:
             leaf.info()
 
     # Main method: creating an ast from a formula
-    def feed(self, formula_string):
+    def feed(self, formula_string: str) -> None:
+        """Parse a formula and build the tree.
+
+        The formula is tokenised, converted into leaves (:meth:`ToBasicLeaves`), then the
+        parentheses are resolved from the innermost ones and the operators are connected
+        by precedence (:meth:`MakeConnections`). On error, the tree is reset.
+
+        Args:
+            formula_string (``str``): formula (``**`` and ``^`` both denote the power).
+        """
         self.logger.debug('Handling the formula: ' + formula_string);
         frml = formula_string.replace('**', ' ^ ')
         for op in self.binary1_ops.keys():
@@ -88,6 +133,9 @@ class AST:
         while ')' in frml:
             id_end   = frml.index(')')
             id_start = [i for i,x in enumerate(frml[:id_end]) if x=='('][-1]
+            # FIXME: the last element before ')' is excluded from the comma search, and frml.index(',')
+            # returns the first comma of the whole formula, not the one inside the current parentheses:
+            # nested two-argument functions are mis-parsed.
             if ',' in frml[id_start+1:id_end-1]:
                 comma_pos   = frml.index(',')
                 sub_tree1 = self.MakeConnections(frml[id_start+1:comma_pos])
@@ -119,7 +167,20 @@ class AST:
 
     # Allow to make connections between leaves
     # There is no parentheses so that we can proceed straightforwardly
-    def MakeConnections(self, sub_formula):
+    def MakeConnections(self, sub_formula: list) -> list | bool:
+        """Connect the leaves of a parenthesis-free (sub-)formula.
+
+        Unary and binary functions are connected first, then the infix operators by
+        increasing precedence value.
+
+        Args:
+            sub_formula (``list``): leaves of the sub-formula (modified in place).
+
+        Returns:
+            ``list | bool``:
+            The reduced list (a single root leaf on success), or ``False`` for an
+            incorrect formula.
+        """
         frml = sub_formula
         iterator_limit = 0
         while len(frml)>1:
@@ -152,6 +213,7 @@ class AST:
                         break
                 else:
                    print(frml[i])
+                   # FIXME: deliberate crash on an undefined name (NameError) left from debugging.
                    aieaieaaie
             if reset:
                 continue
@@ -179,6 +241,7 @@ class AST:
                             break
                     else:
                        print((frml, i, '->', frml[i]))
+                       # FIXME: deliberate crash on an undefined name (NameError) left from debugging.
                        aieaieaaie2
                 if replacement_done:
                     break
@@ -186,7 +249,19 @@ class AST:
 
 
     # replacing all constants from the formulas by leaves
-    def ToBasicLeaves(self, formula):
+    def ToBasicLeaves(self, formula: list[str]) -> list:
+        """Convert the tokens of a formula into leaves.
+
+        Constants, observables, booleans and operators become leaves (a ``-`` following an
+        operator becomes the unary ``minus``); parentheses and commas are kept as strings.
+
+        Args:
+            formula (``list[str]``): tokens of the formula.
+
+        Returns:
+            ``list``:
+            Leaves and remaining string tokens.
+        """
         new_formula = []; last = ""
         self.logger.debug("  ** ToBasicLeaves formula: " + str(formula));
         for elem in formula:
@@ -234,15 +309,34 @@ class AST:
 
 
     # getting a given leaf
-    def get(self, nr):
+    def get(self, nr: int) -> Any:
+        """Get a leaf by identifier.
+
+        Args:
+            nr (``int``): identifier of the leaf.
+
+        Raises:
+            ``IndexError``: if the leaf does not exist.
+
+        Returns:
+            ``Leaf``:
+            The leaf.
+        """
         result = [x for x in self.leaves if x.id==nr]
         if len(result)!=1:
+            # FIXME: a Logger is not callable (TypeError); self.logger.error was intended.
             self.logger('trying to access an unexisting leaf')
         return result[0]
 
 
     # Writing a string out of the AST
-    def tostring(self):
+    def tostring(self) -> str | None:
+        """Write the tree as a human-readable formula.
+
+        Returns:
+            ``str | None``:
+            The formula written from the root leaf.
+        """
         main_mother = [x for x in self.leaves if x.mother==[]]
         if len(main_mother)!=1:
             self.logger.error('Undefined AST without any identified main mother')
@@ -250,8 +344,24 @@ class AST:
 
 
     # Writing a c++ string out of the AST
-    def tocpp(self,cpp_type,name):
+    def tocpp(self,cpp_type: str,name: str) -> str:
+        """Write the tree as a C++ function.
+
+        The function ``<cpp_type> fct_<name>(MAdouble64 <obs1>, ...)`` takes the observables
+        of the formula as arguments and returns its value.
+
+        Args:
+            cpp_type (``str``): C++ return type (``MAdouble64`` for functions, ``MAbool`` for
+                bounds).
+            name (``str``): suffix of the function name.
+
+        Returns:
+            ``str``:
+            The C++ definition of the function.
+        """
         main_mother = [x for x in self.leaves if x.mother==[]]
+        # NOTE: the argument order comes from a set: it varies between runs but is consistent with
+        # tocpp_call within a run.
         obs = list(set([x.name for x in self.leaves if x.type=='var']))
         if len(main_mother)!=1:
             self.logger.error('Undefined AST without any identified main mother')
@@ -269,7 +379,18 @@ class AST:
 
 
     # Setting the c++ in text initialization
-    def tocpp_call(self,obj,name, pointer="->"):
+    def tocpp_call(self,obj: str,name: str, pointer: str = "->") -> str:
+        """Write the C++ call of the function generated by :meth:`tocpp`.
+
+        Args:
+            obj (``str``): C++ expression of the object the observables are evaluated on.
+            name (``str``): suffix of the function name.
+            pointer (``str``, default ``"->"``): member access operator (``->`` or ``.``).
+
+        Returns:
+            ``str``:
+            E.g. ``" fct_eff_11_PT_1(obj->pt()) "``.
+        """
         obs = list(set([x.name for x in self.leaves if x.type=='var']))
         result  = ' fct_' + name + '('
         result += ', '.join([obj+pointer+obs_list.__dict__[x].code_reco for x in obs])

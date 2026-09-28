@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file ClusterBase.h
+ * @brief Base class of the substructure (re)clustering tools.
+ */
+
 #ifndef MADANALYSIS5_CLUSTERBASE_H
 #define MADANALYSIS5_CLUSTERBASE_H
 
@@ -46,8 +51,16 @@ namespace fastjet
 namespace MA5{
     namespace Substructure {
 
+        /** @brief Forward declaration (friend class). */
         class Recluster;
 
+        /**
+         * @brief Base class of the substructure clustering tools (Cluster, VariableR, Recluster).
+         *
+         * Holds a FastJet jet definition (or plugin) and the last cluster sequence. The jets
+         * can be clustered from an event, from the constituents of a jet or from the
+         * constituents of a collection of jets.
+         */
         class ClusterBase {
 
             friend class Recluster;
@@ -64,21 +77,27 @@ namespace MA5{
                                 // returned. if True return a vector of all jets (in the sense of the exclusive
                                 // algorithm) that would be obtained when running the algorithm with the given ptmin.
 
-            /// Jet definition
+            /** @brief FastJet jet definition (owned; used when isPlugin_ is false). */
             fastjet::JetDefinition* JetDefinition_;
+            /** @brief FastJet jet-definition plugin (owned; used when isPlugin_ is true). */
             fastjet::JetDefinition::Plugin* JetDefPlugin_;
+            /** @brief Whether the plugin is used instead of the jet definition. */
             MAbool isPlugin_;
+            /** @brief Whether a cluster sequence is available (required by exclusive_jets_up_to()). */
             MAbool isClustered_;
 
-            // Shared Cluster sequence
+            /** @brief Cluster sequence of the last clustering (shared with the returned jets). */
             std::shared_ptr<fastjet::ClusterSequence> clust_seq;
 
         public:
 
-            /// Constructor without argument
+            /** @brief Constructor without argument. */
+            // FIXME: the default constructor leaves JetDefinition_, JetDefPlugin_, isPlugin_, isClustered_, ptmin_
+            //   and isExclusive_ uninitialised, while ~ClusterBase() deletes both pointers (only one of them is
+            //   ever allocated by the derived classes).
             ClusterBase() {}
 
-            /// Destructor
+            /** @brief Destructor (deletes the jet definition and the plugin). */
             virtual ~ClusterBase()
             {
                 // clean heap allocation
@@ -86,52 +105,117 @@ namespace MA5{
                 delete JetDefPlugin_;
             }
 
-            // Set the Jet definition using algorithm and radius input
+            /**
+             * @brief Set a standard jet definition (no plugin).
+             *
+             * @param algorithm clustering algorithm.
+             * @param radius jet radius.
+             */
             void SetJetDef(Algorithm algorithm, MAfloat32 radius);
 
             //=======================//
             //        Execution      //
             //=======================//
 
-            // Wrapper for event based execution
+            /**
+             * @brief Cluster the event and store the jets in a new jet collection.
+             *
+             * @param event event (its RecEventFormat is modified through a const_cast).
+             * @param JetID identifier of the new jet collection (must not exist yet).
+             */
             virtual void Execute(const EventFormat& event, std::string JetID);
 
-            // Execute with a single jet. This method reclusters the given jet using its constituents
+            /**
+             * @brief Recluster the constituents of a jet.
+             *
+             * The returned jets are allocated on the heap and are owned by the caller.
+             *
+             * @param jet jet to process (its constituents are used).
+             * @return the reclustered jets, pT-ordered.
+             */
             std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet);
 
-            // Execute with a single jet. This method reclusters the given jet using its constituents by filtering
-            // reclustered events with respect to the initial jet
+            /**
+             * @brief Recluster the constituents of a jet and keep the subjets accepted by a filter.
+             *
+             * The returned jets are allocated on the heap and are owned by the caller.
+             *
+             * @tparam Func callable `bool(const RecJetFormat* jet, const RecJetFormat* subjet)`.
+             * @param jet jet to process (its constituents are used).
+             * @param func filter applied to each reclustered jet.
+             * @return the accepted jets, pT-ordered.
+             */
             template<typename Func>
             std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func);
 
-            // Execute with a list of jets. This method reclusters the given collection
-            // of jets by combining their constituents
+            /**
+             * @brief Recluster the combined constituents of a collection of jets.
+             *
+             * The returned jets are allocated on the heap and are owned by the caller.
+             *
+             * @param jets jets to process.
+             * @return the reclustered jets, pT-ordered.
+             */
             virtual std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets);
 
-            // Handler for clustering step
+            /**
+             * @brief Cluster the constituents of a jet and keep the cluster sequence (see exclusive_jets_up_to()).
+             *
+             * @param jet jet to process (its constituents are used).
+             */
             void cluster(const RecJetFormat *jet);
 
-            // return a vector of all jets when the event is clustered (in the exclusive sense) to exactly njets.
-            // If there are fewer than njets particles in the ClusterSequence the function just returns however many
-            // particles there were.
+            /**
+             * @brief Exclusive jets of the last cluster sequence, clustered to exactly `njets`.
+             *
+             * If there are fewer than `njets` particles, all of them are returned. The returned jets are allocated on the heap and are owned by the caller.
+             *
+             * @param njets number of exclusive jets.
+             * @return the jets, pT-ordered.
+             */
             std::vector<const RecJetFormat *> exclusive_jets_up_to(MAint32 njets);
 
         private:
 
-            // Generic clustering method
+            /**
+             * @brief Cluster a set of particles with the current jet definition.
+             *
+             * @param particles input particles.
+             * @return the inclusive (or exclusive) jets above ptmin_, pT-ordered.
+             */
             std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles);
 
-            // Method to transform pseudojet into recjetformat
+            /**
+             * @brief Convert a PseudoJet into a new RecJetFormat.
+             *
+             * @param jet FastJet jet.
+             * @return the new jet (owned by the caller).
+             */
             RecJetFormat * __transform_jet(fastjet::PseudoJet jet) const;
 
-            // Transform pseudojets into RecJetFormat
+            /**
+             * @brief Convert PseudoJets into new RecJetFormat objects.
+             *
+             * @param jets FastJet jets.
+             * @return the new jets (owned by the caller).
+             */
             std::vector<const RecJetFormat *> __transform_jets(std::vector<fastjet::PseudoJet> jets) const;
 
-            // Method to get jet algorithm
+            /**
+             * @brief Convert an MA5 algorithm into a FastJet algorithm.
+             *
+             * @param algorithm MA5 algorithm.
+             * @return the FastJet algorithm (an exception is thrown for an unknown algorithm).
+             */
             fastjet::JetAlgorithm __get_clustering_algorithm(Substructure::Algorithm algorithm) const;
 
-            // Execute with the Reconstructed event. This method creates a new Jet in RecEventFormat which
-            // can be accessed via JetID. The algorithm will only be executed if a unique JetID is given
+            /**
+             * @brief Cluster the event inputs into a new jet collection of RecEventFormat.
+             *
+             * @param myEvent event.
+             * @param JetID identifier of the new jet collection.
+             * @return false if the identifier already exists.
+             */
             MAbool __execute(EventFormat& myEvent, std::string JetID);
         };
     }

@@ -24,21 +24,53 @@
 ################################################################################
 
 
+"""Create a blank analysis class in an expert-mode job.
+
+Usage (from the ``Build/SampleAnalyzer`` folder of a job)::
+
+    ./newAnalyzer.py <ClassName> [mute]
+
+The files ``User/Analyzer/<ClassName>.{h,cpp}`` are created, the analysis is
+registered in ``User/Analyzer/analysisList.h`` and, if ``../Main/main.cpp`` exists,
+the analysis is initialised and executed there. Without a second argument, the
+title of the analysis is asked interactively; otherwise the class name is used.
+"""
+
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import annotations
 import os
 import sys
 import shutil
 from six.moves import input
 
 class AnalyzerManager:
+    """Writer of the files of a new analysis.
+
+    Attributes:
+        name (``str``): C++ class name.
+        title (``str``): name under which the analysis is registered.
+        currentdir (``str``): working directory (``Build/SampleAnalyzer``).
+    """
     
-    def __init__(self,name,title):
+    def __init__(self,name: str,title: str) -> None:
+        """Store the class name and the title.
+
+        Args:
+            name (``str``): C++ class name.
+            title (``str``): name under which the analysis is registered.
+        """
         self.name       = name
         self.title      = title
         self.currentdir = os.getcwd()
 
-    def CheckFilePresence(self):
+    def CheckFilePresence(self) -> bool:
+        """Check that ``User/Analyzer`` exists and that the analysis files do not exist yet.
+
+        Returns:
+            ``bool``:
+            ``True`` if the analysis can be created, ``False`` otherwise.
+        """
         if not os.path.isdir(self.currentdir + "/User/Analyzer"):
             print("        Error: the directory called 'User/Analyzer' is not found.")
             return False
@@ -54,7 +86,12 @@ class AnalyzerManager:
             return False
         return True
 
-    def AddAnalyzer(self):
+    def AddAnalyzer(self) -> None:
+        """Register the analysis in ``User/Analyzer/analysisList.h``.
+
+        The file is created if needed; otherwise a backup (``analysisList.bak``) is made and
+        a ``manager.Add`` line is inserted before the closing brace.
+        """
         # creating the file from scratch
         if not os.path.isfile(self.currentdir + "/User/Analyzer/analysisList.h"):
             output = open(self.currentdir + "/User/Analyzer/analysisList.h","w")
@@ -87,6 +124,7 @@ class AnalyzerManager:
 
                 theline = line.lstrip()
                 theline = theline.split()
+                # NOTE: 'tit' is unused.
                 tit = self.title.replace(' ','_')
                 for word in theline:
                     if word=="}":
@@ -98,7 +136,8 @@ class AnalyzerManager:
             input.close()
             output.close()
 
-    def WriteHeader(self):
+    def WriteHeader(self) -> None:
+        """Write ``User/Analyzer/<name>.h`` (class deriving from ``AnalyzerBase``)."""
         
         file = open(self.currentdir + "/User/Analyzer/" + self.name + ".h","w")
         file.write('#ifndef ANALYSIS_'+self.name.upper()+'_H\n')
@@ -119,7 +158,8 @@ class AnalyzerManager:
         file.write('}\n\n')
         file.write('#endif // ANALYSIS_'+self.name.upper()+'_H')
         file.close()
-    def WriteSource(self):
+    def WriteSource(self) -> None:
+        """Write ``User/Analyzer/<name>.cpp`` with commented examples."""
         
         file = open(self.currentdir + "/User/Analyzer/" + self.name + ".cpp","w")
         file.write('#include "SampleAnalyzer/User/Analyzer/'+self.name+'.h"\n')
@@ -374,7 +414,14 @@ class AnalyzerManager:
         file.write('\n')
         file.close()
 
-    def UpdateMain(self,title):
+    def UpdateMain(self,title: str) -> None:
+        """Initialise and execute the analysis in ``../Main/main.cpp`` (if it exists).
+
+        A backup ``main.bak`` is made.
+
+        Args:
+            title (``str``): title of the analysis.
+        """
         if not os.path.isfile(self.currentdir + "/../Main/main.cpp"):
           return;
         else:
@@ -387,6 +434,7 @@ class AnalyzerManager:
             if "Getting pointer to the analyzer" in line:
               output.write(line)
               TheName = title.replace(' ','_');
+              # FIXME: overwrites the previous line (applied on 'title' again): spaces are not replaced.
               TheName = title.replace('-','_');
               output.write("  std::map<std::string, std::string> prm" + TheName + ";\n")
               output.write("  AnalyzerBase* analyzer_" + TheName + "=\n")
@@ -406,6 +454,7 @@ class AnalyzerManager:
 mute=False
 if len(sys.argv)==3:
     mute=True
+# NOTE: sys.exit() without argument: the error exit code is 0.
 elif len(sys.argv)!=2:
     print("        Error: number of argument incorrect")
     print("        Syntax: ./newAnalyzer.py name")
@@ -423,6 +472,7 @@ else:
 analyzer = AnalyzerManager(sys.argv[1],title)
 
 # Checking presence of required files
+# NOTE: CheckFilePresence runs after the title question.
 if not analyzer.CheckFilePresence():
     sys.exit()
 

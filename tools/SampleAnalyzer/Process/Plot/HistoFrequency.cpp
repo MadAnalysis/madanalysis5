@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyzer headers
+/**
+ * @file HistoFrequency.cpp
+ * @brief Implementation of MA5::HistoFrequency.
+ */
+
 #include "SampleAnalyzer/Process/Plot/HistoFrequency.h"
 
 using namespace MA5;

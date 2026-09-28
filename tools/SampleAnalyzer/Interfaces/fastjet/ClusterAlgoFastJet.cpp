@@ -23,6 +23,11 @@
 
 
 // SampleAnalyser headers
+/**
+ * @file ClusterAlgoFastJet.cpp
+ * @brief Implementation of MA5::ClusterAlgoFastJet.
+ */
+
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoFastJet.h"
 
 using namespace MA5;
@@ -146,6 +151,7 @@ MAbool ClusterAlgoFastJet::Cluster(EventFormat& myEvent, std::string JetID)
     }
 
     // Filling the dataformat with jets
+    // NOTE: insert() does nothing if a collection with the same identifier already exists.
     myEvent.rec()->jetcollection_.insert(std::make_pair(JetID, output_jets));
 
     return true;

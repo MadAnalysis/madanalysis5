@@ -22,7 +22,21 @@
 ################################################################################
 
 
+"""Differential jet rate (DJR) plots used to validate the matrix-element/parton-shower
+merging.
+
+For each dataset and each DJR ``i``, the total distribution and the contributions of
+the samples with ``n`` extra jets are drawn together (histograms ``DJR<i>_total`` and
+``DJR<i>_<n>jet``). ROOT macros and Matplotlib scripts are generated.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.dataset.dataset import Dataset
 from madanalysis.selection.instance_name           import InstanceName
 from madanalysis.enumeration.uncertainty_type      import UncertaintyType
 from madanalysis.enumeration.normalize_type        import NormalizeType
@@ -39,10 +53,22 @@ import logging
 from six.moves import range
 
 class MergingPlots:
+    """DJR plots of all datasets.
+
+    Attributes:
+        counter (``int``): class-level counter giving unique ROOT object names.
+        main (``Main``): session state.
+        detail (``list[MergingPlotsForDataset]``): histograms of each dataset.
+    """
 
     counter = 0
 
-    def __init__(self,main):
+    def __init__(self,main: Main) -> None:
+        """Create one histogram collection per dataset.
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main         = main
         self.detail       = []
         for i in range(0,len(main.datasets)):
@@ -51,7 +77,8 @@ class MergingPlots:
         #self.filenames    = []
 
 
-    def Initialize(self):
+    def Initialize(self) -> None:
+        """Finalise the reading of the histograms of all datasets."""
 
         # Creating plots
         for i in range(0,len(self.detail)):
@@ -59,7 +86,17 @@ class MergingPlots:
             self.detail[i].CreateHistogram()
 
 
-    def DrawAll(self,histo_path,modes,output_paths,ListROOTplots):
+    def DrawAll(self,histo_path: str,modes: list[int],output_paths: list[str],ListROOTplots: list[str]) -> None:
+        """Write the plotting scripts of all datasets.
+
+        Args:
+            histo_path (``str``): folder of the scripts.
+            modes (``list[int]``): report formats
+                (:class:`~madanalysis.enumeration.report_format_type.ReportFormatType`).
+            output_paths (``list[str]``): report folders (one per format).
+            ListROOTplots (``list[str]``): list extended (in place) with the script names
+                (without extension).
+        """
 
         # Loop on each dataset
         rootfiles=[]
@@ -73,7 +110,17 @@ class MergingPlots:
         for item in rootfiles:
             ListROOTplots.append(item)
 
-    def DrawDatasetPlots(self,histos,dataset,histo_path,modes,output_paths,rootfiles):
+    def DrawDatasetPlots(self,histos: MergingPlotsForDataset,dataset: Dataset,histo_path: str,modes: list[int],output_paths: list[str],rootfiles: list[str]) -> None:
+        """Write the plotting scripts of the DJR plots of one dataset.
+
+        Args:
+            histos (``MergingPlotsForDataset``): histograms of the dataset.
+            dataset (``Dataset``): dataset.
+            histo_path (``str``): folder of the scripts.
+            modes (``list[int]``): report formats.
+            output_paths (``list[str]``): report folders (one per format).
+            rootfiles (``list[str]``): list extended (in place) with the script names.
+        """
 
         # Loop over DJR
         for i in range(0,100):
@@ -132,7 +179,17 @@ class MergingPlots:
 
 
             
-    def GetPlotNames(self,mode,output_path):
+    def GetPlotNames(self,mode: int,output_path: str) -> list[list[str]]:
+        """Get the names of the DJR images (without extension).
+
+        Args:
+            mode (``int``): report format (unused).
+            output_path (``str``): report folder.
+
+        Returns:
+            ``list[list[str]]``:
+            Image names, grouped by dataset.
+        """
 
         allnames = []
         
@@ -157,11 +214,26 @@ class MergingPlots:
                       datasetname+"_"+str(i+1))#+"." +\
 #                      ReportFormatType.convert2filetype(mode))
 
+        # FIXME: outside the dataset loop: only the names of the last dataset are returned.
         allnames.append(names)
         return allnames
     
 
-    def DrawROOT(self,DJRplots,dataset,filenameC,output_files,index):
+    def DrawROOT(self,DJRplots: list[Any],dataset: Dataset,filenameC: str,output_files: list[str],index: int) -> bool:
+        """Write the ROOT macro drawing one DJR plot.
+
+        Args:
+            DJRplots (``list[Any]``): the total DJR histogram followed by the ``n``-jet
+                contributions.
+            dataset (``Dataset``): dataset (cross section).
+            filenameC (``str``): path of the script to write.
+            output_files (``list[str]``): images to produce when the script runs.
+            index (``int``): 1-based index of the DJR.
+
+        Returns:
+            ``bool``:
+            ``False`` if the file cannot be written, ``True`` otherwise.
+        """
 
         # Open the file in write-mode
         try:
@@ -218,6 +290,7 @@ class MergingPlots:
         # Loop over other DJR plots    
         for ind in range(1,len(DJRplots)):
             if DJRplots[ind].summary.nentries!=0:
+                # NOTE: every contribution is scaled with the number of entries of the total plot.
                 scales.append( float(xsection) / \
                                float(DJRplots[0].summary.nentries) )
             else:
@@ -286,6 +359,8 @@ class MergingPlots:
         outputC.write('  stack->GetYaxis()->SetTitleFont(22);\n')
         outputC.write('  stack->GetYaxis()->SetTitleOffset(1);\n')
         outputC.write('  stack->GetYaxis()->SetTitle("'+axis_titleY+'");\n')
+        # FIXME: 'ind' is the last index of the loop above; ymin/ymax are lists (TypeError when
+        # concatenated to a str) and ymax is passed to SetMinimum.
         if DJRplots[ind].ymin!=[]:
             outputC.write('  stack->SetMinimum('+DJRplots[ind].ymin+');\n')
         if DJRplots[ind].ymax!=[]:
@@ -340,13 +415,28 @@ class MergingPlots:
         try:
             outputC.close()
         except:
+            # FIXME: concatenating the file object raises a TypeError (filenameC was meant).
             logging.getLogger('MA5').error('Impossible to close the file: '+outputC)
             return False
 
         # Ok
         return True
 
-    def DrawMATPLOTLIB(self,DJRplots,dataset,filenamePy,output_files,index):
+    def DrawMATPLOTLIB(self,DJRplots: list[Any],dataset: Dataset,filenamePy: str,output_files: list[str],index: int) -> bool:
+        """Write the Matplotlib script drawing one DJR plot.
+
+        Args:
+            DJRplots (``list[Any]``): the total DJR histogram followed by the ``n``-jet
+                contributions.
+            dataset (``Dataset``): dataset (cross section).
+            filenamePy (``str``): path of the script to write.
+            output_files (``list[str]``): images to produce when the script runs.
+            index (``int``): 1-based index of the DJR.
+
+        Returns:
+            ``bool``:
+            ``False`` if the file cannot be written, ``True`` otherwise.
+        """
 
         # Open the file in write-mode
         try:
@@ -414,6 +504,7 @@ class MergingPlots:
         for bin in range(0,xnbin):
             if bin!=0:
                 outputPy.write(',')
+            # NOTE: 'ind' is a leftover index from the scale loop above.
             outputPy.write(str(DJRplots[ind].GetBinMean(bin)))
         outputPy.write('])\n\n')
 
@@ -463,6 +554,7 @@ class MergingPlots:
 
             try:
                 import matplotlib.pyplot as plt
+                # NOTE: probes the Matplotlib API ('normed' was removed in Matplotlib 3.1) at generation time.
                 plt.hist([0],normed=True)
                 outputPy.write('rwidth=0.8,\\\n'+\
                                 '             color='+linecolor+', '+\
@@ -483,6 +575,7 @@ class MergingPlots:
                     'align="mid", orientation="vertical")\n\n')
 
         # Setting X axis label
+        # FIXME: the label uses the last loop index instead of 'index' (DJR number).
         axis_titleX = "log10(DJR"+str(ind)+")"
         outputPy.write('    # Axes\n')
         outputPy.write("    plt.rc('text',usetex=False)\n")
@@ -527,6 +620,7 @@ class MergingPlots:
         try:
             outputPy.close()
         except:
+            # FIXME: concatenating the file object raises a TypeError (filenamePy was meant).
             logging.getLogger('MA5').error('Impossible to close the file: '+outputPy)
             return False
 

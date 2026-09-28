@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file JetClustererManager.h
+ * @brief Registry of the jet clusterers.
+ */
+
 #ifndef JET_CLUSTERING_MANAGER_h
 #define JET_CLUSTERING_MANAGER_h
 
@@ -34,6 +39,7 @@
 namespace MA5
 {
 
+/** @brief Registry of the jet clusterers. */
 class JetClustererManager : public ManagerBase<JetClusterer>
 {
   // -------------------------------------------------------------
@@ -41,18 +47,22 @@ class JetClustererManager : public ManagerBase<JetClusterer>
   // -------------------------------------------------------------
   public :
 
-   /// Constructor without argument
+   /** @brief Constructor. */
    JetClustererManager() : ManagerBase<JetClusterer>()
    { }
 
-   /// Destructor
+   /** @brief Destructor. */
    ~JetClustererManager()
    { }
 
-   /// Build the table
+  /** @brief Register the available jet clusterers (kt, antikt, genkt, cambridge, SISCone, CDFMidpoint, CDFJetClu and GridJet, when compiled with FASTJET_USE). */
   void BuildTable(); 
 
-  /// Print the list of items in the collection
+  /**
+   * @brief Print the registered jet clusterers.
+   *
+   * @param os logger.
+   */
   void Print(LogStream& os=INFO) const
   { ManagerBase<JetClusterer>::Print(Objects_, Names_, os); }
 

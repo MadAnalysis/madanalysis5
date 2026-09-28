@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file SmearerBase.cpp
+ * @brief Implementation of the SFS particle propagator and Gaussian smearing.
+ */
+
 #include <algorithm>
 #include <cmath>
 
@@ -42,6 +47,7 @@ void SmearerBase::ParticlePropagator(MCParticleFormat * part)
 {
   // Rotation undergone by the mother's momentum
   //  --> to be applied to the daughter
+  // NOTE: assumes that the particle has at least one mother.
   MAdouble64 RotAngle = part->mothers()[0]->momentum_rotation();
   if (RotAngle!=0.)
   {
@@ -85,6 +91,7 @@ void SmearerBase::ParticlePropagator(MCParticleFormat * part)
 
   // Charged particle evolving in a magnetic field
   // Definition of the helix centre and radius [mm]
+  // helix radius [mm]: the PDG service gives three times the charge; pT/(qB) with c in m/s
   MAdouble64 R       = part->pt()/( (PDG->GetCharge(part->pdgid())/3.)*Bz())*1.0e+12/c_;
   MAdouble64 x_helix = part->mothers()[0]->decay_vertex().X() + R * sin(part->phi());
   MAdouble64 y_helix = part->mothers()[0]->decay_vertex().Y() - R * cos(part->phi());
@@ -139,6 +146,7 @@ void SmearerBase::ParticlePropagator(MCParticleFormat * part)
 void SmearerBase::SetDisplacementObservables(const MCParticleFormat* part, MCParticleFormat &output)
 {
     // Point of closest approach
+    // NOTE: division by pT: undefined for particles at rest (pT = 0).
     MAdouble64 xd = part->mothers()[0]->decay_vertex().X() - part->px()/part->pt() * ( part->mothers()[0]->decay_vertex().X()*part->px() + part->mothers()[0]->decay_vertex().Y()*part->py() ) / part->pt();
     MAdouble64 yd = part->mothers()[0]->decay_vertex().Y() - part->py()/part->pt() * ( part->mothers()[0]->decay_vertex().X()*part->px() + part->mothers()[0]->decay_vertex().Y()*part->py() ) / part->pt();
     MAdouble64 zd = part->mothers()[0]->decay_vertex().Z() - part->pz()/part->pt() * ( part->mothers()[0]->decay_vertex().X()*part->px() + part->mothers()[0]->decay_vertex().Y()*part->py() ) / part->pt();
@@ -155,6 +163,7 @@ void SmearerBase::SetDisplacementObservables(const MCParticleFormat* part, MCPar
 }
 
 
+// NOTE: 'sigma' is the standard deviation, not the variance.
 /// Smearer Gaussian function 
 /// (one smears the quantity 'property' with a Gaussian of variance 'sigma')
 ///

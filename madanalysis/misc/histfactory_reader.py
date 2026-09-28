@@ -21,6 +21,15 @@
 #
 ################################################################################
 
+"""Handling of full likelihoods (HistFactory/pyhf JSON workspaces) in the recasting mode.
+
+The background-only workspace is read from the PAD (:class:`HF_Background`) and the
+signal is added as a JSON patch built from the signal-region efficiencies
+(:class:`HF_Signal`). Both can be extrapolated to another luminosity.
+"""
+
+from typing import Any
+
 import copy
 import json
 import logging
@@ -38,7 +47,23 @@ except ImportError:
 
 
 class HistFactory:
-    def __init__(self, pyhf_config):
+    """Base class of the HistFactory workspaces and patches.
+
+    Attributes:
+        pyhf_config (``dict``): signal-region configuration of the likelihood profile
+            (``{region: {"channels": id, "data": [regions], "is_included": bool}}``).
+        lumi (``float``): luminosity of the workspace in fb^-1.
+        path (``Path``): folder of the JSON file.
+        name (``str``): name of the JSON file.
+        hf (``dict | list``): the workspace (background) or the patch (signal).
+    """
+    def __init__(self, pyhf_config: "dict") -> "None":
+        """Read the common configuration.
+
+        Args:
+            pyhf_config (``dict``): likelihood-profile configuration (``SR``, ``lumi``, ``path``,
+                ``name``).
+        """
         self.pyhf_config = pyhf_config.get("SR", {})
         self.lumi = pyhf_config.get("lumi", 1.0)
         self.path = Path(pyhf_config.get("path", "missing_path"))
@@ -50,15 +75,34 @@ class HistFactory:
         elif isinstance(self, HF_Signal):
             self.hf = []
 
-    def __call__(self, lumi):
+    def __call__(self, lumi: "float") -> "dict | list":
+        """Get the workspace/patch for a luminosity (see :meth:`extrapolate`).
+
+        Args:
+            lumi (``float``): luminosity in fb^-1.
+
+        Returns:
+            ``dict | list``:
+            The (extrapolated) workspace or patch.
+        """
         return self.extrapolate(lumi)
 
-    def extrapolate(self, lumi):
-        """To calculate the HL variables HF needs to be extrapolated. Expected
-        observables will be extrapolated and summed, summation is superseeded
-        to the observed values since there is no observation in HL.
+    def extrapolate(self, lumi: "float") -> "dict | list":
+        """Extrapolate the workspace/patch to another luminosity.
 
-        Modifiers are extrapolated with respect to their nature."""
+        Yields and ``shapesys``/``histosys`` data are scaled by the luminosity ratio,
+        ``staterror`` data by its square root; ``normsys``, ``normfactor``, ``shapefactor`` and
+        ``lumi`` modifiers are unchanged. For the background, the observations are replaced by
+        the total expected yields (no observation exists at a future luminosity).
+
+        Args:
+            lumi (``float``): luminosity in fb^-1.
+
+        Returns:
+            ``dict | list``:
+            A copy of the extrapolated workspace/patch (the original one if the luminosity is
+            unchanged).
+        """
         lumi = float(lumi)
         if lumi == self.lumi or self.hf in [{}, []]:
             return self.hf
@@ -173,6 +217,8 @@ class HistFactory:
 
                     # extrapolate shape variables
                     elif mod_type == "shapesys":
+                        # FIXME: the inner loops reuse 'i', the index of the outer loop over the patch operations:
+                        # after them, HF[i] refers to another element.
                         for i in range(len(HF[i]["value"]["modifiers"][imod]["data"])):
                             HF[i]["value"]["modifiers"][imod]["data"][i] *= lumi_scale
 
@@ -202,7 +248,18 @@ class HistFactory:
 
 
 class HF_Background(HistFactory):
+    """Background-only HistFactory workspace of a likelihood profile."""
     def __init__(self, pyhf_config: dict, expected: bool = False):
+        """Read the background workspace.
+
+        Args:
+            pyhf_config (``dict``): likelihood-profile configuration.
+            expected (``bool``, default ``False``): replace the observations by the total
+                expected yields.
+
+        Raises:
+            ``ImportError``: if spey-pyhf is not installed.
+        """
         super().__init__(pyhf_config)
 
         if WorkspaceInterpreter is None:
@@ -221,13 +278,22 @@ class HF_Background(HistFactory):
         if expected:
             self.hf = self.impose_expected()
 
-    def size(self):
+    def size(self) -> "list[int]":
+        """Get the number of bins of each channel.
+
+        Returns:
+            ``list[int]``:
+            Number of bins per channel.
+        """
         # The number of SRs in the likelihood profile
         return list(WorkspaceInterpreter(self.hf).bin_map.values())
 
-    def impose_expected(self):
-        """
-        To switch observed data with total expected data per SR bin.
+    def impose_expected(self) -> "dict":
+        """Replace the observed data by the total expected background in each bin.
+
+        Returns:
+            ``dict``:
+            A modified copy of the workspace.
         """
         total_expected = {}
         HF = copy.deepcopy(self.hf)
@@ -251,13 +317,31 @@ class HF_Background(HistFactory):
 
         return HF
 
-    def get_expected(self):
+    def get_expected(self) -> "list":
+        """Get the expected observations.
+
+        Returns:
+            ``list``:
+            The ``observations`` block of :meth:`impose_expected`.
+        """
         return self.impose_expected().get("observations", [])
 
-    def get_observed(self):
+    def get_observed(self) -> "list":
+        """Get the observed data.
+
+        Returns:
+            ``list``:
+            The ``observations`` block of the workspace.
+        """
         return self.hf.get("observations", [])
 
-    def get_sample_names(self):
+    def get_sample_names(self) -> "dict[str, list[str]]":
+        """Get the sample names of each channel.
+
+        Returns:
+            ``dict[str, list[str]]``:
+            Channel name -> sample names.
+        """
         samples = {}
         HF = copy.deepcopy(self.hf)
         for iSR in range(len(HF.get("channels", []))):
@@ -270,21 +354,34 @@ class HF_Background(HistFactory):
 
 
 class HF_Signal(HistFactory):
+    """Signal patch of a HistFactory workspace.
+
+    The patch adds a sample (``MA5_signal_<n>``) with the signal yields to each included
+    channel and removes the excluded channels. It requires the background workspace, which
+    also provides the name of the parameter of interest.
+
+    Keyword arguments (``**kwargs``):
+
+    * ``validate`` (``bool``): build a mock signal (efficiencies set to 1) to validate the
+      configuration against the background;
+    * ``background`` (``HF_Background``): background used to validate the bin numbers;
+    * ``add_normsys`` / ``add_histosys`` (``list[dict]``): extra modifiers.
+
+    An empty :attr:`hf` means that the validation failed.
     """
-    HistFactory requires a jsonpathch file to be attached to the bkg.
-    BKG histfactory includes a configuration file which is necessary to
-    construct the signal patch.
 
-    **kwargs are for initialization of uncertainties in the future
-    also background can be inputted for simultaneous validation of the profile.
+    def __init__(self, pyhf_config: "dict", regiondata: "dict", xsection: "float" = -1, **kwargs) -> "None":
+        """Build the signal patch.
 
-    validate = True  will initiate a mock validation sequence to ensure that
-    the construction of pyhf_config is correct. The validation requires the
-    background sample to be completed. self.hf == [] means that validation
-    is failed and correct pyhf_config is needed.
-    """
+        Args:
+            pyhf_config (``dict``): likelihood-profile configuration.
+            regiondata (``dict``): region data with the ``N0`` and ``Nf`` sums of weights.
+            xsection (``float``, default ``-1``): signal cross section in pb (``<= 0``: empty patch).
+            **kwargs: see the class documentation.
 
-    def __init__(self, pyhf_config, regiondata, xsection=-1, **kwargs):
+        Raises:
+            ``ImportError``: if spey-pyhf is not installed.
+        """
         super().__init__(pyhf_config)
         self.signal_config = {}
 
@@ -335,7 +432,19 @@ class HF_Signal(HistFactory):
             add_histosys=kwargs.get("add_histosys", []),
         )
 
-    def set_HF(self, xsection, **kwargs):
+    def set_HF(self, xsection: "float", **kwargs) -> "list":
+        """Build the JSON patch.
+
+        Args:
+            xsection (``float``): signal cross section in pb.
+            **kwargs: ``background``, ``add_normsys``, ``add_histosys`` (see the class
+                documentation).
+
+        Returns:
+            ``list``:
+            The patch operations (empty if the cross section is not positive or the
+            validation fails).
+        """
         HF = []
         if xsection <= 0.0:
             return HF
@@ -376,6 +485,7 @@ class HF_Signal(HistFactory):
         for sys in kwargs.get("add_normsys", []):
             HF = self.add_normsys(HF, sys["hi"], sys["lo"], sys["name"])
         for sys in kwargs.get("add_histosys", []):
+            # FIXME: add_normsys is called for the histosys modifiers (add_histosys intended).
             HF = self.add_normsys(HF, sys["hi_data"], sys["lo_data"], sys["name"])
 
         background = kwargs.get("background", {})
@@ -385,11 +495,22 @@ class HF_Signal(HistFactory):
                 return []
         return HF
 
-    def validate_bins(self, background, HF: list = None):
+    def validate_bins(self, background: "HF_Background", HF: list = None) -> "bool":
+        """Check that the signal patch is compatible with the background workspace.
+
+        Args:
+            background (``HF_Background``): background workspace.
+            HF (``list``, default ``None``): patch to check (:attr:`hf` if ``None``).
+
+        Returns:
+            ``bool``:
+            ``True`` if every channel is either removed or has the right number of bins.
+        """
         if HF is None:
             HF = self.hf
         bkg_bins = background.size()
         to_validate = [False] * len(bkg_bins)
+        # NOTE: HF is a list: this comparison with a dict is never true.
         if HF == {}:
             return all(to_validate)
         try:
@@ -421,14 +542,32 @@ class HF_Signal(HistFactory):
             return False
         return all(to_validate)
 
-    def isAlive(self):
+    def isAlive(self) -> "bool":
+        """Check whether the signal has at least one positive yield.
+
+        Returns:
+            ``bool``:
+            ``True`` if some yield is positive.
+        """
         for sample in self.hf:
             if sample["op"] != "remove":
                 if any([s > 0 for s in sample["value"]["data"]]):
                     return True
         return False
 
-    def add_normsys(self, HF, hi, lo, name):
+    def add_normsys(self, HF: "list", hi: "float", lo: "float", name: "str") -> "list":
+        """Add a ``normsys`` modifier to all signal samples.
+
+        Args:
+            HF (``list``): patch.
+            hi (``float``): up variation.
+            lo (``float``): down variation.
+            name (``str``): name of the modifier.
+
+        Returns:
+            ``list``:
+            The modified patch.
+        """
         # systematic unc: name has to be MA5_scale, MA5_PDF, MA5_TH or MA5_sys
         # hi = 1.XX lo = 0.XX
         for i in range(len(HF)):
@@ -439,7 +578,19 @@ class HF_Signal(HistFactory):
             )
         return HF
 
-    def add_histosys(self, HF, hi_data, lo_data, name):
+    def add_histosys(self, HF: "list", hi_data: "list", lo_data: "list", name: "str") -> "list":
+        """Add a ``histosys`` modifier to all signal samples.
+
+        Args:
+            HF (``list``): patch.
+            hi_data (``list``): up variation per bin.
+            lo_data (``list``): down variation per bin.
+            name (``str``): name of the modifier.
+
+        Returns:
+            ``list``:
+            The modified patch.
+        """
         # scale and TH uncertainties: name has to be MA5_scale, MA5_PDF, MA5_TH or MA5_sys
         # hi_data,lo_data are list!!
         for i in range(len(HF)):
@@ -454,17 +605,27 @@ class HF_Signal(HistFactory):
             )
         return HF
 
-    def clear_modifiers(self):
+    def clear_modifiers(self) -> "None":
+        """Reset the modifiers of all signal samples to ``lumi`` and the signal strength.
+        """
         for i in range(len(self.hf)):
             self.hf[i]["value"]["modifiers"] = [
                 {"data": None, "name": "lumi", "type": "lumi"},
+                # NOTE: the parameter of interest is hard-coded (self.poi_name is not used).
                 {"data": None, "name": "mu_SIG", "type": "normfactor"},
             ]
 
 
-def get_HFID(file, SRname):
-    """
-    Extract the location of the profiles within the JSON file.
+def get_HFID(file: "str", SRname: "str") -> "int | str":
+    """Find the index of a channel in a workspace file.
+
+    Args:
+        file (``str``): JSON workspace.
+        SRname (``str``): channel name.
+
+    Returns:
+        ``int | str``:
+        The channel index, or an error message.
     """
     if os.path.isfile(file):
         with open(file, "r") as json_file:
@@ -477,8 +638,21 @@ def get_HFID(file, SRname):
     return "Invalid or corrupted info file."
 
 
-def construct_histfactory_dictionary(info_root, run_recast_session) -> Tuple[dict, list]:
-    """Read the info file and construct histfactory dictionary"""
+def construct_histfactory_dictionary(info_root: "Any", run_recast_session: "Any") -> Tuple[dict, list]:
+    """Read the ``<pyhf>`` blocks of an information file.
+
+    Each block defines a likelihood profile: the workspace file (``<name>``, possibly
+    replaced by a simplified likelihood built with ``simplify``) and the mapping between
+    the workspace channels and the signal regions of the analysis (``<regions>``).
+
+    Args:
+        info_root (``Element``): root of the information file.
+        run_recast_session (``RunRecast``): recasting controller (PAD path, settings).
+
+    Returns:
+        ``Tuple[dict, list]``:
+        The configuration of each profile and the profiles to discard.
+    """
     pyhf_config = OrderedDict()
     nprofile, default_lumi = 0, 0
     to_remove = []

@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ClusterAlgoGridJet.h
+ * @brief GridJet algorithm (FastJet).
+ */
+
 #ifndef JETCLUSTERINGGRIDJET_H
 #define JETCLUSTERINGGRIDJET_H
 
@@ -33,6 +38,7 @@
 namespace MA5
 {
 
+/** @brief Jet clustering with the GridJet algorithm. */
 class ClusterAlgoGridJet: public ClusterAlgoPlugin
 {
 //---------------------------------------------------------------------------------
@@ -40,10 +46,10 @@ class ClusterAlgoGridJet: public ClusterAlgoPlugin
 //---------------------------------------------------------------------------------
   private :
 
-    /// y max
+    /** @brief Maximum rapidity of the grid. */
     MAfloat64 Ymax_;
 
-    /// Requested Grid Spacing in y and phi
+    /** @brief Requested grid spacing in rapidity and azimuth. */
     MAfloat64 RequestedGridSpacing_;
 
 //---------------------------------------------------------------------------------
@@ -51,25 +57,43 @@ class ClusterAlgoGridJet: public ClusterAlgoPlugin
 //---------------------------------------------------------------------------------
   public :
 
-    /// Constructor without argument
+    /** @brief Constructor (default parameters). */
     ClusterAlgoGridJet() {Ymax_=2.5; RequestedGridSpacing_=0.05;}
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~ClusterAlgoGridJet () {}
 
-    /// Initialization
+    /**
+     * @brief Create the FastJet jet definition.
+     *
+     * @return true.
+     */
     virtual MAbool Initialize();
 
-    /// Set parameter
+    /**
+     * @brief Set a parameter (`ymax`, `ptmin` and `requestedgridspacing`).
+     *
+     * @param key parameter name (lower case).
+     * @param value value.
+     * @return false for an unknown parameter.
+     */
     virtual MAbool SetParameter(const std::string& key, const std::string& value);
 
-    /// Print parameters
+    /** @brief Print the parameters. */
     virtual void PrintParam ();
 
-    /// Accessor to the jet clusterer name
+    /**
+     * @brief Accessor to the name of the algorithm.
+     *
+     * @return the name.
+     */
     virtual std::string GetName();
 
-    /// Accessor to the jet clusterer parameters
+    /**
+     * @brief Accessor to the parameters.
+     *
+     * @return a printable summary.
+     */
     virtual std::string GetParameters();
 
 };

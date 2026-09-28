@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MCProcessFormat.h
+ * @brief Properties of a generated process (LHE <init> block).
+ */
+
 #ifndef PROCESS_FORMAT_H
 #define PROCESS_FORMAT_H
 
@@ -44,6 +49,7 @@ class STDHEPreader;
 class ROOTReader;
 class LHEWriter;
 
+/** @brief Cross section, uncertainty and maximum weight of a generated process. */
 class ProcessFormat
 {
   friend class LHEReader;
@@ -59,6 +65,7 @@ class ProcessFormat
   // -------------------------------------------------------------
  private:
 
+  /** @brief Cross section [pb], its statistical uncertainty, the maximum weight and the process identifier. */
   MAfloat64 xsectionMean_;    /// cross-section (pb)
   MAfloat64 xsectionError_;   /// statistical error on the cross-section
   MAfloat64 weightMax_;       /// maximum weight encountered in the events
@@ -70,35 +77,55 @@ class ProcessFormat
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor (members reset). */
   ProcessFormat() {Reset();}
 
-  /// Destructor
+  /** @brief Destructor. */
   ~ProcessFormat() {}
 
-  /// Accessor to the mean value of the process cross section
+  /**
+   * @brief Accessor to the cross section.
+   *
+   * @return the cross section [pb].
+   */
   const MAfloat64&  xsection()      const {return xsectionMean_;  }
 
-  /// Accessor to the mean value of the process cross section
+  /**
+   * @brief Accessor to the cross section.
+   *
+   * @return the cross section [pb].
+   */
   const MAfloat64&  xsectionMean()  const {return xsectionMean_;  }
 
-  /// Accessor to the error value of the process cross section
+  /**
+   * @brief Accessor to the uncertainty on the cross section.
+   *
+   * @return the uncertainty [pb].
+   */
   const MAfloat64&  xsectionError() const {return xsectionError_; }
 
-  /// Accessor to the highest weight
+  /**
+   * @brief Accessor to the maximum event weight.
+   *
+   * @return the maximum weight.
+   */
   const MAfloat64&  weightMax()     const {return weightMax_;     }
 
-  /// Accessor to the process identity
+  /**
+   * @brief Accessor to the process identifier.
+   *
+   * @return the identifier.
+   */
   const MAuint32&   processId()      const {return processId_;     }
 
-  /// Clearing all information
+  /** @brief Reset the members. */
   void Reset()
   {
      xsectionMean_=0.; xsectionError_=0.;
      weightMax_=0.;    processId_=0;
   }
 
-  /// Displaying data member values
+  /** @brief Print the process properties. */
   void Print() const
   {
     INFO << "processId="        << processId_

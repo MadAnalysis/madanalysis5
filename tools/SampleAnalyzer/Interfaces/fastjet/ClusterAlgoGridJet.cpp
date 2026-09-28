@@ -23,6 +23,11 @@
 
 
 // SampleAnalyser headers
+/**
+ * @file ClusterAlgoGridJet.cpp
+ * @brief Implementation of MA5::ClusterAlgoGridJet.
+ */
+
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
 
 // FastJet headers
@@ -84,6 +89,7 @@ MAbool ClusterAlgoGridJet::SetParameter(const std::string& key, const std::strin
 MAbool ClusterAlgoGridJet::Initialize()
 { 
   // Creating Plugin
+  // NOTE: the plugin is never deleted (the jet definition does not own it).
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::GridJetPlugin(Ymax_, RequestedGridSpacing_);
 
   // Creating jet definition

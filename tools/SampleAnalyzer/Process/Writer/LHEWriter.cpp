@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // STL headers
+/**
+ * @file LHEWriter.cpp
+ * @brief Implementation of MA5::LHEWriter.
+ */
+
 #include <sstream>
 
 // SampleAnalyzer headers
@@ -30,6 +35,13 @@
 
 using namespace MA5;
 
+/**
+ * @brief Is a Monte Carlo particle part of the hard process (status 3 or 21-29; 110-125 for Herwig 6)?
+ *
+ * @param part particle.
+ * @param sample sample.
+ * @return true if it must be written.
+ */
 MAbool MCParticleToSave(const MCParticleFormat &part, const SampleFormat &sample)
 {
     // Special Herwig6
@@ -48,6 +60,13 @@ MAbool MCParticleToSave(const MCParticleFormat &part, const SampleFormat &sample
     }
 }
 
+/**
+ * @brief Is a Monte Carlo particle an incoming particle of the hard process?
+ *
+ * @param part particle.
+ * @param sample sample.
+ * @return true if it must be written.
+ */
 MAbool InitialMCParticleToSave(const MCParticleFormat &part, const SampleFormat &sample)
 {
     // Special Herwig6
@@ -66,6 +85,13 @@ MAbool InitialMCParticleToSave(const MCParticleFormat &part, const SampleFormat 
     }
 }
 
+/**
+ * @brief Position of a particle in a collection.
+ *
+ * @param part particle.
+ * @param collection collection.
+ * @return the 1-based position, or 0 if not found.
+ */
 MAuint32 Find(const MCParticleFormat *part,
               const std::vector<const MCParticleFormat *> &collection)
 {
@@ -77,6 +103,13 @@ MAuint32 Find(const MCParticleFormat *part,
     return 0;
 }
 
+/**
+ * @brief Position in a collection of the first hard-process ancestor of a particle.
+ *
+ * @param part particle.
+ * @param collection collection.
+ * @return the 1-based position, or 0 if not found.
+ */
 MAuint32 FindDeeply(const MCParticleFormat *part,
                     const std::vector<const MCParticleFormat *> &collection)
 {
@@ -413,6 +446,12 @@ MAbool LHEWriter::WriteHeader(const SampleFormat &mySample)
     return true;
 }
 
+/**
+ * @brief Index of the mother of a particle in the simplified LHE event record.
+ *
+ * @param index index of the particle.
+ * @return the index of the mother.
+ */
 MAint32 GetMotherIndex(MAint32 index)
 {
     if (index == 0)

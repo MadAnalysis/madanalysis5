@@ -23,6 +23,11 @@
 
 
 // SampleAnalyser headers
+/**
+ * @file ClusterAlgoSISCone.cpp
+ * @brief Implementation of MA5::ClusterAlgoSISCone.
+ */
+
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
 
 // FastJet headers
@@ -108,6 +113,7 @@ MAbool ClusterAlgoSISCone::SetParameter(const std::string& key, const std::strin
 MAbool ClusterAlgoSISCone::Initialize()
 {
   // Creating plugin
+  // NOTE: the plugin is never deleted (the jet definition does not own it).
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::SISConePlugin(R_, OverlapThreshold_, NPassMax_, Protojet_ptmin_);
 
   // Creating jet definition

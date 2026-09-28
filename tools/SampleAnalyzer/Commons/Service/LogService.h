@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LogService.h
+ * @brief Singleton giving access to the loggers (DEBUG, INFO, WARNING, ERROR, USER).
+ */
+
 #ifndef LOG_SERVICE_H
 #define LOG_SERVICE_H
 
@@ -39,28 +44,26 @@
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 
-// ShortCuts to the different loggers
+/** @brief Debug logger (usage: `DEBUG << ... << endmsg;`). */
 #define DEBUG      MA5::LogService::GetInstance()->GetDebug()
+/** @brief Information logger. */
 #define INFO       MA5::LogService::GetInstance()->GetInfo()
+/** @brief Warning logger. */
 #define WARNING    MA5::LogService::GetInstance()->GetWarning()
+/** @brief Error logger. */
 #define ERROR      MA5::LogService::GetInstance()->GetError()
+/** @brief User logger identified by a name. */
 #define USER(id)   MA5::LogService::GetInstance()->GetUser(id)
 
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class LogService gives the access to loggers ; the loggers are sorted
-/// according to their level of verbosity.
-///
-/// LogService is a singleton-pattern-based class : only one instance.
-/// Getting the only one instance : LogService::GetInstance()
-//////////////////////////////////////////////////////////////////////////////
+/** @brief Singleton giving access to the loggers, sorted by verbosity level. */
 class LogService
 {
  public:
 
-  // Definition of the different levels of verbosity
+  /** @brief Verbosity levels (a logger is muted if its level is below the chosen one). */
   enum VerbosityLevel{DEBUG_LEVEL=1,USER_LEVEL=2,
                       INFO_LEVEL=3,WARNING_LEVEL=4,
                       ERROR_LEVEL=5};
@@ -70,13 +73,13 @@ class LogService
   // -------------------------------------------------------------
  private:
 
-  /// Pointer to the unique instance of LogService
+  /** @brief Unique instance. */
   static LogService* Service_;
 
-  /// Veto on verbosity
+  /** @brief Current verbosity level. */
   VerbosityLevel Level_;
 
-  /// Logger with DEBUG verbosity level
+  /** @brief Loggers with the DEBUG, INFO, WARNING and ERROR levels. */
   LogStream Debug_;
 
   /// Logger with INFO verbosity level
@@ -88,10 +91,10 @@ class LogService
   /// Logger with ERROR verbosity level
   LogStream Error_;
 
-  /// Collection of logger with USER verbosity level
+  /** @brief Loggers with the USER level, by name. */
   std::map<std::string,LogStream> User_;
 
-  /// Veto on the user name for USER logger
+  /** @brief If set, only the USER logger with this name is active. */
   std::string ExclusiveUser_;
 
   // -------------------------------------------------------------
@@ -99,7 +102,7 @@ class LogService
   // -------------------------------------------------------------
  private:
 
-  /// Constructor without argument
+  /** @brief Constructor (colours, prompts, INFO verbosity level). */
   LogService() 
   {
     // Initializing Debug streamer
@@ -122,11 +125,15 @@ class LogService
     SetVerbosityLevel(INFO_LEVEL);
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~LogService()
   {}
 
-  /// Mute a given USER logger 
+  /**
+   * @brief Mute or unmute all the USER loggers (respecting the exclusive user).
+   *
+   * @param mute true to mute.
+   */
   void SetGlobalMuteUser(MAbool mute)
   {
     for (std::map<std::string,LogStream>::iterator 
@@ -141,37 +148,62 @@ class LogService
 
  public:
 
-  /// Getting the unique instance of LogService
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static LogService* GetInstance()
   {
     if (Service_==0) Service_ = new LogService;
     return Service_;
   }
 
-  /// Deleting the unique instance of LogService
+  /** @brief Delete the unique instance. */
   static void Kill()
   {
     if (Service_!=0) delete Service_;
     Service_=0;
   }
   
-  /// Accessor to the DEBUG logger
+  /**
+   * @brief Accessor to the DEBUG logger.
+   *
+   * @return the logger.
+   */
   LogStream& GetDebug()
   { return Debug_; }
 
-  /// Accessor to the INFO logger
+  /**
+   * @brief Accessor to the INFO logger.
+   *
+   * @return the logger.
+   */
   LogStream& GetInfo()
   { return Info_; }
 
-  /// Accessor to the WARNING logger
+  /**
+   * @brief Accessor to the WARNING logger.
+   *
+   * @return the logger.
+   */
   LogStream& GetWarning()
   { return Warning_; }
 
-  /// Accessor to the ERROR logger
+  /**
+   * @brief Accessor to the ERROR logger.
+   *
+   * @return the logger.
+   */
   LogStream& GetError()
   { return Error_; }
 
-  /// Accessor to the appropriate logger
+  /**
+   * @brief Get a USER logger (created if needed).
+   *
+   * @param name name of the logger.
+   * @return the logger (the DEBUG logger if it cannot be created).
+   */
   LogStream& GetUser(const std::string& name)
   { 
     std::map<std::string, LogStream>::iterator it = User_.find(name);
@@ -202,15 +234,24 @@ class LogService
     return it->second;
   }
 
-  /// Modifiying level of verbosity
+  /**
+   * @brief Set the verbosity level (and mute/unmute the loggers accordingly).
+   *
+   * @param level verbosity level.
+   */
   void SetVerbosityLevel(VerbosityLevel level);
 
-  /// Applying a veto on the user name for the USER logger
+  /**
+   * @brief Restrict the USER loggers to a single name.
+   *
+   * @param name name of the only active USER logger.
+   */
   void SetExclusiveUser(const std::string& name)
   {
     ExclusiveUser_=name;
     for (std::map<std::string,LogStream>::iterator it=User_.begin(); it!=User_.end(); it++)
     {
+      // FIXME: both branches mute the logger: the exclusive user is muted as well (SetUnMute was meant).
       if (it->first==name) it->second.SetMute();
       else it->second.SetMute();
     }

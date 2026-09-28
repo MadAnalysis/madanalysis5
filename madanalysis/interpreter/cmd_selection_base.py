@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Parsing helpers shared by the ``plot`` and ``select``/``reject`` commands."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from madanalysis.observable.observable_base import ObservableBase
 from madanalysis.multiparticle.particle_object import ParticleObject
 from madanalysis.multiparticle.extraparticle   import ExtraParticle
 from madanalysis.enumeration.operator_type     import OperatorType
@@ -36,26 +43,61 @@ import logging
 from six.moves import range
 
 class CmdSelectionBase():
+    """Mixin parsing observables, operators, arguments and particle expressions.
 
-    def __init__(self):
+    .. note::
+        The class relies on the attribute ``main`` defined by
+        :class:`~madanalysis.interpreter.cmd_base.CmdBase`, which the concrete commands
+        (:class:`~madanalysis.interpreter.cmd_plot.CmdPlot`,
+        :class:`~madanalysis.interpreter.cmd_cut.CmdCut`) also inherit.
+    """
+
+    def __init__(self) -> None:
+        """Initialise the logger."""
         self.logger       = logging.getLogger('MA5')
 
-    def DisplayObservableError(self,word):
+    def DisplayObservableError(self,word: str) -> None:
+        """Log an error for an unknown observable.
+
+        Args:
+            word (``str``): name of the observable.
+        """
         self.logger.error("'"+word+\
                       "' is an unknown observable and cannot be used in a plot/cut definition.")
 
-    def extract_observable(self,word,display=True):
+    def extract_observable(self,word: str,display: bool = True) -> str | None:
+        """Check whether a word is an observable that can be plotted.
+
+        Args:
+            word (``str``): candidate observable name.
+            display (``bool``, default ``True``): log an error if the observable is unknown.
+
+        Returns:
+            ``str | None``:
+            The observable name, or ``None`` if unknown.
+        """
 
         # Getting observable
         if self.main.observables.findPlotObservable(word):
             return word
         else:
             if display:
+                # FIXME: typos in the message ('unwknown', 'int a plot').
                 self.logger.error("'"+word+\
                               "' is an unwknown observable and cannot be used int a plot definition.")
             return None
 
-    def extract_operator(self,words):
+    def extract_operator(self,words: list[str]) -> int:
+        """Decode a comparison operator split into one or two characters.
+
+        Args:
+            words (``list[str]``): characters of the operator (e.g. ``['<', '=']``).
+
+        Returns:
+            ``int``:
+            Value of :class:`~madanalysis.enumeration.operator_type.OperatorType`
+            (``UNKNOWN`` if not recognised).
+        """
 
         if len(words)==1:
             if words[0]=="=":
@@ -82,7 +124,23 @@ class CmdSelectionBase():
         else:
             return OperatorType.UNKNOWN
 
-    def extract_arguments(self,words,obsName,obsRef):
+    def extract_arguments(self,words: list[str],obsName: str,obsRef: ObservableBase) -> list[Any] | None:
+        """Decode the comma-separated arguments of an observable.
+
+        Each argument is decoded according to the expected
+        :class:`~madanalysis.enumeration.argument_type.ArgumentType` (particle, particle
+        combination, integer or float).
+
+        Args:
+            words (``list[str]``): words between the parentheses of the observable.
+            obsName (``str``): name of the observable (for error messages).
+            obsRef (``ObservableBase``): description of the observable.
+
+        Returns:
+            ``list[Any] | None``:
+            Decoded arguments (``ParticleObject``, ``int`` or ``float``), or ``None`` on
+            error.
+        """
         tmp=[]
         arguments=[]
 
@@ -114,6 +172,7 @@ class CmdSelectionBase():
                     return None
                 for parts in result:
                     if len(parts)!=1:
+                        # FIXME: the error is logged but None is not returned: the invalid argument is accepted.
                         self.logger.error("Argument "+str(iarg)+" of the observable "+\
                                       obsName+" must be a particle/multiparticle "+\
                                       "and not a combination of "+\
@@ -154,7 +213,16 @@ class CmdSelectionBase():
         return results
 
 
-    def extract_integer(self,words):
+    def extract_integer(self,words: list[str]) -> int | None:
+        """Decode an integer argument.
+
+        Args:
+            words (``list[str]``): words of the argument (joined without separator).
+
+        Returns:
+            ``int | None``:
+            The value, or ``None`` on error.
+        """
         theString = "".join(words)
         try:
             value=int(theString)
@@ -164,7 +232,16 @@ class CmdSelectionBase():
         return value
 
 
-    def extract_float(self,words):
+    def extract_float(self,words: list[str]) -> float | None:
+        """Decode a floating-point argument.
+
+        Args:
+            words (``list[str]``): words of the argument (joined without separator).
+
+        Returns:
+            ``float | None``:
+            The value, or ``None`` on error.
+        """
         theString = "".join(words)
         try:
             value=float(theString)
@@ -174,7 +251,20 @@ class CmdSelectionBase():
         return value
 
 
-    def extract_particle(self,words):
+    def extract_particle(self,words: list[str]) -> ParticleObject | None:
+        """Decode a particle expression.
+
+        The grammar supports combinations (``a b``), alternatives (``and``), the ``all``
+        keyword, PT ranks (``a[1]``), mother requirements (``a < b`` for a direct mother,
+        ``a << b`` for any ancestor) and parentheses.
+
+        Args:
+            words (``list[str]``): words of the expression.
+
+        Returns:
+            ``ParticleObject | None``:
+            The decoded expression, or ``None`` on syntax error.
+        """
 
         # Checking first and end position
         if words[0]=="and" or words[-1]=="and":
@@ -281,6 +371,7 @@ class CmdSelectionBase():
             # Normal mode
             elif item=="and":
                 if ALLmode and len(parts)>1:
+                    # FIXME: typo 'Reversed' (instead of 'Reserved') in the message below.
                     self.logger.error("Reversed word 'all' must be applied in front of only (multi)particle")
                     return
                 object.Add(parts,ALLmode)
@@ -318,6 +409,7 @@ class CmdSelectionBase():
 
         if len(parts)!=0:
             if ALLmode and len(parts)>1:
+                # FIXME: typo 'Reversed' (instead of 'Reserved') in the message below.
                 self.logger.error("Reversed word 'all' must be applied in front of only (multi)particle")
                 return
             object.Add(parts,ALLmode)
@@ -330,7 +422,18 @@ class CmdSelectionBase():
         #return instance
 
 
-    def extract_options(self,histo,words):
+    def extract_options(self,histo: Any,words: list[str]) -> bool:
+        """Apply shortcut options (e.g. ``logY``, ``normalize2one``) to a histogram.
+
+        Args:
+            histo (``Any``): histogram (``Histogram``, ``HistogramFrequency`` or
+                ``HistogramLogX``).
+            words (``list[str]``): options.
+
+        Returns:
+            ``bool``:
+            ``False`` at the first invalid option, ``True`` otherwise.
+        """
         for item in words:
             test=histo.user_SetShortcuts(item)
             if not test:

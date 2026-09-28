@@ -21,18 +21,45 @@
 #  
 ################################################################################
 
+"""Writer of the SFS tagger source file (``new_tagger.cpp``)."""
+
+from __future__ import annotations
+from typing import TYPE_CHECKING, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.fastsim.fastsim import SuperFastSim
+
 from madanalysis.job.job_tagger_header import JobTaggerHeader
 from madanalysis.fastsim.tagger import TaggerStatus
 
 class JobTaggerMain:
+    """Writer of the ``NewTagger`` efficiency methods.
+
+    Attributes:
+        fastsim (``SuperFastSim``): SFS configuration.
+    """
 
     ## Initialization
-    def __init__(self, fastsim):
+    def __init__(self, fastsim: SuperFastSim) -> None:
+        """Store the SFS configuration.
+
+        Args:
+            fastsim (``SuperFastSim``): SFS configuration (``main.superfastsim``).
+        """
         self.fastsim = fastsim
 
 
     ## Writing NewTagger.h
-    def WriteNewTaggerSource(self, file):
+    def WriteNewTaggerSource(self, file: TextIO) -> None:
+        """Write ``new_tagger.cpp``.
+
+        For each distinct ``(true_id, reco_id, status)`` rule, the method returns the sum of
+        ``bound * efficiency`` over the efficiency pieces of the matching rules (the
+        efficiency is redefined, not summed, if several rules match).
+
+        Args:
+            file (``TextIO``): output C++ file.
+        """
         # header
         file.write('#include "SampleAnalyzer/User/Analyzer/new_tagger.h"\n')
         file.write('#include "SampleAnalyzer/User/Analyzer/efficiencies.h"\n')

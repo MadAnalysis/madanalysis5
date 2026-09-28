@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file ProgressBar.cpp
+ * @brief Implementation of MA5::ProgressBar.
+ */
+
 #include <cstdlib>
 
 // SampleAnalyzer headers
@@ -78,6 +83,9 @@ void ProgressBar::Initialize(MAuint32 Nstep,
   std::cout.rdbuf(newstreambuf_cout_);
 
   newstreambuf_cerr_ = new SpyStreamBuffer(oldstreambuf_cerr_);
+  // FIXME: std::cout.rdbuf is set three times: std::cerr and std::clog are never redirected, and
+  //   std::cout
+  // ends up using the spy buffer of std::clog (std::cerr.rdbuf/std::clog.rdbuf were meant).
   std::cout.rdbuf(newstreambuf_cerr_);
 
   newstreambuf_clog_ = new SpyStreamBuffer(oldstreambuf_clog_);
@@ -180,6 +188,7 @@ void ProgressBar::Finalize()
   oldstreambuf_cout_=0;
   oldstreambuf_cerr_=0;
   oldstreambuf_clog_=0;
+  // NOTE: the pointers are not reset to 0: the destructor deletes the buffers a second time.
   if (newstreambuf_cout_!=0) delete newstreambuf_cout_;
   if (newstreambuf_cerr_!=0) delete newstreambuf_cerr_;
   if (newstreambuf_clog_!=0) delete newstreambuf_clog_;

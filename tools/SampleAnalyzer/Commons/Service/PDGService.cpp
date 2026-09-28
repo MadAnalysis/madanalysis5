@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file PDGService.cpp
+ * @brief Static members of MA5::PDGService.
+ */
+
 #include "SampleAnalyzer/Commons/Service/PDGService.h"
 
 

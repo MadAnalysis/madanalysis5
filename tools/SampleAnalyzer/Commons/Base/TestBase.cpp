@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file TestBase.cpp
+ * @brief Compilation test of the base-class headers.
+ */
+
 #include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 #include "SampleAnalyzer/Commons/Base/ReaderBase.h"

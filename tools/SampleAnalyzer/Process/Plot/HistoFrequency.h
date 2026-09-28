@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file HistoFrequency.h
+ * @brief Histogram of the frequencies of integer values (e.g. PDG codes).
+ */
+
 #ifndef HISTO_FREQUENCY_H
 #define HISTO_FREQUENCY_H
 
@@ -36,6 +41,7 @@
 namespace MA5
 {
 
+    /** @brief Histogram counting the occurrences of integer values (used for NPID/NAPID). */
     class HistoFrequency : public PlotBase
     {
 
@@ -43,37 +49,51 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     protected:
-        /// Collection of observables
+        /** @brief Sum of the weights for each value. */
         std::map<int, std::vector<WEIGHTS>> stack_;
 
-        /// Sum of event-weights over entries
+        /** @brief Sum of the weights of the entries. */
         std::vector<WEIGHTS> sum_w_;
 
-        /// RegionSelections attached to the histo
+        /** @brief Regions to which the histogram is attached. */
         std::vector<RegionSelection *> regions_;
 
         // -------------------------------------------------------------
         //                       method members
         // -------------------------------------------------------------
     public:
-        /// Constructor with argument
+        /**
+         * @brief Constructor.
+         *
+         * @param name name.
+         */
         HistoFrequency(const std::string &name) : PlotBase(name) { initialised_ = false; }
 
-        /// Destructor
+        /** @brief Destructor. */
         virtual ~HistoFrequency() {}
 
+        /**
+         * @brief Size the containers for the event weights.
+         *
+         * @param multiweight weights of an event (only the size is used).
+         */
         void _initialize(const WeightCollection &multiweight) { sum_w_.resize(multiweight.size()); }
 
-        /// Setting the linked regions
+        /**
+         * @brief Attach the histogram to regions.
+         *
+         * @param myregions regions.
+         */
         void SetSelectionRegions(std::vector<RegionSelection *> myregions)
         {
             regions_.insert(regions_.end(), myregions.begin(), myregions.end());
         }
 
-        /// Checking that all regions of the histo are surviving
-        /// Returns 0 if all regions are failing (includes te case with 0 SR)
-        /// Returns 1 if all regions are passing
-        // returns -1 otherwise
+        /**
+         * @brief Check the status of the attached regions.
+         *
+         * @return 1 if all the regions survive, 0 if all fail (or no region), -1 otherwise.
+         */
         MAint32 AllSurviving()
         {
             if (regions_.size() == 0)
@@ -88,10 +108,19 @@ namespace MA5
                 return 0;
         }
 
-        /// Adding an entry for a given observable
+        /**
+         * @brief Count an occurrence of a value.
+         *
+         * @param obs value.
+         * @param weights weights of the event.
+         */
         void Fill(const MAint32 &obs, WeightCollection &weights);
 
-        /// Write the plot in a text file
+        /**
+         * @brief Write the histogram in the SAF format.
+         *
+         * @param output output stream.
+         */
         virtual void Write_TextFormat(std::ostream *output);
     };
 

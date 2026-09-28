@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file Physics.h
+ * @brief Singleton gathering the physics toolboxes (PHYSICS).
+ */
+
 #ifndef PHYSICS_SERVICE_h
 #define PHYSICS_SERVICE_h
 
@@ -45,12 +50,20 @@
 #include "SampleAnalyzer/Commons/Service/TransverseVariables.h"
 
 
+/** @brief Shortcut to the PhysicsService singleton. */
 #define PHYSICS MA5::PhysicsService::getInstance()
 
 
 namespace MA5
 {
 
+/**
+ * @brief Singleton gathering the physics toolboxes.
+ *
+ * PHYSICS->Id (identification, e.g. IsFinalState), PHYSICS->Isol (isolation),
+ * PHYSICS->Transverse (MT2, alphaT, ...), PHYSICS->RF (RestFrames helper), and a few
+ * event-level helpers.
+ */
 class PhysicsService
 {
 
@@ -58,6 +71,7 @@ class PhysicsService
   //                       data members
   // -------------------------------------------------------------
  protected:
+  /** @brief Unique instance. */
   static PhysicsService* service_;
 
   // -------------------------------------------------------------
@@ -65,49 +79,83 @@ class PhysicsService
   // -------------------------------------------------------------
  public:
 
-  /// Transverse variable toolbox
+  /** @brief Toolbox of transverse variables (MT2, alphaT, ...). */
   TransverseVariables *Transverse;
+  /** @brief Helper owning RestFrames objects. */
   RestFramesHelper *RF;
 
-  /// Identification method toolbox
+  /** @brief Toolbox of identification methods. */
   Identification *Id;
 
-  // Isolation
+  /** @brief Toolbox of isolation methods. */
   Isolation* Isol;
 
-  /// GetInstance
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static PhysicsService* getInstance()
   {
     if (service_==0) service_ = new PhysicsService;
     return service_;
   }
 
-  /// Kill
+  /** @brief Delete the unique instance. */
   static void kill()
   {
     if (service_!=0) delete service_;
     service_=0;
   }
 
-  /// Get MCconfig
+  /**
+   * @brief Accessor to the Monte Carlo configuration (hadronic/invisible PDG codes).
+   *
+   * @return the configuration.
+   */
   const MCconfig& mcConfig() const  
   { return Id->mcConfig(); }
+  /**
+   * @brief Accessor to the Monte Carlo configuration.
+   *
+   * @return the configuration.
+   */
   MCconfig& mcConfig()
   { return Id->mcConfig(); }
 
-  /// Get RECconfig
+  /**
+   * @brief Accessor to the reconstruction configuration (isolation).
+   *
+   * @return the configuration.
+   */
   const RECconfig& recConfig() const  
   { return Id->recConfig(); }
+  /**
+   * @brief Accessor to the reconstruction configuration.
+   *
+   * @return the configuration.
+   */
   RECconfig& recConfig()
   { return Id->recConfig(); }
 
-  /// Weights
+  /**
+   * @brief Nominal weight of an event.
+   *
+   * @param event Monte Carlo event.
+   * @return the weight.
+   */
   inline MAfloat64 weights(const MCEventFormat* event) const
   {
     return event->weight();
   }
 
-  /// MT 
+  /**
+   * @brief Transverse mass of a particle and the missing transverse momentum.
+   *
+   * @param part particle.
+   * @param event Monte Carlo event (MET).
+   * @return the transverse mass (0 if the squared mass is negative).
+   */
   MAfloat32 MT(const MCParticleFormat& part, const MCEventFormat* event)
   {
     // Computing ET sum
@@ -122,23 +170,26 @@ class PhysicsService
   }
 
 
+  /**
+   * @brief Transverse mass of a particle and the missing transverse momentum.
+   *
+   * @param part particle (0 allowed).
+   * @param event Monte Carlo event (MET).
+   * @return the transverse mass (0 for a null pointer).
+   */
   MAfloat32 MT(const MCParticleFormat* part, const MCEventFormat* event)
   {
     if (part==0) return false;
     return MT(*part,event);
   }
 
-  ///Get the decay mode : 1 = Tau --> e nu nu
-  ///                     2 = Tau --> mu nu nu
-  ///                     3 = Tau --> K nu
-  ///                     4 = Tau --> K* nu
-  ///                     5 = Tau --> Rho (--> pi pi0) nu
-  ///                     6 = Tau --> A1 (--> pi 2pi0) nu
-  ///                     7 = Tau --> A1 (--> 3pi) nu
-  ///                     8 = Tau --> pi nu
-  ///                     9 = Tau --> 3pi pi0 nu
-  ///                     0 = other
-  ///                    -1 = error
+  /**
+   * @brief Decay mode of a Monte Carlo tau from its daughters.
+   *
+   * @param part tau.
+   * @return 1 e nu nu, 2 mu nu nu, 3 K nu, 4 K* nu, 5 rho nu, 6 a1 (-> pi 2pi0) nu, 7 a1 (-> 3pi) nu,
+   *         8 pi nu, 9 3pi pi0 nu, 0 other, -1 error (not a tau or null pointer).
+   */
   MAint32 GetTauDecayMode (const MCParticleFormat* part)
   {
     if (part==0) return -1;
@@ -188,12 +239,23 @@ class PhysicsService
     else return 0;
   }
 
+  /**
+   * @brief Decay mode of a Monte Carlo tau from its daughters.
+   *
+   * @param part tau.
+   * @return the decay mode (see the pointer version).
+   */
   MAint32 GetTauDecayMode (const MCParticleFormat& part)
   {
     return GetTauDecayMode(&part);
   }
 
-  /// Compute srqt(S)
+  /**
+   * @brief Partonic centre-of-mass energy, computed from the initial-state particles.
+   *
+   * @param event Monte Carlo event.
+   * @return sqrt(s-hat).
+   */
   inline MAfloat64 SqrtS(const MCEventFormat* event) const
   {
     MALorentzVector q(0.,0.,0.,0.);
@@ -207,7 +269,7 @@ class PhysicsService
 
  private:
 
-  /// Constructor
+  /** @brief Constructor (creates the toolboxes). */
   PhysicsService()  
   {
     RF = new RestFramesHelper();
@@ -216,7 +278,7 @@ class PhysicsService
     Isol = new Isolation();
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~PhysicsService()
   {
     delete RF;

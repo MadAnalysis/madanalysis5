@@ -22,7 +22,10 @@
 ################################################################################
 
 
+"""Logical connector between two conditions of a cut."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 from madanalysis.enumeration.connector_type     import ConnectorType
 from madanalysis.enumeration.operator_type      import OperatorType
 from madanalysis.enumeration.combination_type   import CombinationType
@@ -30,20 +33,43 @@ import logging
 
 
 class ConditionConnector():
+    """``and``/``or`` connector of a :class:`~madanalysis.selection.condition_sequence.ConditionSequence`.
 
-    def __init__(self,name):
+    Attributes:
+        value (``int``): :class:`~madanalysis.enumeration.connector_type.ConnectorType` code.
+    """
+
+    def __init__(self,name: str) -> None:
+        """Create the connector.
+
+        Args:
+            name (``str``): ``"or"`` or ``"and"``.
+        """
+        # FIXME: any other name leaves 'self.value' undefined (AttributeError later).
         if name=="or":
             self.value=ConnectorType.OR
         elif name=="and":
             self.value=ConnectorType.AND
 
-    def GetStringDisplay(self):
+    def GetStringDisplay(self) -> str | None:
+        """Get the user-level keyword.
+
+        Returns:
+            ``str | None``:
+            ``"or"`` or ``"and"`` (``None`` for other connectors).
+        """
         if self.value==ConnectorType.OR:
             return "or"
         elif self.value==ConnectorType.AND:
             return "and"
 
-    def GetStringCode(self):
+    def GetStringCode(self) -> str | None:
+        """Get the C++ operator.
+
+        Returns:
+            ``str | None``:
+            ``"||"`` or ``"&&"`` (``None`` for other connectors).
+        """
         if self.value==ConnectorType.OR:
             return "||"
         elif self.value==ConnectorType.AND:

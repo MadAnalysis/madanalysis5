@@ -23,6 +23,11 @@
 
 
 // SampleHeader headers
+/**
+ * @file DelphesDataFormat.cpp
+ * @brief Implementation of MA5::DelphesDataFormat.
+ */
+
 #include "SampleAnalyzer/Interfaces/delphes/DelphesDataFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
@@ -39,6 +44,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 DelphesDataFormat::DelphesDataFormat()
 {
+  // FIXME: branchVertex_ is not initialised to 0 in this constructor.
   branchFatJet_       = 0;
   branchJet_          = 0;
   branchElectron_     = 0;

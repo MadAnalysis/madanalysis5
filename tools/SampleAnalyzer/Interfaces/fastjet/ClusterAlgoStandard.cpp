@@ -23,6 +23,11 @@
 
 
 // SampleAnalyser headers
+/**
+ * @file ClusterAlgoStandard.cpp
+ * @brief Implementation of MA5::ClusterAlgoStandard.
+ */
+
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
 
 // FastJet headers

@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file RecJetFormat.h
+ * @brief Reconstructed jet with b/c/tau tags.
+ */
+
 #ifndef RecJetFormat_h
 #define RecJetFormat_h
 
@@ -61,6 +66,15 @@ namespace MA5
     class DelphesMemoryInterface;
     class SFSTaggerBase;
 
+    /**
+     * @brief Reconstructed jet.
+     *
+     * Tags come in four categories: truth (matching with B/C hadrons or hadronic taus,
+     * before any detector effect) and the loose, medium and tight working points
+     * (after the detector effects of the SFS tagger). For backward compatibility,
+     * btag(), ctag() and tautag() return the loose tags. In FastJet mode, the
+     * corresponding fastjet::PseudoJet is kept for substructure studies.
+     */
     class RecJetFormat : public RecParticleFormat
     {
 
@@ -90,29 +104,33 @@ namespace MA5
         // -------------------------------------------------------------
     protected:
 
+        /** @brief Number of tracks. */
+        // NOTE: this member shadows RecParticleFormat::ntracks_.
         MAuint16 ntracks_;   /// number of tracks
 
-        /// Tags are separated into 4 cathegories truth, loose, mid, tight.
-        /// Truth is used for MC event tagging rest is from detector simulations.
-        /// Loose tagging will be used as default for backwards compatibility btag()
-        /// ctag(), tautag() will return loose tagging criteria.
+        /** @brief Loose b-, c- and tau-tags. */
         MAbool loose_btag_;        /// loose b-tag
         MAbool loose_ctag_;        /// loose c-tag
         MAbool loose_tautag_;      /// loose tau-tag
 
+        /** @brief Medium b-, c- and tau-tags. */
         MAbool mid_btag_;        /// tight b-tag
         MAbool mid_ctag_;        /// tight c-tag
         MAbool mid_tautag_;      /// tight tau-tag
 
+        /** @brief Tight b-, c- and tau-tags. */
         MAbool tight_btag_;        /// tight b-tag
         MAbool tight_ctag_;        /// tight c-tag
         MAbool tight_tautag_;      /// tight tau-tag
 
+        /** @brief Truth-level c-, b- and tau-tags (before identification or misidentification). */
         MAbool true_ctag_;   /// c-tag (before id or misid)
         MAbool true_btag_;   /// b-tag (before id or misid)
         MAbool true_tautag_; /// tau-tag (before id or misid)
 
+        /** @brief Indices of the constituents in the Monte Carlo particle collection. */
         std::vector<MAint32> Constituents_;  /// indices of the MC particles
+        /** @brief Isolation cones. */
         std::vector<IsolationConeType> isolCones_; // isolation cones
 
 #ifdef MA5_FASTJET_MODE
@@ -126,20 +144,35 @@ namespace MA5
         // -------------------------------------------------------------
     public:
 
-        /// Constructor without arguments
+        /** @brief Constructor (members reset). */
         RecJetFormat()
         { clear(); }
 
-        /// Constructor with argument
+        /**
+         * @brief Constructor from (pT, eta, phi, m).
+         *
+         * @param pt transverse momentum.
+         * @param eta pseudorapidity.
+         * @param phi azimuthal angle.
+         * @param m mass.
+         */
         RecJetFormat(MAfloat64 pt, MAfloat64 eta, MAfloat64 phi, MAfloat64 m)
         { clear(); momentum_.SetPtEtaPhiM(pt,eta,phi,m); }
 
-        /// Constructor with argument
+        /**
+         * @brief Constructor from a four-vector.
+         *
+         * @param p four-momentum.
+         */
         RecJetFormat(const MALorentzVector& p)
         { clear(); momentum_.SetPxPyPzE(p.Px(),p.Py(),p.Pz(),p.E()); }
 
 #ifdef MA5_FASTJET_MODE
-        /// Constructor with argument
+        /**
+         * @brief Constructor from a FastJet jet (the pseudojet is kept).
+         *
+         * @param jet FastJet jet.
+         */
         RecJetFormat(fastjet::PseudoJet& jet)
         {
             clear();
@@ -148,11 +181,11 @@ namespace MA5
         }
 #endif
 
-        /// Destructor
+        /** @brief Destructor. */
         virtual ~RecJetFormat()
         {}
 
-        /// Dump information
+        /** @brief Print the jet properties. */
         virtual void Print() const
         {
             INFO << "ntracks ="   << /*set::setw(8)*/"" << std::left << ntracks_  << ", "
@@ -168,10 +201,10 @@ namespace MA5
             RecParticleFormat::Print();
         }
 
-        /// Clear all information
+        /** @brief Reset the jet-specific members. */
         virtual void Reset() { clear(); }
 
-        /// Clear all information
+        /** @brief Reset the jet-specific members (the momentum is not reset). */
         void clear()
         {
             ntracks_ = 0;
@@ -191,109 +224,241 @@ namespace MA5
             Constituents_.clear();
         }
 
-        /// Accessor to the number of tracks
+        /**
+         * @brief Accessor to the number of tracks.
+         *
+         * @return the number of tracks.
+         */
         const MAuint16 ntracks() const {return ntracks_;}
 
-        /// Setting ntracks
+        /**
+         * @brief Set the number of tracks.
+         *
+         * @param ntracks number of tracks.
+         */
         void setNtracks(MAuint16 ntracks) { ntracks_ = ntracks; }
 
         ///==================///
         /// Tagger accessors ///
         ///==================///
 
-        /// Accessor to the loose b-tag
+        /**
+         * @brief Accessor to the loose b-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& btag() const { return loose_btag(); }
 
-        /// Accessor to the loose c-tag
+        /**
+         * @brief Accessor to the loose c-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& ctag() const { return loose_ctag(); }
 
-        /// Accessor to the loose c-tag
+        /**
+         * @brief Accessor to the loose tau-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& tautag() const { return loose_tautag(); }
 
-        /// Accessor to the loose b-tag
+        /**
+         * @brief Accessor to the loose b-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& loose_btag() const { return loose_btag_; }
 
-        /// Accessor to the loose c-tag
+        /**
+         * @brief Accessor to the loose c-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& loose_ctag() const { return loose_ctag_; }
 
-        /// Accessor to the loose c-tag
+        /**
+         * @brief Accessor to the loose tau-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& loose_tautag() const { return loose_tautag_; }
 
-        /// Accessor to the mid b-tag
+        /**
+         * @brief Accessor to the medium b-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& mid_btag() const { return mid_btag_; }
 
-        /// Accessor to the mid c-tag
+        /**
+         * @brief Accessor to the medium c-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& mid_ctag() const { return mid_ctag_; }
 
-        /// Accessor to the mid c-tag
+        /**
+         * @brief Accessor to the medium tau-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& mid_tautag() const { return mid_tautag_; }
 
-        /// Accessor to the tight b-tag
+        /**
+         * @brief Accessor to the tight b-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& tight_btag() const { return tight_btag_; }
 
-        /// Accessor to the tight c-tag
+        /**
+         * @brief Accessor to the tight c-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& tight_ctag() const { return tight_ctag_; }
 
-        /// Accessor to the tight c-tag
+        /**
+         * @brief Accessor to the tight tau-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& tight_tautag() const { return tight_tautag_; }
 
-        /// Accessor to the true c-tag
+        /**
+         * @brief Accessor to the truth-level c-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& true_ctag() const {return true_ctag_;}
 
-        /// Accessor to the true b-tag
+        /**
+         * @brief Accessor to the truth-level b-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& true_btag() const {return true_btag_;}
 
-        /// Accessor to the true tau-tag
+        /**
+         * @brief Accessor to the truth-level tau-tag.
+         *
+         * @return the tag.
+         */
         const MAbool& true_tautag() const {return true_tautag_;}
 
         /// Setters for tagger
 
-        /// Setting a new true_btag_ value
+        /**
+         * @brief Set the truth-level b-tag.
+         *
+         * @param tag value.
+         */
         void setTrueBtag(const MAbool& tag) { true_btag_ = tag;}
 
-        /// Setting a new true_ctag_ value
+        /**
+         * @brief Set the truth-level c-tag.
+         *
+         * @param tag value.
+         */
         void setTrueCtag(const MAbool& tag) { true_ctag_ = tag;}
 
-        /// Setting a new true_tautag_ value
+        /**
+         * @brief Set the truth-level tau-tag.
+         *
+         * @param tag value.
+         */
         void setTrueTautag(const MAbool& tag) { true_tautag_ = tag;}
 
-        /// Setting a new loose_btag_ value
+        /**
+         * @brief Set the loose b-tag.
+         *
+         * @param tag value.
+         */
         void setBtag(const MAbool& tag) { setLooseBtag(tag); }
 
-        /// Setting a new loose_ctag_ value
+        /**
+         * @brief Set the loose c-tag.
+         *
+         * @param tag value.
+         */
         void setCtag(const MAbool& tag) { setLooseCtag(tag); }
 
-        /// Setting a new loose_tautag_ value
+        /**
+         * @brief Set the loose tau-tag.
+         *
+         * @param tag value.
+         */
         void setTautag(const MAbool& tag) { setLooseTautag(tag); }
 
-        /// Setting a new loose_btag_ value
+        /**
+         * @brief Set the loose b-tag.
+         *
+         * @param tag value.
+         */
         void setLooseBtag(const MAbool& tag) { loose_btag_ = tag; }
 
-        /// Setting a new loose_ctag_ value
+        /**
+         * @brief Set the loose c-tag.
+         *
+         * @param tag value.
+         */
         void setLooseCtag(const MAbool& tag) { loose_ctag_ = tag; }
 
-        /// Setting a new loose_tautag_ value
+        /**
+         * @brief Set the loose tau-tag.
+         *
+         * @param tag value.
+         */
         void setLooseTautag(const MAbool& tag) { loose_tautag_ = tag; }
 
-        /// Setting a new Mid_btag_ value
+        /**
+         * @brief Set the medium b-tag.
+         *
+         * @param tag value.
+         */
         void setMidBtag(const MAbool& tag) { mid_btag_ = tag; }
 
-        /// Setting a new Mid_ctag_ value
+        /**
+         * @brief Set the medium c-tag.
+         *
+         * @param tag value.
+         */
         void setMidCtag(const MAbool& tag) { mid_ctag_ = tag; }
 
-        /// Setting a new Mid_tautag_ value
+        /**
+         * @brief Set the medium tau-tag.
+         *
+         * @param tag value.
+         */
         void setMidTautag(const MAbool& tag) { mid_tautag_ = tag; }
 
-        /// Setting a new Tight_btag_ value
+        /**
+         * @brief Set the tight b-tag.
+         *
+         * @param tag value.
+         */
         void setTightBtag(const MAbool& tag) { tight_btag_ = tag; }
 
-        /// Setting a new Tight_ctag_ value
+        /**
+         * @brief Set the tight c-tag.
+         *
+         * @param tag value.
+         */
         void setTightCtag(const MAbool& tag) { tight_ctag_ = tag; }
 
-        /// Setting a new Tight_tautag_ value
+        /**
+         * @brief Set the tight tau-tag.
+         *
+         * @param tag value.
+         */
         void setTightTautag(const MAbool& tag) { tight_tautag_ = tag; }
 
-        /// Set all b-tags
+        /**
+         * @brief Set the truth-level and all the working-point b-tags.
+         *
+         * @param tag value.
+         */
         void setAllBtags(const MAbool &tag) {
             true_btag_ = tag;
             loose_btag_ = tag;
@@ -301,7 +466,11 @@ namespace MA5
             tight_btag_ = tag;
         }
 
-        /// Set all c-tags
+        /**
+         * @brief Set the truth-level and all the working-point c-tags.
+         *
+         * @param tag value.
+         */
         void setAllCtags(const MAbool &tag) {
             true_ctag_ = tag;
             loose_ctag_ = tag;
@@ -309,7 +478,11 @@ namespace MA5
             tight_ctag_ = tag;
         }
 
-        /// Set all tau-tags
+        /**
+         * @brief Set the truth-level and all the working-point tau-tags.
+         *
+         * @param tag value.
+         */
         void setAllTautags(const MAbool &tag) {
             true_tautag_ = tag;
             loose_tautag_ = tag;
@@ -317,34 +490,82 @@ namespace MA5
             tight_tautag_ = tag;
         }
 
-        /// Add one constituent
+        /**
+         * @brief Add a constituent.
+         *
+         * @param index index of the constituent in the Monte Carlo particle collection.
+         */
+        // FIXME: AddConstituent, constituents, AddIsolCone and isolCones are declared unconditionally but
+        // defined in RecJetFormat.cpp only in FastJet mode (MA5_FASTJET_MODE).
         void AddConstituent (const MAint32& index);
 
-        /// get constituent collections
+        /**
+         * @brief Accessor to the constituents.
+         *
+         * @return the indices of the constituents.
+         */
         const std::vector<MAint32>& constituents() const;
 
-        /// Add one isolation cone
+        /**
+         * @brief Add an isolation cone.
+         *
+         * @param cone cone.
+         */
         void AddIsolCone (const IsolationConeType& cone);
 
-        /// get the collection of isolation cones
+        /**
+         * @brief Accessor to the isolation cones.
+         *
+         * @return the cones.
+         */
         const std::vector<IsolationConeType>& isolCones() const;
 
 #ifdef MA5_FASTJET_MODE
-     // Accessor for pseudojets
+    /**
+     * @brief Accessor to the FastJet pseudojet.
+     *
+     * @return the pseudojet.
+     */
     const fastjet::PseudoJet& pseudojet() const {return pseudojet_;}
 
-    // return a vector of all subjets of the current jet (in the sense of the exclusive algorithm)
-    // that would be obtained when running the algorithm with the given dcut.
+    /**
+     * @brief Exclusive subjets obtained with a distance cut (exclusive algorithms only).
+     *
+     * The subjets are allocated with new and must be deleted by the caller.
+     *
+     * @param dcut distance cut.
+     * @return the subjets sorted in pT (empty with an error if not available).
+     */
     std::vector<const RecJetFormat *> exclusive_subjets(MAfloat32 dcut) const;
 
-    // return the list of subjets obtained by unclustering the supplied jet down to nsub subjets.
+    /**
+     * @brief Exclusive subjets obtained by declustering down to a given number of subjets.
+     *
+     * The subjets are allocated with new and must be deleted by the caller.
+     *
+     * @param nsub number of subjets.
+     * @return the subjets sorted in pT (empty with an error if not available).
+     */
     std::vector<const RecJetFormat *> exclusive_subjets(MAint32 nsub) const;
 
-    //returns true if the PseudoJet has support for exclusive subjets
+    /**
+     * @brief Does the pseudojet support exclusive subjets?
+     *
+     * @return true if it does.
+     */
     MAbool has_exclusive_subjets() const;
 
-    // Add one pseudojet
+    /**
+     * @brief Set the FastJet pseudojet.
+     *
+     * @param v pseudojet.
+     */
     void setPseudoJet (const fastjet::PseudoJet& v) {pseudojet_=v;}
+    /**
+     * @brief Set the FastJet pseudojet from a four-vector.
+     *
+     * @param v four-momentum.
+     */
     void setPseudoJet (MALorentzVector& v) 
     {
         pseudojet_=fastjet::PseudoJet(v.Px(), v.Py(), v.Pz(), v.E());

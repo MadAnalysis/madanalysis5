@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Detection of zlib (compressed event files)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 import glob
 import os
@@ -34,8 +38,28 @@ from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectZlib:
+    """Detector of zlib (compressed event files).
 
-    def __init__(self,archi_info, user_info, session_info, debug):
+    The methods are called by
+    :meth:`madanalysis.system.detect_manager.DetectManager.Execute` in the following
+    order (only when defined): ``IsItVetoed``, ``AreDependenciesInstalled``,
+    ``ManualDetection``, ``ToolsDetection``, ``AutoDetection``, ``ExtractInfo`` and
+    ``SaveInfo``.
+
+    Attributes:
+        name (``str``): name displayed in the configuration check.
+        mandatory (``bool``): whether MadAnalysis 5 can run without the package.
+    """
+
+    def __init__(self,archi_info: Any, user_info: Any, session_info: Any, debug: bool) -> None:
+        """Create the detector of zlib (compressed event files).
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration, filled by :meth:`SaveInfo`.
+            user_info (``UserInfo``): user options (vetoes, forced paths).
+            session_info (``SessionInfo``): session information, filled by :meth:`SaveInfo`.
+            debug (``bool``): print detailed information.
+        """
         # madatory options
         self.archi_info   = archi_info
         self.user_info    = user_info
@@ -64,7 +88,14 @@ class DetectZlib:
 
 
     @staticmethod
-    def AddIfValid(path,container):
+    def AddIfValid(path: str,container: list[str]) -> None:
+        """Add the folders matching a glob pattern to a list (duplicates and the
+        ``ExternalSymLink`` folder are skipped).
+
+        Args:
+            path (``str``): glob pattern.
+            container (``list[str]``): list to fill.
+        """
         path=os.path.normpath(path)
         dirs=glob.glob(path)
         for item in dirs:
@@ -75,7 +106,13 @@ class DetectZlib:
             container.append(item)
 
 
-    def IsItVetoed(self):
+    def IsItVetoed(self) -> bool:
+        """Check whether zlib (compressed event files) has been vetoed by the user (``installation_options.dat``).
+
+        Returns:
+            ``bool``:
+            ``True`` if vetoed.
+        """
         if self.user_info.zlib_veto:
             self.logger.debug("user setting: veto on Zlib module")
             return True
@@ -84,7 +121,8 @@ class DetectZlib:
             return False
 
 
-    def FillHeaders(self):
+    def FillHeaders(self) -> None:
+        """Build the list of folders where ``zlib.h`` is searched."""
         # Filling container with paths included in CPLUS_INCLUDE_PATH
         try:
             cplus_include_path = os.environ['CPLUS_INCLUDE_PATH'].split(':')
@@ -100,11 +138,14 @@ class DetectZlib:
         DetectZlib.AddIfValid('/opt/local/include',self.search_incs)
         DetectZlib.AddIfValid('/usr/local/opt/zlib/lib',self.search_incs)
         DetectZlib.AddIfValid('/usr/local/opt/zlib/include/',self.search_incs)
+        # FIXME: the compiler header search paths are added to the library list (search_libs)
+        # instead of the header list (search_incs).
         for path in self.session_info.gcc_header_search_path:
             DetectZlib.AddIfValid(path,self.search_libs)
 
 
-    def FillLibraries(self):
+    def FillLibraries(self) -> None:
+        """Build the list of folders where ``libz`` is searched."""
         # Filling container with paths included in LD_LIBRARY_PATH
         try:
             ld_library_path = os.environ['LD_LIBRARY_PATH'].split(':')
@@ -138,7 +179,14 @@ class DetectZlib:
             DetectZlib.AddIfValid(path,self.search_libs)
         
 
-    def ManualDetection(self):
+    def ManualDetection(self) -> tuple[int, str]:
+        """Look for zlib (compressed event files) in the location given by the user (``installation_options.dat``).
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
 
         # User setting for header
         force1=False
@@ -173,7 +221,14 @@ class DetectZlib:
             return DetectStatusType.UNFOUND, ''
         
 
-    def ToolsDetection(self):
+    def ToolsDetection(self) -> tuple[int, str]:
+        """Look for zlib (compressed event files) in the ``tools`` folder of MadAnalysis 5 (local installation).
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
 
         # Check
         pathname = os.path.normpath(self.archi_info.ma5dir+'/tools/zlib')
@@ -201,7 +256,17 @@ class DetectZlib:
             return DetectStatusType.UNFOUND, ''
 
 
-    def LookForPattern(self,path,patterns):
+    def LookForPattern(self,path: str,patterns: list[str]) -> list[str]:
+        """Find the files matching some patterns in a folder.
+
+        Args:
+            path (``str``): folder.
+            patterns (``list[str]``): glob patterns of file names.
+
+        Returns:
+            ``list[str]``:
+            Matching files.
+        """
         result=[]
         for pattern in patterns:
             filename=os.path.normpath(path+'/'+pattern)
@@ -216,7 +281,14 @@ class DetectZlib:
         return result
 
     
-    def AutoDetection(self):
+    def AutoDetection(self) -> tuple[int, str]:
+        """Look for zlib (compressed event files) on the system.
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
 
         self.logger.debug("Search for header & libraries possible paths...")
         self.FillHeaders()
@@ -258,9 +330,16 @@ class DetectZlib:
         return DetectStatusType.FOUND, ""
 
 
-    def SaveInfo(self):
+    def SaveInfo(self) -> bool:
+        """Store the information about zlib (compressed event files) in the architecture/session information.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # remove symlink
+        # NOTE: 'library_files2' is computed but never used.
         library_files2=[]
         for item in self.library_files:
             if os.path.islink(item):

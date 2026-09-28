@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file Utils.h
+ * @brief Helpers for expert-mode analyses: vector concatenation, object filtering and overlap removal.
+ */
+
 #ifndef UTILITY_SERVICE_H
 #define UTILITY_SERVICE_H
 
@@ -46,8 +51,14 @@ namespace MA5
     // ===== Vector operations ===== //
     // ============================= //
 
-    /// Create a new vector by adding two vectors together.
-    /// @attention this wont change the content of two original vectors
+    /**
+     * @brief Concatenate two vectors (the inputs are not modified).
+     *
+     * @tparam T element type.
+     * @param A first vector.
+     * @param B second vector.
+     * @return a new vector containing A followed by B.
+     */
     template <typename T>
     std::vector<T> operator+(const std::vector<T> &A, const std::vector<T> &B)
     {
@@ -58,9 +69,14 @@ namespace MA5
         return AB;
     }
 
-    /// Add second vector to the first vector
-    /// @attention this wont create a new vector but
-    /// will add the second to the first
+    /**
+     * @brief Append a vector to another one.
+     *
+     * @tparam T element type.
+     * @param A vector modified in place.
+     * @param B vector to append.
+     * @return A.
+     */
     template <typename T>
     std::vector<T> &operator+=(std::vector<T> &A, const std::vector<T> &B)
     {
@@ -73,7 +89,18 @@ namespace MA5
     // Filtering //
     //===========//
 
-    // Example: std::vector<RecJetFormat> signaljets = filter(event.rec()->jets(), ptmin, etamax);
+    /**
+     * @brief Select the objects passing kinematic thresholds.
+     *
+     * Example: `auto signaljets = filter(event.rec()->jets(), 25., 2.5);`
+     *
+     * @tparam Type object type.
+     * @param objects objects.
+     * @param ptmin minimum pT.
+     * @param absetamax maximum |eta|.
+     * @param absetamin minimum |eta|.
+     * @return pointers to the selected objects.
+     */
     template<class Type>
     std::vector<const Type *> filter(const std::vector<Type>& objects, MAfloat64 ptmin,
                                      MAfloat64 absetamax=20., MAfloat64 absetamin=-1.)
@@ -87,7 +114,16 @@ namespace MA5
         return filtered;
     }
 
-    // Example: std::vector<RecJetFormat> signaljets = filter(signaljets, ptmin, etamax);
+    /**
+     * @brief Select the objects passing kinematic thresholds.
+     *
+     * @tparam Type object type.
+     * @param objects pointers to the objects.
+     * @param ptmin minimum pT.
+     * @param absetamax maximum |eta|.
+     * @param absetamin minimum |eta|.
+     * @return pointers to the selected objects.
+     */
     template<class Type>
     std::vector<const Type *> filter(std::vector<const Type *>& objects, MAfloat64 ptmin,
                                      MAfloat64 absetamax=20., MAfloat64 absetamin=-1.)
@@ -101,8 +137,18 @@ namespace MA5
         return filtered;
     }
 
-    // Example:  std::vector<RecJetFormat> filtered_jets = filter_select(event.rec()->jets(),
-    //                                        [] (RecJetFormat jet) { return jet->pt()>50.; });
+    /**
+     * @brief Select the objects for which a predicate is true.
+     *
+     * Example: `filter_select(event.rec()->jets(), [] (const RecJetFormat* jet) { return jet->pt()>50.; });`
+     * (the predicate receives a pointer).
+     *
+     * @tparam Type object type.
+     * @tparam FN predicate type.
+     * @param objects objects.
+     * @param func predicate taking a pointer to an object.
+     * @return pointers to the selected objects.
+     */
     template<class Type, typename FN>
     std::vector<const Type *> filter_select(const std::vector<Type>& objects, FN func)
     {
@@ -113,8 +159,15 @@ namespace MA5
         return filtered;
     }
 
-    // Example:  std::vector<const RecJetFormat *> filtered_jets = filter_select(signaljets,
-    //                                        [] (const RecJetFormat* jet) { return jet->pt()>50.; });
+    /**
+     * @brief Select the objects for which a predicate is true.
+     *
+     * @tparam Type object type.
+     * @tparam FN predicate type.
+     * @param objects pointers to the objects.
+     * @param func predicate taking a pointer to an object.
+     * @return pointers to the selected objects.
+     */
     template<class Type, typename FN>
     std::vector<const Type *> filter_select(std::vector<const Type *>& objects, FN func)
     {
@@ -129,9 +182,16 @@ namespace MA5
     // Overlap Removal //
     //=================//
 
-    /// @brief Overlap Removal
-    /// Remove overlaping objects from the first collection (v1) with
-    /// respect to a minimum deltaR distance from the second collection (v2)
+    /**
+     * @brief Remove from v1 the objects closer than drmin to any object of v2.
+     *
+     * @tparam T1 type of the first collection.
+     * @tparam T2 type of the second collection.
+     * @param v1 collection to clean.
+     * @param v2 reference collection.
+     * @param drmin minimum DeltaR.
+     * @return the cleaned collection.
+     */
     template<typename T1, typename T2> std::vector<const T1*>
     OverlapRemoval(std::vector<const T1*> &v1, std::vector<const T2*> &v2,
                    const MAdouble64 &drmin)
@@ -154,14 +214,23 @@ namespace MA5
         return cleaned_v1;
     }
 
-    /// Example:
-    /// @code
-    /// signaljets = conditional_removal(signaljets,signalel,
-    ///            [] (const RecJetFormat * jet, const RecLeptonFormat * el)
-    ///                {return jet->dr(el) > 0.2;});
-    /// @endcode
-    /// Remove objects from the first collection (v1) with respect
-    /// to a boolean function between v1 and second collection.
+    /**
+     * @brief Remove from v1 the objects for which a predicate is true with any object of v2.
+     *
+     * Example:
+     * @code
+     * signaljets = conditional_removal(signaljets, signalel,
+     *     [] (const RecJetFormat * jet, const RecLeptonFormat * el) {return jet->dr(el) > 0.2;});
+     * @endcode
+     *
+     * @tparam T1 type of the first collection.
+     * @tparam T2 type of the second collection.
+     * @tparam FN predicate type.
+     * @param v1 collection to clean.
+     * @param v2 reference collection.
+     * @param func predicate (object of v1, object of v2) -> remove?
+     * @return the cleaned collection.
+     */
     template<typename T1, typename T2, typename FN>
     std::vector<const T1*> conditional_removal(
             std::vector<const T1*> &v1, std::vector<const T2*> &v2, FN func

@@ -22,29 +22,67 @@
 ################################################################################
 
 
+"""Combination of particle arguments (e.g. ``M(mu+ mu-)``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.selection.instance_name import InstanceName
 from operator import itemgetter, attrgetter
 import logging
 from six.moves import range
 
 class ParticleCombination():
+    """Ordered combination of :class:`~madanalysis.multiparticle.extraparticle.ExtraParticle`
+    objects, sorted by particle name.
 
-    def __init__(self,extraparticles):
+    Attributes:
+        extraparticles (``list[ExtraParticle]``): the combined particles.
+        ALL (``bool``): ``True`` when the combination is prefixed by ``all``.
+    """
+
+    def __init__(self,extraparticles: list) -> None:
+        """Create the combination.
+
+        Args:
+            extraparticles (``list[ExtraParticle]``): particles to combine (sorted by name).
+        """
         self.extraparticles=sorted(extraparticles,\
                                    key=attrgetter("particle.name"))
         self.ALL = False
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Get the number of combined particles.
+
+        Returns:
+            ``int``:
+            Number of particles.
+        """
         return len(self.extraparticles)
 
-    def __getitem__(self,i):
+    def __getitem__(self,i: int) -> Any:
+        """Get a combined particle.
+
+        Args:
+            i (``int``): index of the particle.
+
+        Returns:
+            ``ExtraParticle``:
+            The ``i``-th particle.
+        """
         return self.extraparticles[i]
         
-    def Display(self):
+    def Display(self) -> None:
+        """Log the combination."""
         logging.getLogger('MA5').info(" combination = "+self.GetStringDisplay())
 
-    def GetStringDisplay(self):
+    def GetStringDisplay(self) -> str:
+        """Get the user-level representation (also available as the :attr:`name` property).
+
+        Returns:
+            ``str``:
+            E.g. ``"mu+ mu-"``, ``"all j"`` or ``"( b < t ) j"``.
+        """
         text=""
 
         # Case of ALL
@@ -65,14 +103,34 @@ class ParticleCombination():
                 text+=self.extraparticles[ind].GetStringDisplay()
         return text    
 
-    def DoYouUseMultiparticle(self,name):
+    def DoYouUseMultiparticle(self,name: str) -> bool:
+        """Check whether a (multi)particle is used in the combination.
+
+        Args:
+            name (``str``): label of the (multi)particle.
+
+        Returns:
+            ``bool``:
+            ``True`` if one of the particles has this name.
+        """
         for item in self.extraparticles:
+            # FIXME: ExtraParticle.name includes the rank and mother (e.g. 'mu[1]'), so this
+            # comparison with a bare label fails for ranked or mother-constrained particles.
             if item.name==name.lower():
                 return True
         return False
         
     # egality between 2 ParticleCombination
-    def __eq__(self,other):
+    def __eq__(self,other: ParticleCombination) -> bool:
+        """Compare two combinations particle by particle.
+
+        Args:
+            other (``ParticleCombination``): combination to compare with.
+
+        Returns:
+            ``bool``:
+            ``True`` if both combinations contain equal particles in the same order.
+        """
         if len(self)!=len(other):
             return False
         for ind in range(0,len(self)):

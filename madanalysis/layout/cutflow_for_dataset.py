@@ -22,7 +22,15 @@
 ################################################################################
 
 
+"""Cut-flow chart of one dataset (numbers of events, efficiencies and uncertainties)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.dataset.dataset import Dataset
 from madanalysis.enumeration.uncertainty_type import UncertaintyType
 from madanalysis.enumeration.normalize_type   import NormalizeType
 from madanalysis.IOinterface.job_reader       import JobReader
@@ -33,8 +41,36 @@ from six.moves import range
 
 
 class CutFlowForDataset:
+    """Cut-flow of one dataset, per signal region.
 
-    def __init__(self,main,dataset):
+    The per-region lists are indexed as ``[region][cut]``; only event cuts appear in the
+    cut-flow. Quantities with the ``_posweight``/``_negweight`` suffixes are computed
+    separately for events with positive and negative weights; the combined quantities
+    are their difference.
+
+    Attributes:
+        cuts (``list[list[CutInfo]]``): raw counters read from the SAF files (filled by
+            :meth:`~madanalysis.IOinterface.job_reader.JobReader.ExtractCuts`).
+        initial (``CutInfo``): counters before any cut.
+        Ntotal (``Measure``): total number of events (normalised by :meth:`Calculate`).
+        Nselected (``list[list[Measure]]``): number of events passing each cut.
+        Nrejected (``list[list[Measure]]``): number of events rejected by each cut.
+        eff (``list[list[Measure]]``): efficiency of each cut with respect to the previous
+            one.
+        effcumu (``list[list[Measure]]``): cumulative efficiency of each cut.
+        warnings (``list[list[list[str]]]``): warnings of each cut.
+        main (``Main``): session state.
+        dataset (``Dataset | int``): dataset (``0`` for the signal/background summaries of
+            :class:`~madanalysis.layout.cutflow.CutFlow`).
+    """
+
+    def __init__(self,main: Main,dataset: Dataset | int) -> None:
+        """Initialise empty cut-flows (one per region, ``myregion`` if none).
+
+        Args:
+            main (``Main``): session state.
+            dataset (``Dataset | int``): dataset, or ``0`` for a summary.
+        """
 
         self.cuts = []
         self.initial = CutInfo()
@@ -70,7 +106,13 @@ class CutFlowForDataset:
         self.dataset = dataset
 
 
-    def Initialize(self):
+    def Initialize(self) -> bool:
+        """Create the containers of the event cuts and copy the raw sums of weights.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         # Preparing architecture for vectors
         self.Ntotal=Measure()
         self.Ntotal_posweight=Measure()
@@ -79,6 +121,8 @@ class CutFlowForDataset:
         self.Ntotal_sumw2_posweight=Measure()
         self.Ntotal_sumw2_negweight=Measure()
         myregs = self.main.regions.GetNames()
+        # NOTE: regions are sorted here (same order as the SAF files read by JobReader), whereas the
+        # other methods and the summaries use the declaration order of main.regions.
         myregs.sort()
         if myregs == []:
             myregs = ['myregion']
@@ -124,7 +168,16 @@ class CutFlowForDataset:
         return True
 
 
-    def Calculate(self):
+    def Calculate(self) -> None:
+        """Compute the numbers of selected/rejected events, the efficiencies and their
+        uncertainties.
+
+        Negative numbers and numbers larger than at the previous step are set to zero (with
+        a warning). Uncertainties are binomial. With the ``lumi``/``lumi_weight``
+        normalisation, the numbers are scaled to ``xsection * lumi`` (times the dataset
+        weight) and the cross-section uncertainty is added in quadrature. The user
+        cross section (if set) overrides the measured one.
+        """
         myregs = self.main.regions.GetNames()
         if myregs == []:
             myregs = ['myregion']
@@ -170,6 +223,7 @@ class CutFlowForDataset:
                         self.Nselected[reg][icut].mean=0
                 else:
                     if self.Nselected[reg][icut].mean > self.Nselected[reg][icut-1].mean:
+                        # NOTE: the message below compares with the previous cut, not with the initial number.
                         self.warnings[reg][icut].append('The number of selected events > the initial number of events: '+\
                           str(self.Nselected[reg][icut].mean)+' > '+str(self.Nselected[reg][icut-1].mean)+\
                                                         '. Set the number of selected events to 0.')

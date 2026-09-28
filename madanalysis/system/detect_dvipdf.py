@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Detection of ``dvipdf`` (conversion of DVI reports into PDF)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 import glob
 import os
@@ -34,8 +38,28 @@ from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectDvipdf:
+    """Detector of ``dvipdf`` (conversion of DVI reports into PDF).
 
-    def __init__(self, archi_info, user_info, session_info, debug):
+    The methods are called by
+    :meth:`madanalysis.system.detect_manager.DetectManager.Execute` in the following
+    order (only when defined): ``IsItVetoed``, ``AreDependenciesInstalled``,
+    ``ManualDetection``, ``ToolsDetection``, ``AutoDetection``, ``ExtractInfo`` and
+    ``SaveInfo``.
+
+    Attributes:
+        name (``str``): name displayed in the configuration check.
+        mandatory (``bool``): whether MadAnalysis 5 can run without the package.
+    """
+
+    def __init__(self, archi_info: Any, user_info: Any, session_info: Any, debug: bool) -> None:
+        """Create the detector of ``dvipdf`` (conversion of DVI reports into PDF).
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration, filled by :meth:`SaveInfo`.
+            user_info (``UserInfo``): user options (vetoes, forced paths).
+            session_info (``SessionInfo``): session information, filled by :meth:`SaveInfo`.
+            debug (``bool``): print detailed information.
+        """
         # mandatory options
         self.archi_info   = archi_info
         self.user_info    = user_info
@@ -48,11 +72,19 @@ class DetectDvipdf:
         # adding what you want here
 
 
-    def PrintDisableMessage(self):
+    def PrintDisableMessage(self) -> None:
+        """Log the consequences of ``dvipdf`` (conversion of DVI reports into PDF) being unavailable.
+        """
         self.logger.warning("dvipdf disabled. DVI reports will not be converted to pdf files.")
         
 
-    def IsItVetoed(self):
+    def IsItVetoed(self) -> bool:
+        """Check whether ``dvipdf`` (conversion of DVI reports into PDF) has been vetoed by the user (``installation_options.dat``).
+
+        Returns:
+            ``bool``:
+            ``True`` if vetoed.
+        """
         if self.user_info.dvipdf_veto:
             self.logger.debug("user setting: veto on dvipdf")
             return True
@@ -61,10 +93,19 @@ class DetectDvipdf:
             return False
 
         
-    def AutoDetection(self):
+    def AutoDetection(self) -> tuple[int, str]:
+        """Look for ``dvipdf`` (conversion of DVI reports into PDF) on the system.
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         # Which
         result = ShellCommand.Which('dvipdf',all=False,mute=True)
         if len(result)==0:
+            # FIXME: a bare status is returned instead of a (status, message) tuple; DetectManager
+            # unpacks two values (TypeError). Same below.
             return DetectStatusType.UNFOUND
         if self.debug:
             self.logger.debug("  which:         " + str(result[0]))
@@ -73,7 +114,13 @@ class DetectDvipdf:
         return DetectStatusType.FOUND
 
 
-    def ExtractInfo(self):
+    def ExtractInfo(self) -> bool:
+        """Extract detailed information about the detected ``dvipdf`` (conversion of DVI reports into PDF) (version, paths, ...).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Which all
         if self.debug:
             result = ShellCommand.Which('dvipdf',all=True,mute=True)
@@ -87,7 +134,13 @@ class DetectDvipdf:
         return True
 
 
-    def SaveInfo(self):
+    def SaveInfo(self) -> bool:
+        """Store the information about ``dvipdf`` (conversion of DVI reports into PDF) in the architecture/session information.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         self.session_info.has_dvipdf = True
 
         # Consisntency with the latex option

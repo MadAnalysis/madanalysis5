@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ClusterAlgoPlugin.h
+ * @brief Base class of the clustering algorithms based on FastJet plugins.
+ */
+
 #ifndef JETCLUSTERINGPLUGIN_H
 #define JETCLUSTERINGPLUGIN_H
 
@@ -33,6 +38,7 @@
 namespace MA5
 {
 
+/** @brief Base class of the clustering algorithms based on FastJet plugins (SISCone, CDF, GridJet). */
 class ClusterAlgoPlugin: public ClusterAlgoFastJet
 {
 //---------------------------------------------------------------------------------
@@ -46,11 +52,11 @@ class ClusterAlgoPlugin: public ClusterAlgoFastJet
 //---------------------------------------------------------------------------------
   public :
 
-    /// Constructor without argument
+    /** @brief Constructor. */
     ClusterAlgoPlugin() : ClusterAlgoFastJet("fastjet_plugin")
     {}
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~ClusterAlgoPlugin()
     {}
 };

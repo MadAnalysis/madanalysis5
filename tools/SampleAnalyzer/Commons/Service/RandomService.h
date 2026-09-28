@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file RandomService.h
+ * @brief Singleton random-number generator, available as RANDOM.
+ */
+
 #ifndef RANDOM_SERVICE_H
 #define RANDOM_SERVICE_H
 
@@ -36,20 +41,19 @@
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 
-// ShortCut to access to RandomService
+/** @brief Shortcut to the RandomService singleton. */
 #define RANDOM MA5::RandomService::GetInstance()   
 
 
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class RandomService contains static methods used for producing random
-/// numbers according to a given pdf.
-///
-/// RandomService is a singleton-pattern-based class : only one instance.
-/// Getting the only one instance : RandomService::GetInstance()
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Singleton random-number generator based on std::rand().
+ *
+ * The seed is taken from the current time unless SetSeed() is called (main.random_seed
+ * in the Python interface).
+ */
 class RandomService
 {
   // -------------------------------------------------------------
@@ -57,7 +61,7 @@ class RandomService
   // -------------------------------------------------------------
  private :
 
-  /// Pointer to the unique instance of RandomService
+  /** @brief Unique instance. */
   static RandomService* Service_;
 
   // -------------------------------------------------------------
@@ -65,41 +69,53 @@ class RandomService
   // -------------------------------------------------------------
  private:
 
-  /// Constructor without argument
+  /** @brief Constructor (seed from the current time). */
   RandomService() 
   {
     // select a random seed according to the time
     std::srand(time(0));
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~RandomService()
   {}
 
-  /// (Re)initialzing the streamer
+  /** @brief (Re)initialise the generator (nothing to do). */
   void Initialize()
   { }
 
  public:
 
-  /// Getting the unique instance of RandomService
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static RandomService* GetInstance()
   {
     if (Service_==0) Service_ = new RandomService;
     return Service_;
   }
 
-  /// Set random seed
+  /**
+   * @brief Set the random seed.
+   *
+   * @param seed seed.
+   */
   static void SetSeed(int seed) { std::srand(seed); }
 
-  /// Deleting the unique instance of Convert Service
+  /** @brief Delete the unique instance. */
   static void Kill()
   {
     if (Service_!=0) delete Service_;
     Service_=0;
   }
 
-  /// Random a number between 0 and 1 according to a flat pdf
+  /**
+   * @brief Draw a number uniformly distributed in [0, 1] (both bounds included).
+   *
+   * @return the random number.
+   */
   MAdouble64 flat() const
   {
     return static_cast<MAdouble64>(std::rand()) /

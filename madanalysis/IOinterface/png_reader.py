@@ -22,8 +22,11 @@
 ################################################################################
 
 
+"""Minimal reader of PNG headers (used to get the size of the report figures)."""
+
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import annotations
 import copy
 import logging
 import shutil
@@ -33,8 +36,18 @@ from six.moves import range
 import six
 
 class PngHeader():
+    """Content of the ``IHDR`` chunk of a PNG file.
 
-    def __init__(self):
+    Attributes:
+        width / height (``int``): image size in pixels.
+        bit_depth / color_type / compression_type / filter_type / interlace_type (``int``):
+            PNG header fields.
+    """
+
+    def __init__(self) -> None:
+        """Create an empty header (see FIXME)."""
+        # FIXME: local variables are assigned instead of attributes (self.width, ...): the attributes
+        # only exist after PngReader.ExtractHeader.
         width            = 0
         height           = 0
         bit_depth        = 0
@@ -73,7 +86,8 @@ class PngHeader():
         #   defined: 0 (no interlace) or 1 (Adam7 interlace).
        
 
-    def Print(self):
+    def Print(self) -> None:
+        """Print the header fields."""
         print('PNG file with width='+str(self.width)+\
               ' height='+str(self.height)+\
               ' bit_depth='+str(self.bit_depth)+\
@@ -85,17 +99,36 @@ class PngHeader():
         
 
 class PngReader():
+    """Reader of the header of a PNG file.
+
+    Attributes:
+        png_header (``list[int]``): PNG signature (class attribute).
+        filename (``str``): path of the file.
+        header (``PngHeader``): decoded header.
+        input: open file object.
+    """
 
     png_header=[137,80,78,71,13,10,26,10]
 
 
-    def __init__(self,filename):
+    def __init__(self,filename: str) -> None:
+        """Create the reader.
+
+        Args:
+            filename (``str``): path of the PNG file.
+        """
         self.filename = filename
         self.header   = PngHeader()
         self.input    = 0
 
 
-    def Open(self):
+    def Open(self) -> bool:
+        """Open the file in binary mode.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         try:
             self.input = open(self.filename,'rb')
         except:
@@ -104,7 +137,13 @@ class PngReader():
         return True
 
 
-    def Close(self):
+    def Close(self) -> bool:
+        """Close the file.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         try:
             self.input.close()
         except:
@@ -113,7 +152,13 @@ class PngReader():
         return True
 
 
-    def IsValid(self):
+    def IsValid(self) -> bool:
+        """Check the PNG signature (first 8 bytes).
+
+        Returns:
+            ``bool``:
+            ``True`` for a PNG file.
+        """
         # Read PNG stamp
         try:
             head = self.input.read(8)
@@ -139,7 +184,13 @@ class PngReader():
         return True
         
 
-    def ExtractHeader(self):
+    def ExtractHeader(self) -> bool:
+        """Read and decode the ``IHDR`` chunk into :attr:`header`.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # Begin of header
         try:
@@ -168,7 +219,16 @@ class PngReader():
             logging.getLogger('MA5').error('Wrong PNG header for the file "'+self.filename+'".')
             return False
         
-        def decode(d):
+        def decode(d: int | str) -> int:
+            """Convert a byte into an integer (Python 2/3 compatibility).
+
+            Args:
+                d (``int | str``): byte.
+
+            Returns:
+                ``int``:
+                Its value.
+            """
             if six.PY2:
                 return ord(d)
             else:

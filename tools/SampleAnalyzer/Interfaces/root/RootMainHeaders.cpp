@@ -23,6 +23,11 @@
 
 
 // SampleHeader headers
+/**
+ * @file RootMainHeaders.cpp
+ * @brief Implementation of the ROOT conversion helpers.
+ */
+
 #include "SampleAnalyzer/Interfaces/root/RootMainHeaders.h"
 
 

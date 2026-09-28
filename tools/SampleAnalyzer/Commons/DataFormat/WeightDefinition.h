@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file WeightDefinition.h
+ * @brief Definition of the weights of a sample (LHE <initrwgt> groups).
+ */
+
 #ifndef WEIGHT_DEFINITION_H
 #define WEIGHT_DEFINITION_H
 
@@ -45,13 +50,26 @@ namespace MA5
 
 struct WeightEntry;
   
+/** @brief Group of weights (e.g. scale or PDF variations). */
 struct WeightGroup
 {
+  /**
+   * @brief Constructor.
+   *
+   * @param combin combination method (none, gaussian, hessian, envelope).
+   * @param nam name of the group.
+   */
   WeightGroup(std::string combin, std::string nam){combine=combin; name=nam;}
   std::string               name; // Lower & Upper case
   std::string               combine;
   
   std::vector<WeightEntry*> weights;
+  /**
+   * @brief Compare two groups (name, combination method and number of weights).
+   *
+   * @param v other group.
+   * @return true if equal.
+   */
   MAbool operator==(const WeightGroup& v) const
   {
     return (name==v.name &&
@@ -61,13 +79,29 @@ struct WeightGroup
 };
 
  
+/** @brief Definition of one weight. */
 struct WeightEntry
 {
+  /**
+   * @brief Constructor.
+   *
+   * @param i identifier.
+   * @param nam name.
+   * @param grou group of the weight.
+   */
+  // FIXME: 'grou=group' assigns the (uninitialised) member to the parameter: 'group' is never set.
   WeightEntry(MAuint32 i, std::string nam, WeightGroup* grou) {id=i;name=nam; grou=group;}
   MAuint32 id;
   std::string  name; // Lower & Upper case
   WeightGroup* group;
   
+  /**
+   * @brief Compare two weights (name, identifier and group name).
+   *
+   * @param v other weight.
+   * @return true if equal.
+   */
+  // NOTE: dereferences 'group', which is never set (see the constructor).
   MAbool operator==(const WeightEntry& v) const
   {
     return ( name==v.name &&
@@ -78,6 +112,7 @@ struct WeightEntry
 };
 
  
+/** @brief Definition of the weights of a sample, organised in groups. */
 class WeightDefinition
 {
 
@@ -85,6 +120,7 @@ class WeightDefinition
   //                        data members
   // -------------------------------------------------------------
  private:
+  /** @brief Groups, weights (by identifier) and group being filled. */
   std::vector<WeightGroup>          groups_; 
   std::map<MAuint32,WeightEntry>    weights_;
   WeightGroup*                      lastgroup_;
@@ -95,34 +131,55 @@ class WeightDefinition
   // -------------------------------------------------------------
  public :
 
-  /// Constructor withtout arguments
+  /** @brief Constructor. */
   WeightDefinition()
   { Reset(); }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~WeightDefinition()
   { }
 
-  /// Clear all the content
+  /** @brief Remove all the groups and weights. */
   void Reset()
   { groups_.clear(); weights_.clear(); lastgroup_=0; }
+  /** @brief Remove all the groups and weights (alias of Reset()). */
   void clear()
   { Reset(); }
 
-  /// Compare the weights
+  /**
+   * @brief Compare two definitions.
+   *
+   * @param v other definition.
+   * @return true if equal.
+   */
   MAbool Compare(const WeightDefinition& v) const
   { return (v.groups_==groups_ && v.weights_==weights_); }
 
-  /// Add a new weight group
+  /**
+   * @brief Add a new group; the next weights are attached to it.
+   *
+   * @param name name.
+   * @param combine combination method.
+   */
   void AddGroup(std::string name, std::string combine);
   
-  /// Add a new Weight
+  /**
+   * @brief Add a weight to the last group.
+   *
+   * @param id identifier.
+   * @param name name.
+   * @return false if there is no group or the identifier already exists.
+   */
   MAbool AddWeight(MAuint32 id, std::string name);
     
-  /// Add a new weight group
+  /** @brief Print the groups and weights. */
   void Print() const;
 
-  /// Size
+  /**
+   * @brief Number of weights.
+   *
+   * @return the number of weights.
+   */
   MAuint32 size() const
   { return weights_.size(); }
   

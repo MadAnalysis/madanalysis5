@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file LHEParticleFormat.cpp
+ * @brief Implementation of MA5::LHEParticleFormat.
+ */
+
 #include <sstream>
 #include <iomanip>
 #include <cstdlib>
@@ -50,6 +55,8 @@ std::string LHEParticleFormat::FortranFormat_SimplePrecision(MAfloat32 value,MAu
   if (value!=0)
   {
     for (; value > 1.0; exponent++) value/=10.;
+    // FIXME: 'value < 0.0' is never true (0.1 was meant): numbers below 0.1 are not normalised and lose
+    // significant digits. The versions in LHEWriter.cpp are correct.
     for (; value < 0.0; exponent--) value*=10.;
   }
 
@@ -79,6 +86,8 @@ std::string LHEParticleFormat::FortranFormat_DoublePrecision(MAfloat64 value,MAu
   if (value!=0)
   {
     for (; value > 1.0; exponent++) value/=10.;
+    // FIXME: 'value < 0.0' is never true (0.1 was meant): numbers below 0.1 are not normalised and lose
+    // significant digits. The versions in LHEWriter.cpp are correct.
     for (; value < 0.0; exponent--) value*=10.;
   }
 

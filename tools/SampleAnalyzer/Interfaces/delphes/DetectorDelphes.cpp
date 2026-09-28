@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file DetectorDelphes.cpp
+ * @brief Implementation of MA5::DetectorDelphes.
+ */
+
 #include <fstream>
 #include <algorithm>
 
@@ -225,6 +230,7 @@ void DetectorDelphes::Finalize()
   modularDelphes_->FinishTask();
   if (output_) treeWriter_->Write();
 
+  // NOTE: outputFile_ is neither closed nor deleted (tmp.root is left on disk when `output` is 0).
   delete modularDelphes_; modularDelphes_=0;
   delete confReader_; confReader_=0;
   delete treeWriter_; treeWriter_=0;
@@ -299,6 +305,8 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
     }
     else
     {
+      // FIXME: the candidate mass is only set for the particles unknown to TDatabasePDG (the other ones keep
+      //   the default mass), unlike in DetectorDelphesMA5tune.
       candidate->Charge = pdgParticle ? MAint32(pdgParticle->Charge()/3.0) : -999;
     }
 

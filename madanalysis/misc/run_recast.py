@@ -21,7 +21,34 @@
 #
 ################################################################################
 
+"""Execution of the recasting mode (``set main.recast = on`` followed by ``submit``).
+
+For each detector card listed in the recasting card (see
+:mod:`madanalysis.configuration.recast_configuration`), the events of every dataset are
+processed by the corresponding detector simulation and PAD analyses:
+
+* ``v1.2`` (PAD) and ``v1.1`` (PADForMA5tune): a SampleAnalyzer job running Delphes
+  (resp. Delphes-MA5tune) and the analyses is built in ``<job>_RecastRun``
+  (:meth:`RunRecast.run_delphes_analysis`);
+* ``vSFS`` (PADForSFS): the SFS card is loaded with a nested interpreter and a
+  SampleAnalyzer job running FastJet+SFS and the analyses is built in
+  ``<job>_SFSRun`` (:meth:`RunRecast.run_SimplifiedFastSim`).
+
+The cut-flows are then combined with the information files (``<analysis>.info``) of
+the analyses to compute the 95% CL upper limits on the signal cross section and the
+exclusion confidence levels with Spey (:meth:`RunRecast.compute_cls`), for each signal
+region, simplified likelihood (covariance matrix) and full likelihood (pyhf), possibly
+for extrapolated luminosities and with theory/systematic uncertainty bands. The
+results are written in ``Output/SAF/<dataset>/CLs_output*.dat``.
+
+References:
+    * arXiv:1407.3278 (PAD), arXiv:2006.09387 (SFS), arXiv:1910.11418 (uncertainties
+      and luminosity extrapolation), arXiv:2206.14870 (global likelihoods),
+      arXiv:2307.06996 (Spey).
+"""
+
 from __future__ import absolute_import
+from typing import Any, TextIO
 
 import copy
 import json
@@ -67,21 +94,35 @@ log = logging.getLogger("MA5")
 
 
 class RunRecast:
-    """
-    One-line summary
-    Initialize the RunRecast controller holding runtime state for recasting runs.
+    """Controller of a recasting run.
 
-    Extended summary
-    Stores references to the main application object, directory paths and
-    internal configuration derived from the architecture and recasting
-    settings. Prepares PAD <-> detector mapping and Delphes include paths.
-
-    Args:
-        main (``Main``): The main MadAnalysis application object providing configuration.
-        dirname (``str``): Base working directory used for the recasting jobs.
+    Attributes:
+        dirname (``str``): job directory.
+        main (``Main``): session state (its fast-simulation and recasting settings are
+            temporarily modified during the run).
+        delphes_runcard (``list[tuple[str, str]]``): ``(version, detector card)`` pairs to run.
+        analysis_runcard (``list[tuple[str, str]]``): ``(version, analysis)`` pairs to run.
+        forced (``bool``): original value of ``main.forced`` (restored at the end).
+        detector (``str``): detector simulation of the current run (``delphes``,
+            ``delphesMA5tune`` or ``fastjet``).
+        pad (``str``): path to the PAD of the current run.
+        pyhf_config (``dict``): full-likelihood (HistFactory) configuration of the current
+            analysis.
+        cov_config (``dict``): simplified-likelihood (covariance) configuration of the
+            current analysis.
+        TACO_output (``str``): TACO output file name (empty = disabled).
+        pad_dict (``dict[str, tuple[str, str]]``): version -> (PAD folder, detector) for the
+            available PADs.
+        delphes_inc_pths (``list[str]``): Delphes include paths.
     """
 
     def __init__(self, main: Main, dirname: str):
+        """Initialise the controller.
+
+        Args:
+            main (``Main``): session state.
+            dirname (``str``): job directory.
+        """
         self.dirname: str = dirname
         self.main: Main = main
         self.logger = logging.getLogger("MA5")
@@ -113,18 +154,11 @@ class RunRecast:
             )
 
     def init(self) -> bool:
-        """
-        One-line summary
-        Prepare and validate the recasting runs by editing the recasting card and collecting runs.
-
-        Extended summary
-        Optionally opens an editor for the recasting card (unless forced or in script mode),
-        then obtains the list of delphes and analysis runs from the recasting card and
-        verifies there is work to do.
+        """Read the recasting card (after proposing to edit it, unless in forced/script mode).
 
         Returns:
             ``bool``:
-            True if at least one delphes run was found and initialization succeeded, False otherwise.
+            ``True`` if at least one detector card has to be processed.
         """
         ### First, the analyses to take care off
         log.debug("  Inviting the user to edit the recasting card...")
@@ -147,17 +181,16 @@ class RunRecast:
 
     ## Running the machinery
     def execute(self) -> bool:
-        """
-        One-line summary
-        Execute all configured PAD runs for the collected delphes runcard entries.
+        """Run all detector cards of the recasting card.
 
-        Extended summary
-        Iterates over the configured delphes runs, maps version to PAD/detector, runs the
-        analysis for each entry and performs cleanup. Restores main.forced at exit.
+        For each ``(version, card)`` pair, the PAD and detector are selected from
+        :attr:`pad_dict` and :meth:`analysis_single` is executed; the temporary
+        ``<job>_RecastRun`` folder is removed (kept in developer mode). ``main.forced`` is set
+        to ``True`` during the run and restored at the end.
 
         Returns:
             ``bool``:
-            True if execution completed successfully for all runs, False on error or unsupported version.
+            ``True`` on success, ``False`` on error or for an unavailable PAD version.
         """
         self.main.forced = True
         for version, card in self.delphes_runcard:
@@ -177,6 +210,7 @@ class RunRecast:
             ## Cleaning
             pth = Path(os.path.normpath(self.dirname + "_RecastRun"))
             if not self.main.developer_mode:
+                # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
                 if not FolderWriter.RemoveDirectory(str(pth)):
                     log.error("Cannot remove directory: %s", str(pth))
             else:
@@ -189,26 +223,27 @@ class RunRecast:
     ################################################
     ### FastSim RUN
     ################################################
+    # FIXME: 'dataset' is annotated as DatasetCollection but a single Dataset is passed
+    # (same for run_SimplifiedFastSim and compute_cls).
     def run_delphes_analysis(
         self, dataset: DatasetCollection, card: str, analysislist: list[str]
     ) -> bool:
-        """
-        One-line summary
-        Build, compile and run a PAD-based Delphes analysis for a dataset.
+        """Build, compile and run a SampleAnalyzer job running Delphes and PAD analyses.
 
-        Extended summary
-        Prepares the run directory, writes analyzer sources and Makefiles, patches main.cpp,
-        fixes pileup references, compiles, links and executes the SampleAnalyzer job and moves
-        any produced Delphes events back to the main output layout.
+        The job is created in ``<job>_RecastRun`` with the Delphes (or Delphes-MA5tune)
+        detector card of the PAD, the analyses are copied from the PAD, ``main.cpp`` is
+        rewritten to instantiate and execute them (plus the TACO output if requested), the
+        pile-up paths of the card are fixed, and the job is compiled and run. The Delphes ROOT
+        file is moved to ``Output/SAF/<dataset>/RecoEvents/RecoEvents_<v1x1|v1x2>_<card>.root``.
 
         Args:
-            dataset (``DatasetCollection``): Dataset collection to process.
-            card (``str``): Delphes card filename (relative to PAD Input).
-            analysislist (``list[str]``): List of analyzer names to include in the run.
+            dataset (``Dataset``): dataset to process (see FIXME on the annotation).
+            card (``str``): name of the Delphes card (in ``tools/<PAD>/Input/Cards``).
+            analysislist (``list[str]``): analyses to run.
 
         Returns:
             ``bool``:
-            True on success, False on any failure during preparation, compilation or execution.
+            ``True`` on success.
         """
         # Preparing the run
         self.main.recasting.status = "off"
@@ -404,6 +439,7 @@ class RunRecast:
         self.main.recasting.status = "on"
         self.main.fastsim.package = "none"
 
+        # NOTE: FileNotFoundError if the output folder of the dataset does not exist.
         event_path = next((x for x in (recast_path / f"Output/SAF/_{dataset.name}").iterdir() if "RecoEvents" in str(x)), None)
         if event_path is not None:
             root_filename = "DelphesMA5tuneEvents.root" if self.detector == "delphesMA5tune" else "DelphesEvents.root"
@@ -419,23 +455,23 @@ class RunRecast:
     def run_SimplifiedFastSim(
         self, dataset: DatasetCollection, card: str, analysislist: list[str]
     ) -> bool:
-        """
-        One-line summary
-        Run the Simplified Fast Simulation (SFS) workflow for a dataset.
+        """Build, compile and run a SampleAnalyzer job running the SFS and PADForSFS analyses.
 
-        Extended summary
-        Rejects already reconstructed inputs, loads the analysis card into the interpreter,
-        prepares a SFS run directory, writes analyzers from PAD, patches main, compiles, links
-        and runs the analysis and moves produced outputs into the main Output/SAF layout.
+        The SFS card is loaded through a nested interpreter (it defines the jet clustering,
+        smearers, efficiencies and taggers), a job is created in ``<job>_SFSRun`` with the
+        analyses copied from the PADForSFS and ``main.cpp`` rewritten to execute them (plus
+        an LHE writer if ``store_events`` is set, and the TACO output if requested). After the
+        run, the cut-flows, histograms, (optional) events and sample summary are moved to
+        ``Output/SAF/<dataset>/<analysis>``.
 
         Args:
-            dataset (``DatasetCollection``): Dataset collection to process.
-            card (``str``): Path to the analysis card to load.
-            analysislist (``list[str]``): List of analyzers to include.
+            dataset (``Dataset``): dataset to process (hadron-level files only).
+            card (``str``): path to the SFS card.
+            analysislist (``list[str]``): analyses to run.
 
         Returns:
             ``bool``:
-            True on success, False on error.
+            ``True`` on success.
         """
         # Reject already-reconstructed inputs
         if any(
@@ -681,6 +717,7 @@ class RunRecast:
 
             # Move event file if any
             if self.main.recasting.store_events:
+                # NOTE: the event file is moved for the first analysis only; the next analyses find an empty folder.
                 src_event_dir = sfs_out_base / "lheEvents0_0"
                 if src_event_dir.is_dir():
                     # move first event file found
@@ -712,6 +749,7 @@ class RunRecast:
 
         # Cleanup the SFS run directory unless in developer mode
         if not self.main.developer_mode:
+            # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
             if not FolderWriter.RemoveDirectory(str(run_dir)):
                 log.error("Cannot remove directory: %s", run_dir)
         else:
@@ -723,22 +761,20 @@ class RunRecast:
     ### ANALYSIS EXECUTION
     ################################################
     def analysis_single(self, version: str, card: str) -> bool:
-        """
-        One-line summary
-        Perform a single analysis version/card recasting including PAD execution and CLs.
+        """Process all datasets with one detector card and compute the limits.
 
-        Extended summary
-        Selects the appropriate detector, prepares analyzer list for the given card,
-        executes the PAD or SFS runs over all datasets, manages eventfile postprocessing
-        and optionally triggers CLs computation.
+        The detector simulation is activated if needed, the analyses associated with the card
+        are selected, each dataset is processed (Delphes or SFS), the dataset cross section is
+        read from the SAF file if not set by the user, and :meth:`compute_cls` is called
+        (unless in analysis-only mode).
 
         Args:
-            version (``str``): PAD version identifier (e.g. 'v1.2').
-            card (``str``): Analysis card name.
+            version (``str``): PAD version (``v1.1``, ``v1.2`` or ``vSFS``).
+            card (``str``): detector card.
 
         Returns:
             ``bool``:
-            True on success for all datasets and CLs calculations, False otherwise.
+            ``True`` on success.
         """
         ## Init and header
         self.analysis_header(version, card)
@@ -800,6 +836,7 @@ class RunRecast:
                             "Simplified-FastSim does not use root, hence file will not be stored."
                         )
 
+                # NOTE: the cross section read from the SAF file overwrites the dataset setting (side effect).
                 if myset.xsection == 0.0:
                     myset.xsection = read_xsec(
                         f"{self.dirname}/Output/SAF/{myset.name}/{myset.name}.saf"
@@ -818,20 +855,11 @@ class RunRecast:
         return True
 
     def analysis_header(self, version: str, card: str) -> None:
-        """
-        One-line summary
-        Log a standardized header for a PAD run.
-
-        Extended summary
-        Prints a nicely formatted banner with the PAD version and card name to the log.
+        """Log the banner of a PAD run.
 
         Args:
-            version (``str``): PAD version string.
-            card (``str``): Card filename or identifier.
-
-        Returns:
-            ``None``:
-            Pure logging side-effect.
+            version (``str``): PAD version.
+            card (``str``): detector card.
         """
         ## Printing
         log.info("   **********************************************************")
@@ -845,25 +873,23 @@ class RunRecast:
         log.info("   **********************************************************")
 
     def update_pad_main(self, analysislist: list[str]) -> bool:
-        """
-        One-line summary
-        Update the PAD main.cpp for a set of analyzers and copy required analyzer sources.
+        """Legacy: write the ``main.cpp`` and ``analysisList.h`` of ``<job>_RecastRun`` from the
+        PAD ``main.cpp`` for the selected analyses.
 
-        Extended summary
-        Creates/overwrites the analysisList.h and a modified main.cpp inside the RecastRun
-        directory to register the specified analyzers. Also copies analyzer headers and
-        sources from the PAD into the run directory.
+        .. note::
+            Not called anywhere on this branch (superseded by :meth:`run_delphes_analysis`).
 
         Args:
-            analysislist (``list[str]``): List of analyzer names to include in the PAD run.
+            analysislist (``list[str]``): analyses to include.
 
         Returns:
             ``bool``:
-            True on success, False if required files are missing or on I/O errors.
+            ``True`` on success.
         """
         ## Migrating the necessary files to the working directory
         log.info("   Writing the PAD analyses")
         ## Safety (for backwards compatibility)
+        # NOTE: legacy method, not called anywhere on this branch (see also make_pad).
         if not os.path.isfile(self.pad + "/Build/Main/main.bak"):
             shutil.copy(
                 self.pad + "/Build/Main/main.cpp", self.pad + "/Build/Main/main.bak"
@@ -871,6 +897,7 @@ class RunRecast:
         mainfile = open(self.pad + "/Build/Main/main.bak", "r")
         newfile = open(self.dirname + "_RecastRun/Build/Main/main.cpp", "w")
         # Clean the analyzer folder
+        # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
         if not FolderWriter.RemoveDirectory(
             os.path.normpath(
                 self.dirname + "_RecastRun/Build/SampleAnalyzer/User/Analyzer"
@@ -986,17 +1013,14 @@ class RunRecast:
         return True
 
     def make_pad(self) -> bool:
-        """
-        One-line summary
-        Compile the PAD library within the RecastRun build directory.
+        """Legacy: compile the job in ``<job>_RecastRun/Build``.
 
-        Extended summary
-        Invokes 'make' with an appropriate core count and captures the compilation log.
-        Returns False if compilation fails.
+        .. note::
+            Not called anywhere on this branch.
 
         Returns:
             ``bool``:
-            True if make succeeded, False otherwise.
+            ``True`` on success.
         """
         # Initializing the compiler
         log.info("   Compiling the PAD located in %s_RecastRun", self.dirname)
@@ -1025,23 +1049,21 @@ class RunRecast:
     def save_output(
         self, eventfile: str, setname: str, analyses: list[str], card: str
     ) -> bool:
-        """
-        One-line summary
-        Save and merge produced SAF outputs and move analyzer outputs to the main Output/SAF.
+        """Move the results of a Delphes/PAD run to the job directory.
 
-        Extended summary
-        If the target SAF doesn't exist, moves the produced SAF file; otherwise merges
-        file entries. Moves analyzer-specific directories and TACO outputs if requested.
+        The sample summary SAF file is moved (or its ``<FileInfo>`` block extended if it
+        already exists), the analysis outputs are moved to ``Output/SAF/<dataset>/<analysis>``
+        and the TACO output (if any) is renamed after the card.
 
         Args:
-            eventfile (``str``): Event file path string (may include quotes).
-            setname (``str``): Dataset name.
-            analyses (``list[str]``): List of analyses to move into Output/SAF.
-            card (``str``): Card name used to generate TACO outputs.
+            eventfile (``str``): quoted path of the reconstructed event file.
+            setname (``str``): dataset name.
+            analyses (``list[str]``): analyses of the run.
+            card (``str``): detector card.
 
         Returns:
             ``bool``:
-            True when outputs were moved/merged successfully.
+            Always ``True``.
         """
         outfile = self.dirname + "/Output/SAF/" + setname + "/" + setname + ".saf"
         if not os.path.isfile(outfile):
@@ -1109,22 +1131,25 @@ class RunRecast:
     ################################################
 
     def compute_cls(self, analyses: list[str], dataset: DatasetCollection) -> bool:
-        """
-        One-line summary
-        Compute CLs exclusion limits for the provided analyses and dataset.
+        """Compute the limits for all analyses of a dataset.
 
-        Extended summary
-        Validates XML parsing support, writes bibliography, iterates over requested
-        extrapolated luminosities and analyses, parses analysis info files, reads cutflows,
-        constructs statistical models and computes limits. Writes results into CLs output files.
+        For the nominal luminosity and every extrapolated luminosity, the information file and
+        the cut-flows of each analysis are read, the statistical models are built with Spey
+        (:func:`~madanalysis.misc.statistical_models.initialise_statistical_models`), the 95% CL
+        upper limits on the cross section and (if the cross section is known) the exclusion
+        confidence levels are computed, possibly for varied cross sections (scale, PDF and
+        systematic uncertainties), and the results are written in
+        ``Output/SAF/<dataset>/CLs_output[_lumi_<L>].dat``. A ``bibliography.bib`` file with the
+        relevant references is written in the job directory.
 
         Args:
-            analyses (``list[str]``): List of analysis names to compute CLs for.
-            dataset (``DatasetCollection``): Dataset metadata used for the computation.
+            analyses (``list[str]``): analyses to process.
+            dataset (``Dataset``): the dataset (see FIXME on the annotation).
 
         Returns:
             ``bool``:
-            True on success for all computations, False on any encountered error.
+            ``True`` on success, ``False`` if an information file or cut-flow is missing or
+            the cross section is not defined.
         """
         import spey
         from spey.system.webutils import get_bibtex
@@ -1201,6 +1226,7 @@ class RunRecast:
             outfile = os.path.join(
                 self.dirname, "Output/SAF", dataset.name, "CLs_output" + outext + ".dat"
             )
+            # NOTE: the file is not closed when returning False below.
             if os.path.isfile(outfile):
                 mysummary = open(outfile, "a+")
                 mysummary.write("\n")
@@ -1367,21 +1393,17 @@ class RunRecast:
             mysummary.close()
         return True
 
-    def check_xml_scipy_methods(self):
-        """
-        One-line summary
-        Determine an XML parsing module to use (lxml or xml.etree.ElementTree).
-
-        Extended summary
-        Tries to import lxml.etree first and falls back to xml.etree.ElementTree.
-        Logs and returns False if neither is available.
+    def check_xml_scipy_methods(self) -> "Any":
+        """Get an XML parsing module (lxml if available, else ``xml.etree.ElementTree``).
 
         Returns:
-            ``module``:
-            The imported XML module on success, or False on failure.
+            ``Any``:
+            The ElementTree-like module, or ``False`` if none is available.
         """
         ## Checking XML parsers
         try:
+            # FIXME: lxml has no 'ET' member ('from lxml import etree as ET' was intended): the
+            # standard library parser is always used.
             from lxml import ET
         except ImportError as err:
             log.debug(str(err))
@@ -1395,24 +1417,18 @@ class RunRecast:
         return ET
 
     def parse_info_file(
-        self, etree, analysis: str, extrapolated_lumi: Union[str, float]
+        self, etree: "Any", analysis: str, extrapolated_lumi: Union[str, float]
     ) -> tuple[float, list, dict]:
-        """
-        One-line summary
-        Parse an analysis .info XML file and extract header information.
-
-        Extended summary
-        Opens and parses the analysis.info file using the provided etree module and
-        delegates extraction to header_info_file. Returns (-1,-1,-1) on errors.
+        """Read the information file ``<analysis>.info`` of an analysis.
 
         Args:
-            etree (``module``): XML parsing module (e.g. xml.etree.ElementTree).
-            analysis (``str``): Analyzer name (without extension) to parse.
-            extrapolated_lumi (``str`` or ``float``): 'default' or a numeric extrapolated luminosity.
+            etree (``module``): ElementTree-like module.
+            analysis (``str``): analysis name.
+            extrapolated_lumi (``Union[str, float]``): ``"default"`` or a luminosity in fb^-1.
 
         Returns:
-            ``tuple``:
-            (lumi (float), regions (list), regiondata (dict)) on success or (-1,-1,-1) on error.
+            ``tuple[float, list, dict]``:
+            See :meth:`header_info_file`; ``(-1, -1, -1)`` on error.
         """
         ## Is file existing?
         filename = (
@@ -1439,21 +1455,16 @@ class RunRecast:
             return -1, -1, -1
 
     def fix_pileup(self, filename: str) -> bool:
-        """
-        One-line summary
-        Ensure Delphes card references point to local PAD pileup files.
+        """Point the ``PileUpFile`` entries of a Delphes card to the PAD pile-up folder.
 
-        Extended summary
-        Backs up the provided tcl card, scans for 'set PileUpFile' directives and rewrites
-        the referenced path to point to the PAD/Input/Pileup directory inside the MA5 installation.
-        Verifies that the referenced pileup files exist after modification.
+        The original card is saved as ``<card>.original``.
 
         Args:
-            filename (``str``): Path to the Delphes .tcl card file to fix.
+            filename (``str``): Delphes card to modify.
 
         Returns:
             ``bool``:
-            True if pileup entries were fixed and referenced files exist, False on error.
+            ``False`` if the card or a referenced pile-up file is missing.
         """
         # x
         filename = str(filename)
@@ -1509,25 +1520,27 @@ class RunRecast:
         return True
 
     def header_info_file(
-        self, etree, analysis: str, extrapolated_lumi: Union[str, float]
-    ):
-        """
-        One-line summary
-        Extract header-level information from a parsed analysis info XML tree.
+        self, etree: "Any", analysis: str, extrapolated_lumi: Union[str, float]
+    ) -> "tuple[float, list, dict] | tuple[int, int, int]":
+        """Decode the XML information file of an analysis.
 
-        Extended summary
-        Validates root tags, extracts the analysis luminosity and region definitions, handles
-        covariance and pyhf blocks, rescales rates for extrapolated luminosities and
-        returns (lumi, regions, regiondata). Performs extensive validation and returns -1 triplet on error.
+        The luminosity, the signal regions (``<region>`` with ``<nobs>``, ``<nb>`` and
+        ``<deltanb>`` or ``<deltanb_syst>``/``<deltanb_stat>``) and the optional covariance
+        matrices (``cov_subset``) and full likelihoods (``<pyhf>``) are read. For an
+        extrapolated luminosity, the yields are rescaled and the background uncertainties
+        extrapolated according to ``main.recasting.error_extrapolation``. The simplified and
+        full likelihood configurations are stored in :attr:`cov_config` and
+        :attr:`pyhf_config`.
 
         Args:
-            etree (``xml.etree.ElementTree.ElementTree``): Parsed XML tree (root accessible via getroot()).
-            analysis (``str``): Analyzer name (for logging and validation).
-            extrapolated_lumi (``str`` or ``float``): 'default' or numeric target luminosity for rescaling.
+            etree (``ElementTree``): parsed information file.
+            analysis (``str``): analysis name.
+            extrapolated_lumi (``Union[str, float]``): ``"default"`` or a luminosity in fb^-1.
 
         Returns:
-            ``tuple``:
-            (lumi (float), regions (list), regiondata (dict)) on success or (-1,-1,-1) on failure.
+            ``tuple[float, list, dict] | tuple[int, int, int]``:
+            ``(lumi, regions, regiondata)`` where ``regiondata[region]`` holds ``nobs``, ``nb``
+            and ``deltanb``; ``(-1, -1, -1)`` for an invalid file.
         """
         log.debug("Reading info from the file related to %s...", analysis)
         ## checking the header of the file
@@ -1720,6 +1733,9 @@ class RunRecast:
                 if self.main.recasting.error_extrapolation == "sqrt":
                     new_sigma = np.round(sigma * math.sqrt(lumi_scaling), 8)
                 elif self.main.recasting.error_extrapolation == "linear":
+                    # FIXME: inconsistent with the per-region linear extrapolation (deltanb * lumi_scaling above):
+                    # the standard deviation is scaled by lumi_scaling**2; the user-defined case below mixes
+                    # sigma, sqrt(sigma) and the relative uncertainties of the per-region formula.
                     new_sigma = sigma * lumi_scaling**2
                 else:
                     new_sigma = (
@@ -1739,22 +1755,17 @@ class RunRecast:
 
         return lumi, regions, regiondata
 
-    def pyhf_info_file(self, info_root) -> dict:
-        """
-        One-line summary
-        Extract and validate pyhf-related configuration from an analysis info XML root.
-
-        Extended summary
-        If <pyhf> blocks are present, attempts to import spey_pyhf, constructs the
-        HistFactory dictionary and validates likelihood profiles. Returns an empty dict
-        if pyhf support is missing or validation fails.
+    def pyhf_info_file(self, info_root: "Any") -> dict:
+        """Build and validate the full-likelihood configurations declared in an information file.
 
         Args:
-            info_root (``xml.etree.ElementTree.Element``): Root element of the parsed info file.
+            info_root (``Element``): root of the information file.
 
         Returns:
             ``dict``:
-            A validated pyhf configuration dictionary, or {} if none or invalid.
+            Valid likelihood profiles (see
+            :func:`~madanalysis.misc.histfactory_reader.construct_histfactory_dictionary`);
+            empty if there is none or spey-pyhf is not available.
         """
         self.pyhf_config = {}  # reset
         if any(x.tag == "pyhf" for x in info_root):
@@ -1809,22 +1820,12 @@ class RunRecast:
 
         return pyhf_config
 
-    def write_cls_header(self, xs: float, out) -> None:
-        """
-        One-line summary
-        Write the header of a CLs output file depending on whether signal xsec is known.
-
-        Extended summary
-        Produces a human-readable header describing columns written in CLs output .dat files.
-        If systematics are configured, the header includes corresponding columns.
+    def write_cls_header(self, xs: float, out: "TextIO") -> None:
+        """Write the column header of a ``CLs_output.dat`` file.
 
         Args:
-            xs (``float``): Signal cross section, used to select header format.
-            out (``file``): Open file-like object to write the header into.
-
-        Returns:
-            ``None``:
-            Writes into the provided file object.
+            xs (``float``): signal cross section (``<= 0``: only the upper limits are computed).
+            out (``TextIO``): output file.
         """
         if xs <= 0:
             log.info(
@@ -1875,23 +1876,19 @@ class RunRecast:
             out.write("\n")
 
     def read_cutflows(self, path: str, regions: list[str], regiondata: dict) -> dict:
-        """
-        One-line summary
-        Read per-region SAF cutflow files and populate regiondata with initial and final counts.
+        """Read the initial and final sums of weights of each signal region.
 
-        Extended summary
-        For each requested signal region (or combined regions), opens the corresponding .saf
-        file, extracts initial and final sums of weights and updates regiondata with N0 and Nf.
-        Returns -1 on any validation or parsing error.
+        Regions combined with ``;`` in the information file are summed. The cut-flow file
+        names are obtained with :func:`~madanalysis.misc.utils.clean_region_name`.
 
         Args:
-            path (``str``): Directory containing region .saf cutflow files.
-            regions (``list[str]``): List of region identifiers to read.
-            regiondata (``dict``): Pre-initialized region data dictionary to update.
+            path (``str``): ``Cutflows`` folder of the analysis.
+            regions (``list[str]``): signal regions.
+            regiondata (``dict``): region data (``N0`` and ``Nf`` are added).
 
         Returns:
             ``dict``:
-            Updated regiondata on success, or -1 on failure.
+            The updated region data, or ``-1`` if a cut-flow is missing or invalid.
         """
         log.debug("Read the cutflow from the files:")
         for reg in regions:
@@ -1972,25 +1969,23 @@ class RunRecast:
         lumi: float,
         is_extrapolated: bool,
     ) -> dict:
-        """
-        One-line summary
-        Compute CLs and related quantities for each region using provided statistical models.
+        """Compute the exclusion confidence levels and select the best regions/likelihoods.
 
-        Extended summary
-        Uses the different statistical model containers (uncorrelated, simplified, pyhf)
-        to compute rSR, CLs and mark the best region(s). Also handles covariant subsets and pyhf
-        results. Returns the enriched regiondata dictionary.
+        For single regions, the best region is the one with the largest ratio of expected
+        signal to expected excluded signal (``rSR``); for simplified and full likelihoods, it
+        is the one with the smallest expected upper limit.
 
         Args:
-            regiondata (``dict``): Per-region data with N0/Nf and other entries.
-            stat_models (``dict``): Statistical model objects keyed by model type.
-            xsection (``float``): Signal cross section used to compute expected counts.
-            lumi (``float``): Luminosity used to scale expected signals.
-            is_extrapolated (``bool``): Whether the computation is for an extrapolated luminosity.
+            regiondata (``dict``): region data with the upper limits.
+            stat_models (``dict``): statistical models (see
+                :func:`~madanalysis.misc.statistical_models.initialise_statistical_models`).
+            xsection (``float``): signal cross section in pb.
+            lumi (``float``): luminosity in fb^-1.
+            is_extrapolated (``bool``): extrapolated luminosity (a-priori expected CLs is used).
 
         Returns:
             ``dict``:
-            Updated regiondata with CLs, rSR, best flags and related fields.
+            The region data with the ``CLs``, ``rSR`` and ``best`` entries.
         """
         from .statistical_models import APRIORI, OBSERVED
 
@@ -2008,6 +2003,7 @@ class RunRecast:
                 rSR = -1
                 myCLs = 0
             else:
+                # NOTE: ZeroDivisionError if the expected upper limit is 0.
                 n95 = (
                     float(regiondata[reg]["s95exp"])
                     * lumi
@@ -2065,29 +2061,23 @@ class RunRecast:
         return regiondata
 
     def write_cls_output(
-        self, analysis, regions, regiondata, errordata, summary, xsflag, lumi
+        self, analysis: "str", regions: "list[str]", regiondata: "dict", errordata: "dict", summary: "TextIO", xsflag: "bool", lumi: "float"
     ) -> None:
-        """
-        One-line summary
-        Write final CLs tabulated output for each region and optional global results.
+        """Write the results of an analysis in a ``CLs_output.dat`` file.
 
-        Extended summary
-        Formats efficiency, statistical and systematic bands, global likelihoods (SL/pyhf)
-        and writes them into the provided summary file object. When in developer_mode,
-        optionally dumps json debug files for pyhf.
+        One line is written per signal region, simplified likelihood (``[SL]``) and full
+        likelihood (``[pyhf]``), with the upper limits, the CLs, the efficiency and its
+        statistical/systematic uncertainties, followed by the uncertainty bands. In developer
+        mode, the region data and the signal patches are also dumped as JSON files.
 
         Args:
-            analysis (``str``): Analysis name.
-            regions (``list[str]``): Ordered list of regions to write.
-            regiondata (``dict``): Computed per-region results (CLs, N0, Nf, etc.).
-            errordata (``dict``): Error-variation results keyed by variation names.
-            summary (``file``): Open file-like object to append the CLs results.
-            xsflag (``bool``): Indicates whether signal x-section is undefined (True) or present (False).
-            lumi (``float``): Luminosity used in the computation (fb^-1).
-
-        Returns:
-            ``None``:
-            Writes formatted results to 'summary'.
+            analysis (``str``): analysis name.
+            regions (``list[str]``): signal regions.
+            regiondata (``dict``): nominal results.
+            errordata (``dict``): results for the varied cross sections.
+            summary (``TextIO``): output file.
+            xsflag (``bool``): ``True`` if only upper limits are available (no cross section).
+            lumi (``float``): luminosity in fb^-1.
         """
         log.debug("Write CLs...")
         if self.main.developer_mode:
@@ -2160,6 +2150,8 @@ class RunRecast:
                 band = []
                 for error_set in err_sets:
                     if len([x for x in error_set if x in list(errordata.keys())]) == 2:
+                        # FIXME: 'band' is not reset between the error sets (and the systematics below): each band
+                        # also includes the values of the previous ones.
                         band = band + [
                             errordata[error_set[0]][reg]["CLs"],
                             errordata[error_set[1]][reg]["CLs"],

@@ -22,7 +22,10 @@
 ################################################################################
 
 
+"""Tagging and mistagging efficiencies of the SFS (``define tagger``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 from typing import Any, Optional
 from enum import Enum, auto
@@ -30,14 +33,24 @@ from enum import Enum, auto
 AST = Any
 
 class TaggerStatus(Enum):
+    """Working point of a tagger (``{loose}``, ``{medium}``, ``{tight}`` in the ``define tagger`` command).
+    """
     NONE = auto()
     LOOSE = auto()
     MID = auto()
     TIGHT = auto()
 
     @staticmethod
-    def get_status(status: str):
-        """Convert string to tagger criterion"""
+    def get_status(status: str) -> TaggerStatus:
+        """Convert a string into a working point.
+
+        Args:
+            status (``str``): ``loose``, ``med``/``mid``/``medium`` or ``tight`` (case-insensitive).
+
+        Returns:
+            ``TaggerStatus``:
+            The working point (``NONE`` for other strings).
+        """
         if status.lower() == "loose":
             return TaggerStatus.LOOSE
         elif status.lower() in ["med", "mid", "medium"]:
@@ -48,7 +61,16 @@ class TaggerStatus(Enum):
             return TaggerStatus.NONE
 
     @staticmethod
-    def to_str(status):
+    def to_str(status: TaggerStatus) -> str:
+        """Convert a working point into a string.
+
+        Args:
+            status (``TaggerStatus``): working point.
+
+        Returns:
+            ``str``:
+            ``"loose"``, ``"medium"``, ``"tight"`` or ``""``.
+        """
         if status == TaggerStatus.LOOSE:
             return "loose"
         elif status == TaggerStatus.MID:
@@ -60,21 +82,30 @@ class TaggerStatus(Enum):
 
 
 class Tagger:
+    """Tagging efficiencies (true object -> reconstructed object).
+
+    Each rule is stored in :attr:`rules` as ``{key: {'id_true', 'id_reco', 'tag', 'efficiencies': {n: {'function':
+    AST, 'bounds': AST}}}}``: several (function, bounds) pairs can be attached to the
+    same tagger, each applying in its own domain.
+    """
     # Initialization
-    def __init__(self):
+    def __init__(self) -> None:
+        """Create an empty set of rules."""
         self.logger = logging.getLogger('MA5')
         self.rules = {}
 
     def add_rule(self, id_true: str, id_reco: str, function: AST, bounds: AST, tag: Optional[TaggerStatus] = None) -> None:
-        """
-        Adding a rule to the tagger. The bounds and function are written as ASTs
+        """Add a tagging rule.
 
-        :param id_true: true particle id
-        :param id_reco: particle id to be reconstructed
-        :param function: efficiency function
-        :param bounds: bounds of the function
-        :param tag: loose/medium/tight criterion of the tagger
-        :return:
+        For b, c, tau and light-jet taggers, a missing working point is converted into
+        ``LOOSE``.
+
+        Args:
+            id_true (``str``): PDG code of the true object.
+            id_reco (``str``): PDG code of the object it is tagged as.
+            function (``AST``): efficiency formula.
+            bounds (``AST``): domain of validity.
+            tag (``Optional[TaggerStatus]``, default ``None``): working point.
         """
 
         ## Checking wether the tagger is supported
@@ -102,7 +133,8 @@ class Tagger:
                                                            'bounds': bounds}
 
 
-    def display(self):
+    def display(self) -> None:
+        """Log the defined taggers (the C++ translation is logged at debug level)."""
         self.logger.info('*********************************')
         self.logger.info('       Tagger  information       ')
         self.logger.info('*********************************')
@@ -126,7 +158,22 @@ class Tagger:
             self.logger.info('  --------------------')
 
 
-    def is_supported(self,id_true: str, id_reco: str, tag: TaggerStatus):
+    def is_supported(self,id_true: str, id_reco: str, tag: TaggerStatus) -> bool:
+        """Check whether a tagger is supported.
+
+        Supported combinations (reco <- true): b/c <- j, c, b; tau <- tau, j; j <- e, mu,
+        photon; e <- mu, photon, j; mu <- e, photon; photon <- e, mu, j. Working points are
+        only available for b, c, tau and jet taggers.
+
+        Args:
+            id_true (``str``): PDG code of the true object.
+            id_reco (``str``): PDG code of the reconstructed object.
+            tag (``TaggerStatus``): working point.
+
+        Returns:
+            ``bool``:
+            ``True`` if supported (an error is logged otherwise).
+        """
         supported = {'5': ['21', '4', '5'], '4': ['21', '4', '5'], '15': ['15', '21'],
                      '21': ['11', '13', '22'], '11': ['13', '22', '21'],
                      '13': ['11', '22'], '22': ['11', '13', '21']}

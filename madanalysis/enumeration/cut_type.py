@@ -22,14 +22,44 @@
 ################################################################################
 
 
+"""Types of cuts (``select`` and ``reject`` commands)."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
+        """Metaclass turning the class attribute access ``CutType.NAME`` into an integer code.
 
-        def __getattr__(self, name):
+        Accessing ``CutType.NAME`` returns the index of ``NAME`` in ``CutType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
+
+        def __getattr__(self, name: str) -> int:
+            """Get the integer code of an enumeration entry.
+
+            Args:
+                name (``str``): name of the entry (e.g. ``CutType.SELECT``).
+
+            Raises:
+                ``ValueError``: if ``name`` is not a key of ``values``.
+
+            Returns:
+                ``int``:
+                Index of the entry in ``values``.
+            """
             return list(self.values.keys()).index(name)
 
-        def convert2cmdname(self,cut):
+        def convert2cmdname(self,cut: int) -> str:
+            """Get the interpreter command associated with a cut type.
+
+            Args:
+                cut (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                ``'reject'`` or ``'select'``.
+            """
             name = list(self.values.keys())[cut]
             return self.values[name][0]
     
@@ -38,6 +68,7 @@ class metaclass(type):
 
 @six.add_metaclass(metaclass)
 class CutType(object):
+    """Cut types. Each entry of ``values`` is ``[command_name]``."""
     values = { 'REJECT' : ['reject'],\
                'SELECT' : ['select'] }
 

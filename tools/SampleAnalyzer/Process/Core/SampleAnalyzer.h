@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file SampleAnalyzer.h
+ * @brief Main driver of a SampleAnalyzer job (files, readers, analyses, writers, clusterers, detectors).
+ */
+
 #ifndef SAMPLE_ANALYZER_H
 #define SAMPLE_ANALYZER_H
 
@@ -47,123 +52,246 @@ namespace MA5
     class ProgressBar;
     class Configuration;
 
+    /**
+     * @brief Main driver of a SampleAnalyzer job.
+     *
+     * Typical usage in the generated main.cpp:
+     * 1. Initialize() decodes the command line and the list of samples;
+     * 2. InitializeAnalyzer/Writer/JetClusterer/Detector() set up the components;
+     * 3. PostInitialize() creates the output directories and initialises the analyses;
+     * 4. NextFile()/NextEvent() loop over the samples and events, the analyses being
+     *    executed by the main program;
+     * 5. Finalize() writes the SAF output files and prints the reports.
+     */
     class SampleAnalyzer
     {
     private:
+        /** @brief Name of the analysis and of the dataset, and failure flag of the last file. */
         std::string analysisName_;
         std::string datasetName_;
         MAbool LastFileFail_;
 
-        /// Configuration of SampleAnalyzer
+        /** @brief Configuration decoded from the command line. */
         Configuration cfg_;
 
-        /// List of input files
+        /** @brief Input files. */
         std::vector<std::string> inputs_;
 
-        /// List of managers
+        /** @brief Registries of all the available components. */
         WriterManager fullWriters_;
         ReaderManager fullReaders_;
         AnalyzerManager fullAnalyses_;
         JetClustererManager fullJetClusterers_;
         DetectorManager fullDetectors_;
 
-        /// List of managers
+        /** @brief Components used in this job. */
         std::vector<WriterBase *> writers_;
         std::vector<ReaderBase *> readers_;
         std::vector<AnalyzerBase *> analyzers_;
         std::vector<JetClusterer *> clusters_;
         std::vector<DetectorBase *> detectors_;
 
-        /// Reading status
+        /** @brief Index (1-based) of the current file and flag requesting the next file. */
         MAuint32 file_index_;
         MAbool next_file_;
 
-        /// Counters
+        /** @brief Numbers of read and accepted events, per file. */
         std::vector<MAuint64> counter_read_;
         std::vector<MAuint64> counter_passed_;
 
-        /// The only one pointer to the reader
+        /** @brief Reader of the current file. */
         ReaderBase *myReader_;
 
-        /// Progress bar for event reading
+        /** @brief Progress bar. */
         ProgressBar *progressBar_;
 
     public:
-        /// Constructor withtout arguments
+        /** @brief Constructor (starts the services and checks the data types). */
         SampleAnalyzer();
 
-        /// Adding Analyzer
+        /**
+         * @brief Accessor to the registry of the analyses.
+         *
+         * @return the registry.
+         */
         AnalyzerManager &AnalyzerList() { return fullAnalyses_; }
+        /**
+         * @brief Accessor to the registry of the readers.
+         *
+         * @return the registry.
+         */
         ReaderManager &ReaderList() { return fullReaders_; }
+        /**
+         * @brief Accessor to the registry of the writers.
+         *
+         * @return the registry.
+         */
         WriterManager &WriterList() { return fullWriters_; }
+        /**
+         * @brief Accessor to the registry of the jet clusterers.
+         *
+         * @return the registry.
+         */
         JetClustererManager &JetClustererList() { return fullJetClusterers_; }
+        /**
+         * @brief Accessor to the registry of the detector simulations.
+         *
+         * @return the registry.
+         */
         DetectorManager &DetectorSimList() { return fullDetectors_; }
 
-        /// Initialization of the SampleAnalyzer
+        /**
+         * @brief Decode the command line, read the list of samples and build the registries.
+         *
+         * @param argc number of arguments.
+         * @param argv arguments.
+         * @param filename PDG file name (unused).
+         * @return false in case of error (see the FIXME in the source for a missing list).
+         */
         MAbool Initialize(MAint32 argc, MAchar **argv, const std::string &filename);
 
-        /// Getting pointer to an analyzer
+        /**
+         * @brief Set up an analysis.
+         *
+         * @param name name of the analysis.
+         * @param outputname name of the output.
+         * @param parameters options passed to the analysis.
+         * @return the analysis, or 0 in case of error.
+         */
         AnalyzerBase *InitializeAnalyzer(const std::string &name,
                                          const std::string &outputname,
                                          const std::map<std::string, std::string> &parameters);
 
+        /**
+         * @brief Set up an analysis without option.
+         *
+         * @param name name of the analysis.
+         * @param outputname name of the output.
+         * @return the analysis, or 0 in case of error.
+         */
         AnalyzerBase *InitializeAnalyzer(const std::string &name,
                                          const std::string &outputname);
 
-        /// Getting pointer to a writer
+        /**
+         * @brief Set up a writer (the output is written in a new subdirectory of Output/SAF/<dataset>).
+         *
+         * @param name name of the writer (file format).
+         * @param outputname name of the output file.
+         * @return the writer, or 0 in case of error.
+         */
         WriterBase *InitializeWriter(const std::string &name,
                                      const std::string &outputname);
 
-        /// Getting pointer to a jet clusterer
+        /**
+         * @brief Set up a jet clusterer.
+         *
+         * @param name name of the clusterer.
+         * @param parameters parameters of the clustering and of the taggers.
+         * @return the clusterer, or 0 in case of error.
+         */
         JetClusterer *InitializeJetClusterer(const std::string &name,
                                              const std::map<std::string, std::string> &parameters);
 
-        /// Getting pointer to a detector
+        /**
+         * @brief Set up a detector simulation.
+         *
+         * @param name name of the detector simulation.
+         * @param configFile detector card.
+         * @param parameters options.
+         * @return the detector simulation, or 0 in case of error.
+         */
         DetectorBase *InitializeDetector(const std::string &name,
                                          const std::string &configFile,
                                          const std::map<std::string, std::string> &parameters);
 
-        /// Reading the next event
+        /**
+         * @brief Read the next event of the current file.
+         *
+         * @param mysample current sample.
+         * @param myevent event to fill.
+         * @return KEEP if the event is accepted, SKIP if it must be skipped, FAILURE at the end of the file.
+         */
         StatusCode::Type NextEvent(SampleFormat &mysample, EventFormat &myevent);
 
-        /// @brief Prepare the analyses for execution by initialising the weights
-        /// @param mysample sample data
-        /// @param myevent event data
+        /**
+         * @brief Initialise the region managers of the analyses with the weights of the event.
+         *
+         * @param mysample current sample.
+         * @param myevent current event.
+         */
         void PrepareForExecution(SampleFormat &mysample, EventFormat &myevent);
 
-        /// Reading the next file
+        /**
+         * @brief Open the next file (the previous one is closed).
+         *
+         * @param mysample sample to fill with the header of the file.
+         * @return KEEP if the file is ready, SKIP if it cannot be read, FAILURE when all the files have been read.
+         */
         StatusCode::Type NextFile(SampleFormat &mysample);
 
-        /// Finalization of the SampleAnalyzer
+        /**
+         * @brief Write the SAF output files, finalise the components, print the reports and stop the services.
+         *
+         * @param mysamples samples.
+         * @param myevent last event.
+         * @return true.
+         */
         MAbool Finalize(std::vector<SampleFormat> &mysamples, EventFormat &myevent);
 
-        /// Updating the progress bar
+        /** @brief Update the progress bar with the position in the current file. */
         void UpdateProgressBar();
 
-        /// Creating the directory structure associated with the SRM
+        /**
+         * @brief Create the output directories and initialise the analyses.
+         *
+         * @return false in case of error.
+         */
         MAbool PostInitialize();
 
-        /// Dumping the content of the counters
+        /**
+         * @brief Write the event counters of the signal regions of all the analyses.
+         *
+         * @param outwriter output stream.
+         */
         void DumpSR(std::ostream &);
+        /**
+         * @brief Write the header of the signal-region counters.
+         *
+         * @param outwriter output stream.
+         */
         void HeadSR(std::ostream &);
 
+        /**
+         * @brief Accessor to the command-line options.
+         *
+         * @return the options.
+         */
         std::map<std::string, std::string> options() { return cfg_.Options(); }
 
-        // Default Hadronic particles
+        /** @brief Register the default hadronic PDG codes. */
         void AddDefaultHadronic();
 
-        // Default Hadronic particles
+        /** @brief Register the default invisible PDG codes (neutrinos, neutralino, gravitino). */
         void AddDefaultInvisible();
 
     private:
-        /// CheckDatatypes
+        /** @brief Check the sizes of the portable data types (warnings if unexpected). */
         void CheckDatatypes() const;
 
-        /// Filling the summary format
+        /**
+         * @brief Build the summary sample (total number of events, averaged cross section, sums of weights).
+         *
+         * @param summary summary to fill.
+         * @param mysamples samples.
+         */
         void FillSummary(SampleFormat &summary,
                          const std::vector<SampleFormat> &mysamples);
 
-        /// Creating the directory structure associated with the SRM
+        /**
+         * @brief Create Output/SAF/<dataset>/<analysis>_<n>/{Histograms,Cutflows} for each analysis.
+         *
+         * @return false in case of error.
+         */
         MAbool CreateDirectoryStructure();
     };
 

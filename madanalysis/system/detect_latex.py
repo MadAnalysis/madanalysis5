@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Detection of ``latex`` (DVI reports)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 import glob
 import os
@@ -34,8 +38,28 @@ from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectLatex:
+    """Detector of ``latex`` (DVI reports).
 
-    def __init__(self, archi_info, user_info, session_info, debug):
+    The methods are called by
+    :meth:`madanalysis.system.detect_manager.DetectManager.Execute` in the following
+    order (only when defined): ``IsItVetoed``, ``AreDependenciesInstalled``,
+    ``ManualDetection``, ``ToolsDetection``, ``AutoDetection``, ``ExtractInfo`` and
+    ``SaveInfo``.
+
+    Attributes:
+        name (``str``): name displayed in the configuration check.
+        mandatory (``bool``): whether MadAnalysis 5 can run without the package.
+    """
+
+    def __init__(self, archi_info: Any, user_info: Any, session_info: Any, debug: bool) -> None:
+        """Create the detector of ``latex`` (DVI reports).
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration, filled by :meth:`SaveInfo`.
+            user_info (``UserInfo``): user options (vetoes, forced paths).
+            session_info (``SessionInfo``): session information, filled by :meth:`SaveInfo`.
+            debug (``bool``): print detailed information.
+        """
         # mandatory options
         self.archi_info   = archi_info
         self.user_info    = user_info
@@ -49,11 +73,18 @@ class DetectLatex:
         # adding what you want here
 
 
-    def PrintDisableMessage(self):
+    def PrintDisableMessage(self) -> None:
+        """Log the consequences of ``latex`` (DVI reports) being unavailable."""
         self.logger.warning("latex disabled. Reports under the dvi format will not be compiled.")
         
 
-    def IsItVetoed(self):
+    def IsItVetoed(self) -> bool:
+        """Check whether ``latex`` (DVI reports) has been vetoed by the user (``installation_options.dat``).
+
+        Returns:
+            ``bool``:
+            ``True`` if vetoed.
+        """
         if self.user_info.latex_veto:
             self.logger.debug("user setting: veto on LaTex")
             return True
@@ -62,7 +93,14 @@ class DetectLatex:
             return False
 
         
-    def AutoDetection(self):
+    def AutoDetection(self) -> tuple[int, str]:
+        """Look for ``latex`` (DVI reports) on the system.
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         # Which
         result = ShellCommand.Which('latex',all=False,mute=True)
         if len(result)==0:
@@ -74,7 +112,13 @@ class DetectLatex:
         return DetectStatusType.FOUND,''
 
 
-    def ExtractInfo(self):
+    def ExtractInfo(self) -> bool:
+        """Extract detailed information about the detected ``latex`` (DVI reports) (version, paths, ...).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Which all
         if self.debug:
             result = ShellCommand.Which('latex',all=True,mute=True)
@@ -88,7 +132,13 @@ class DetectLatex:
         return True
 
 
-    def SaveInfo(self):
+    def SaveInfo(self) -> bool:
+        """Store the information about ``latex`` (DVI reports) in the architecture/session information.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         self.session_info.has_latex=True
         return True
 

@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file LogStream.cpp
+ * @brief Implementation of the endmsg manipulator.
+ */
+
 #include "SampleAnalyzer/Commons/Service/LogStream.h"
 
 using namespace MA5;

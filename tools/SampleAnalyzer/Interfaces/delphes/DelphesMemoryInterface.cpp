@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleHeader headers
+/**
+ * @file DelphesMemoryInterface.cpp
+ * @brief Implementation of MA5::DelphesMemoryInterface.
+ */
+
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
@@ -46,6 +51,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 DelphesMemoryInterface::DelphesMemoryInterface()
 {
+    // FIXME: Vertex_ is neither initialised here nor set in Initialize().
     Jet_ = 0;
     FatJet_ = 0;
     Electron_ = 0;

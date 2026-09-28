@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file WriterBase.h
+ * @brief Interface of the event-file writers.
+ */
+
 #ifndef WRITER_BASE_h
 #define WRITER_BASE_h
 
@@ -42,6 +47,7 @@
 namespace MA5
 {
 
+/** @brief Abstract base class of the event-file writers. */
 class WriterBase
 {
   // -------------------------------------------------------------
@@ -49,13 +55,13 @@ class WriterBase
   // -------------------------------------------------------------
  protected:
 
-  /// Allowing to read data from RFIO
+  /** @brief Is the file written through RFIO? */
   MAbool rfio_;
 
-  /// Allowing to read compressed file
+  /** @brief Is the file gzip-compressed? */
   MAbool compress_;
 
-  /// Tag for the first event
+  /** @brief Has the first event not been written yet? */
   MAbool FirstEvent_;
 
   // -------------------------------------------------------------
@@ -63,32 +69,58 @@ class WriterBase
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   WriterBase()
   {
     rfio_=false; compress_=false; FirstEvent_=true;
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~WriterBase()
   {
   }
 
-  /// Initialize (virtual pure)
+  /**
+   * @brief Open the output file.
+   *
+   * @param cfg run configuration.
+   * @param filename output file name.
+   * @return false in case of error.
+   */
   virtual MAbool Initialize(const Configuration* cfg,
                           const std::string& filename) = 0;
 
-  /// Read the sample (virtual pure)
+  /**
+   * @brief Write the header of the file.
+   *
+   * @param mySample sample.
+   * @return false in case of error.
+   */
   virtual MAbool WriteHeader(const SampleFormat& mySample) = 0;
 
-  /// Read the event (virtual pure)
+  /**
+   * @brief Write an event.
+   *
+   * @param myEvent event.
+   * @param mySample sample.
+   * @return false in case of error.
+   */
   virtual MAbool WriteEvent(const EventFormat& myEvent, 
                           const SampleFormat& mySample) = 0;
 
-  /// Finalize the event (virtual pure)
+  /**
+   * @brief Write the footer of the file.
+   *
+   * @param mySample sample.
+   * @return false in case of error.
+   */
   virtual MAbool WriteFoot(const SampleFormat& mySample) = 0;
 
-  /// Finalize
+  /**
+   * @brief Close the file.
+   *
+   * @return false in case of error.
+   */
   virtual MAbool Finalize() = 0;
 
 

@@ -22,12 +22,33 @@
 ################################################################################
 
 
+"""Installation of the ``simplify`` package (likelihood simplification) (``install simplify``).
+"""
+
 from __future__                          import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.install.install_service import InstallService
 import os, sys, logging
 
 class InstallSimplify:
-    def __init__(self,main):
+    """Installer of the ``simplify`` package (likelihood simplification) (``install simplify``).
+
+    The methods are called by
+    :meth:`madanalysis.install.install_manager.InstallManager.Execute` in the following
+    order (only when defined): ``Detect``/``Remove``, ``GetNcores``,
+    ``CreatePackageFolder``, ``CreateTmpFolder``, ``Download``, ``Unpack``, ``Configure``,
+    ``Build``, ``PreCheck``, ``Clean``, ``Install``, ``Check`` and ``NeedToRestart``.
+    """
+    def __init__(self,main: Main) -> None:
+        """Prepare the installation of the ``simplify`` package (likelihood simplification) (folders, download URLs).
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main        = main
         self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/tools/simplify/')
         self.toolsdir    = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
@@ -40,7 +61,13 @@ class InstallSimplify:
         }
         self.simplify_version= None # there is no version info
 
-    def Detect(self):
+    def Detect(self) -> bool:
+        """Check whether the ``simplify`` package (likelihood simplification) is already installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the installation folder exists.
+        """
         if not os.path.isdir(self.toolsdir):
             logging.getLogger('MA5').debug("The folder '"+self.toolsdir+"' is not found")
             return False
@@ -49,24 +76,53 @@ class InstallSimplify:
             return False
         return True
 
-    def Remove(self,question=True):
+    def Remove(self,question: bool = True) -> tuple[bool, bool]:
+        """Remove the previous installation of the ``simplify`` package (likelihood simplification).
+
+        Args:
+            question (``bool``, default ``True``): ask the user for confirmation.
+
+        Returns:
+            ``tuple[bool, bool]``:
+            Result of :meth:`~madanalysis.IOinterface.folder_writer.FolderWriter.RemoveDirectory`:
+            whether the operation succeeded and whether the folder was removed/kept on the
+            user's request.
+        """
         from madanalysis.IOinterface.folder_writer import FolderWriter
         return FolderWriter.RemoveDirectory(self.installdir,question)
 
-    def CreatePackageFolder(self):
+    def CreatePackageFolder(self) -> bool:
+        """Create the installation folder of the ``simplify`` package (likelihood simplification).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if not InstallService.create_tools_folder(self.toolsdir):
             return False
         if not InstallService.create_package_folder(self.toolsdir,'simplify'):
             return False
         return True
 
-    def CreateTmpFolder(self):
+    def CreateTmpFolder(self) -> bool:
+        """Create (clean) the temporary unpacking folder and the download folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ok = InstallService.prepare_tmp(self.untardir, self.downloaddir)
         if ok:
             self.tmpdir=self.untardir
         return ok
 
-    def Download(self):
+    def Download(self) -> bool:
+        """Download the source files of the ``simplify`` package (likelihood simplification).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
             return False
@@ -77,7 +133,13 @@ class InstallSimplify:
         # Ok
         return True
 
-    def Unpack(self):
+    def Unpack(self) -> bool:
+        """Unpack the downloaded files of the ``simplify`` package (likelihood simplification).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
@@ -89,14 +151,32 @@ class InstallSimplify:
         self.tmpdir=packagedir
         return True
 
-    def Build(self):
+    def Build(self) -> bool:
+        """Compile the ``simplify`` package (likelihood simplification).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # all checks are done in Check function.
         return True
 
-    def Install(self):
+    def Install(self) -> bool:
+        """Install the ``simplify`` package (likelihood simplification) in its definitive folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         return True
 
-    def Check(self):
+    def Check(self) -> bool:
+        """Check that the ``simplify`` package (likelihood simplification) has been properly installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the expected files are present.
+        """
         if sys.version_info[0] == 2:
             return False
         try:
@@ -113,10 +193,17 @@ class InstallSimplify:
             return False
         return True
 
-    def display_log(self):
+    def display_log(self) -> None:
+        """Log the paths of the installation log files."""
         logging.getLogger('MA5').error("More details can be found into the log files:")
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/wget.log"))
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
 
-    def NeedToRestart(self):
+    def NeedToRestart(self) -> bool:
+        """Tell whether MadAnalysis 5 must be restarted after the installation.
+
+        Returns:
+            ``bool``:
+            ``True`` if a restart (new configuration check and library build) is needed.
+        """
         return False

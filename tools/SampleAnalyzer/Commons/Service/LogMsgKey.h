@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LogMsgKey.h
+ * @brief Key identifying a logged message (file, line, text).
+ */
+
 #ifndef LOG_MSG_KEY_H
 #define LOG_MSG_KEY_H
 
@@ -36,10 +41,7 @@
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class LogMsgKey contains data which characterizes (unique ID) of an
-/// exception.
-//////////////////////////////////////////////////////////////////////////////
+/** @brief Key identifying a logged message or exception (file, line and text). */
 class LogMsgKey
 {
   // -------------------------------------------------------------
@@ -47,13 +49,13 @@ class LogMsgKey
   // -------------------------------------------------------------
  private:
 
-  /// Name of the file where the exception is thrown
+  /** @brief Name of the file where the message is issued. */
   std::string FileName_;
 
-  /// Number of the line where the exception is thrown
+  /** @brief Line where the message is issued. */
   MAuint32 Line_;
 
-  /// Description of the exception
+  /** @brief Text of the message. */
   std::string Msg_;
   
   // -------------------------------------------------------------
@@ -61,11 +63,17 @@ class LogMsgKey
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument 
+  /** @brief Constructor. */
   LogMsgKey() : Line_(0)
   { }
 
-  /// Constructor without argument 
+  /**
+   * @brief Constructor.
+   *
+   * @param FileName file name.
+   * @param Line line number.
+   * @param Msg text.
+   */
   LogMsgKey(const std::string& FileName, 
             const MAuint32& Line,
             const std::string& Msg) : FileName_(FileName), 
@@ -73,41 +81,70 @@ class LogMsgKey
                                       Msg_(Msg)
   { }
   
-  /// Destructor
+  /** @brief Destructor. */
   ~LogMsgKey()
   {}
 
-  /// Reseting the content
+  /** @brief Reset the content. */
   void Reset()
   {
     FileName_=""; Line_=0; Msg_="";
   } 
   
-  /// Accessor to the file name
+  /**
+   * @brief Accessor to the file name.
+   *
+   * @return the file name.
+   */
   const std::string& GetFileName() const
   {return FileName_;}
 
-  /// Accessor to the line number
+  /**
+   * @brief Accessor to the line number.
+   *
+   * @return the line number.
+   */
   const MAuint32& GetLine() const 
   {return Line_;}
 
-  /// Accessor to the description of the exception
+  /**
+   * @brief Accessor to the text.
+   *
+   * @return the text.
+   */
   const std::string& GetMsg() const 
   {return Msg_;}
   
-  /// Mutator related to the file name
+  /**
+   * @brief Set the file name.
+   *
+   * @param name file name.
+   */
   void SetFileName(const std::string& name) 
   {FileName_=name;}
 
-  /// Mutator related to the line number
+  /**
+   * @brief Set the line number.
+   *
+   * @param line line number.
+   */
   void SetLine(const MAuint32& line)          
   {Line_=line;}
 
-  /// Mutator related to the description of the exception
+  /**
+   * @brief Set the text.
+   *
+   * @param msg text.
+   */
   void SetMsg(const std::string& msg)       
   {Msg_=msg;}
 
-  /// Order relation
+  /**
+   * @brief Order relation (line, then file name, then text).
+   *
+   * @param b other key.
+   * @return true if this key comes first.
+   */
   MAbool operator < (const LogMsgKey& b) const
   {
     if (Line_ < b.Line_) return true;

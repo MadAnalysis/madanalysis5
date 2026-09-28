@@ -22,29 +22,86 @@
 ################################################################################
 
 
+"""Colours used for histograms (``set <dataset>.linecolor/backcolor``)."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
+        """Metaclass turning the class attribute access ``ColorType.NAME`` into an integer code.
 
-        def __getattr__(self, name):
+        Accessing ``ColorType.NAME`` returns the index of ``NAME`` in ``ColorType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
+
+        def __getattr__(self, name: str) -> int:
+            """Get the integer code of an enumeration entry.
+
+            ``GRAY`` is accepted as an alias of ``GREY``.
+
+            Args:
+                name (``str``): name of the entry (e.g. ``ColorType.RED``).
+
+            Returns:
+                ``int``:
+                Index of the entry in ``values``.
+            """
             if (name)=='GRAY':
                 return list(self.values.keys()).index('GREY')
             else:
                 return list(self.values.keys()).index(name)
 
-        def convert2string(self,color):
+        def convert2string(self,color: int) -> str:
+            """Get the user-level name of a colour.
+
+            Args:
+                color (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                Name of the colour.
+            """
             name = list(self.values.keys())[color]
             return self.values[name][0]
   
-        def convert2hexa(self,color):
+        def convert2hexa(self,color: int) -> str:
+            """Get the hexadecimal code of a colour.
+
+            Args:
+                color (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                Code such as ``'#FF0000'`` (empty for ``AUTO``/``NONE``).
+            """
             name = list(self.values.keys())[color]
             return self.values[name][1]
 
-        def convert2rootcode(self,color):
+        def convert2rootcode(self,color: int) -> int:
+            """Get the ROOT code of a colour.
+
+            Args:
+                color (``int``): integer code of the entry.
+
+            Returns:
+                ``int``:
+                ROOT ``TColor`` index.
+            """
             name = list(self.values.keys())[color]
             return self.values[name][2]
 
-        def convert2root(self,color,shade=0):
+        def convert2root(self,color: int,shade: int = 0) -> int:
+            """Get the ROOT code of a shaded colour.
+
+            Args:
+                color (``int``): integer code of the entry.
+                shade (``int``, default ``0``): shade between -4 (lighter) and +4 (darker).
+
+            Returns:
+                ``int``:
+                ROOT ``TColor`` index of the requested shade.
+            """
             name = list(self.values.keys())[color]
             return self.values[name][3][shade+4]
 
@@ -52,6 +109,12 @@ class metaclass(type):
 
 @six.add_metaclass(metaclass)
 class ColorType(object):
+    """Colours available for the datasets.
+
+    Each entry of ``values`` is ``[user_name, hexadecimal_code, root_code, shades]``,
+    where ``shades`` holds nine ROOT colour codes, from the lightest (index 0, shade
+    -4) to the darkest (index 8, shade +4).
+    """
     values = { 'AUTO'   : ['auto',     '',         0, \
                            [0,0,0,0,0,0,0,0,0] ],\
                'NONE'   : ['invisible','',         0, \

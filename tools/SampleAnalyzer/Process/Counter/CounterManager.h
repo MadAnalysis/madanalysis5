@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file CounterManager.h
+ * @brief Cut-flow of a signal region (initial counter and one counter per cut).
+ */
+
 #ifndef COUNTER_MANAGER_H
 #define COUNTER_MANAGER_H
 
@@ -36,6 +41,7 @@
 namespace MA5
 {
 
+    /** @brief Cut-flow of a signal region. */
     class CounterManager
     {
 
@@ -43,43 +49,66 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     private:
-        /// @brief intialisation indicator
+        /** @brief Have the counters been sized for the event weights? */
         MAbool initialised_;
 
-        // Collection of counters
+        /** @brief Counters of the cuts. */
         std::vector<Counter> counters_;
 
-        // Initial number of events
+        /** @brief Counter of the initial number of events. */
         Counter initial_;
 
         // -------------------------------------------------------------
         //                       method members
         // -------------------------------------------------------------
     public:
-        /// Constructor without argument
+        /** @brief Constructor. */
         CounterManager() { initialised_ = false; }
 
-        /// Destructor
+        /** @brief Destructor. */
         ~CounterManager() {}
 
-        /// Initialize
+        /**
+         * @brief Resize the collection of counters.
+         *
+         * @param n number of cuts.
+         */
         void Initialize(const MAuint32 &n) { counters_.resize(n); }
 
-        // Specifying a cut name
+        /**
+         * @brief Add a counter for a new cut.
+         *
+         * @param myname name of the cut.
+         */
         void InitCut(const std::string myname)
         {
             Counter tmpcnt(myname);
             counters_.push_back(tmpcnt);
         }
 
-        /// Reset
+        /** @brief Remove all the cut counters. */
         void Reset() { counters_.clear(); }
 
-        /// Overloading operator []
+        /**
+         * @brief Access a cut counter (read-only).
+         *
+         * @param index index of the cut.
+         * @return the counter.
+         */
         const Counter &operator[](const MAuint32 &index) const { return counters_[index]; }
+        /**
+         * @brief Access a cut counter.
+         *
+         * @param index index of the cut.
+         * @return the counter.
+         */
         Counter &operator[](const MAuint32 &index) { return counters_[index]; }
 
-        /// Incrementing the initial number of events
+        /**
+         * @brief Count an event in the initial counter (the counters are sized at the first call).
+         *
+         * @param weight weights of the event.
+         */
         void IncrementNInitial(const WeightCollection &weight)
         {
             if (!initialised_)
@@ -92,15 +121,28 @@ namespace MA5
             initial_.Increment(weight);
         }
 
-        /// Incrementing the initial number of events
+        /**
+         * @brief Accessor to the initial counter.
+         *
+         * @return the counter.
+         */
         Counter &GetInitial() { return initial_; }
 
+        /**
+         * @brief Accessor to the initial counter (read-only).
+         *
+         * @return the counter.
+         */
         const Counter &GetInitial() const { return initial_; }
 
-        /// Write the counters in a Text file
+        /**
+         * @brief Write the cut-flow in the SAF format.
+         *
+         * @param output SAF writer.
+         */
         void Write_TextFormat(SAFWriter &output) const;
 
-        /// Finalizing
+        /** @brief Remove all the cut counters. */
         void Finalize() { Reset(); }
     };
 

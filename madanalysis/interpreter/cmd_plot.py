@@ -22,7 +22,15 @@
 ################################################################################
 
 
+"""Interpreter command ``plot``: declare a histogram."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.observable.observable_base import ObservableBase
 from madanalysis.interpreter.cmd_base           import CmdBase
 from madanalysis.interpreter.cmd_selection_base import CmdSelectionBase
 from madanalysis.multiparticle.particle_object  import ParticleObject
@@ -36,13 +44,31 @@ from six.moves import range
 
 
 class CmdPlot(CmdBase,CmdSelectionBase):
-    """Command PLOT"""
+    """Command ``plot <observable> [( <particles> )] [nbins xmin xmax] [{ regions }] [[ options ]]``.
 
-    def __init__(self,main):
+    Without explicit binning, the default binning of the observable is used. If the
+    requested regions are not all in the same cluster of regions sharing the same
+    selection (see
+    :meth:`~madanalysis.region.region_collection.RegionCollection.GetClusteredRegions`),
+    one histogram is declared per cluster.
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Register the ``plot`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         self.logger       = logging.getLogger('MA5')
         CmdBase.__init__(self,main,"plot")
 
-    def do(self,args):
+    def do(self,args: list[str]) -> None:
+        """Parse the command and add the histogram(s) to the selection.
+
+        Args:
+            args (``list[str]``): arguments of the command (split by
+                :meth:`~madanalysis.interpreter.interpreter_base.InterpreterBase.split_arg`).
+        """
         # Skipping the case with empty args
         if len(args)==0:
             self.logger.error("wrong syntax")
@@ -152,6 +178,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
                 else:
                     nbins = int(args[beginRegions-3])
             except:
+                # NOTE: the argument numbers in the messages below are wrong when regions are given.
                 self.logger.error("argument nr. " + str(beginOptions-2)+\
                           "(nbins) must have a non-zero, positive, integer value.")
                 return
@@ -200,6 +227,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
 
         # Extracting regions
         if foundRegions:
+            # NOTE: assumes the region block is followed by the option block (or ends the line).
             HistoRegionNames=args[beginRegions+1:beginOptions-1]
             # checking all regions exist
             if [reg for reg in HistoRegionNames if reg not in  self.main.regions.GetNames()] != []:
@@ -241,7 +269,8 @@ class CmdPlot(CmdBase,CmdSelectionBase):
                 self.logger.warning(title + ' { ' + ' '.join(subHistoRegionNames) + ' }')
 
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``plot`` command."""
         self.logger.info("   Syntax: plot observable_name ( multiparticle1 multiparticle2 ... ) nbins xmin xmax "+\
                          "{ region1 regon2 .... } [ option1 option 2 ]")
         self.logger.info("   Declares an histogram: ")
@@ -252,7 +281,19 @@ class CmdPlot(CmdBase,CmdSelectionBase):
         self.logger.info("    - regions to which this histogram applies can be (optionally) given, or it applies to all regions.")
 
 
-    def complete_arguments(self,text,args,obsRef):
+    def complete_arguments(self,text: str,args: list[str],obsRef: ObservableBase) -> list[str] | None:
+        """Complete the arguments of an observable (inside the parentheses).
+
+        Args:
+            text (``str``): word being completed.
+            args (``list[str]``): words after the opening parenthesis.
+            obsRef (``ObservableBase``): description of the observable.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions (PT ranks, multiparticles, ``)``, ``and``), ``None`` if the
+            argument type is not handled.
+        """
 
         # Look after number of commas
         ncommas=0
@@ -322,13 +363,26 @@ class CmdPlot(CmdBase,CmdSelectionBase):
 
         
 
-    def complete(self,text,args,begidx,endidx):
+    def complete(self,text: str,args: list[str],begidx: int,endidx: int) -> list[str]:
+        """Tab completion of the ``plot`` command.
+
+        Args:
+            text (``str``): word being completed.
+            args (``list[str]``): input line split by the interpreter (brackets isolated).
+            begidx (``int``): start index of ``text`` in the line.
+            endidx (``int``): end index of ``text`` in the line.
+
+        Returns:
+            ``list[str]``:
+            Possible completions.
+        """
 
         # plot PT ( mu+ ... mu+ )  100  0   1000 [ option1 ... optionN ]
         # 0    1  2 3  
 
         # Adding potential blank argument
         if not text:
+            # NOTE: 'args' is modified in place.
             args.append('')
 
         # Safety but not necessary

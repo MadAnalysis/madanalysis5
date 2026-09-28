@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyzer headers
+/**
+ * @file JetClusterer.cpp
+ * @brief Implementation of MA5::JetClusterer.
+ */
+
 #include "SampleAnalyzer/Process/JetClustering/JetClusterer.h"
 #include "SampleAnalyzer/Commons/Service/LoopService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
@@ -42,7 +47,15 @@
 namespace MA5
 {
 
-    /// Set isolation cones for tracks, e, mu, photon based on tower objects
+    /**
+     * @brief Add the contribution of a particle to the isolation cones of a collection of objects.
+     *
+     * @tparam Type object type.
+     * @param cone_radius radii of the cones.
+     * @param objects objects.
+     * @param part particle.
+     * @param addself store the pT/ET of the object itself (subtracted later).
+     */
     template <class Type>
     void SetConeRadius(
         std::vector<MAfloat64> cone_radius, std::vector<Type> &objects, MCParticleFormat part, MAbool addself = false)
@@ -253,6 +266,7 @@ namespace MA5
                         else if (tmp == 0.)
                             myTaggerOptions_->tautag_exclusive = false;
                         else
+                            // FIXME: the warning mentions 'cjet_id.exclusive' and ctag_exclusive instead of the tau option.
                             throw EXCEPTION_WARNING(
                                 "'cjet_id.exclusive' must be equal to 0 or 1. Using default value 'cjet_id.exclusive' = " + CONVERT->ToString(myTaggerOptions_->ctag_exclusive), "", 0);
                     }
@@ -350,6 +364,7 @@ namespace MA5
     // -----------------------------------------------------------------------------
     void JetClusterer::Finalize()
     {
+        // FIXME: the pointers are not reset to 0: the destructor deletes these objects a second time.
         if (algo_ != 0)
             delete algo_;
         if (mySmearer_ != 0)
@@ -370,6 +385,7 @@ namespace MA5
             if (PHYSICS->Id->IsFinalState(part->daughters()[i]))
                 finalstates.insert(part->daughters()[i]);
             else
+                // FIXME: 'return' stops the loop after the first non-final daughter: the other daughters are ignored.
                 return GetFinalState(part->daughters()[i], finalstates);
         }
     }
@@ -654,6 +670,7 @@ namespace MA5
                             current_muon->setDZ(smeared.dz());
                             current_muon->setD0Approx(smeared.d0_approx());
                             current_muon->setDZApprox(smeared.dz_approx());
+                            // NOTE: assumes that the particle has a mother.
                             current_muon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
                                                                               part.mothers()[0]->decay_vertex().Y(),
                                                                               part.mothers()[0]->decay_vertex().Z(), 0.0));
@@ -928,6 +945,7 @@ namespace MA5
                 }
             }
 
+            // NOTE: new_algo is leaked when an unknown parameter makes the function return early.
             cluster_collection_.insert(std::pair<std::string, ClusterAlgoBase *>(new_jetid, new_algo));
             for (const auto &it : clustering_params)
                 cluster_collection_[new_jetid]->SetParameter(it.first, it.second);
