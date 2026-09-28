@@ -423,7 +423,7 @@ class InstallService:
     @staticmethod
     # FIXME: 'dict[str, str]' is evaluated at definition time: the module cannot be imported
     # with Python 3.8 (TypeError), although Python >= 3.8 is supported.
-    def UrlAccess(url, headers: dict[str, str] = None) -> "Any":
+    def UrlAccess(url: "str | urllib.request.Request", headers: dict[str, str] = None) -> "Any":
         """Open a URL (three attempts, 3 s apart).
 
         .. warning::

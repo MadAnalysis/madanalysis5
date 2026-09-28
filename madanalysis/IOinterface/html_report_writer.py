@@ -278,7 +278,8 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         self.page.append('>\n')
         self.first_cell=False
 
-    def NewLine(self):
+    def NewLine(self) -> None:
+        """Close the current row and open a new one."""
         self.current_col=0
         self.first_cell=True
         self.page.append("      </td>\n    </tr>\n    <tr>\n")

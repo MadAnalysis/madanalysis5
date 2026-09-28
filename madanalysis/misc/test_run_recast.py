@@ -89,7 +89,7 @@ class _DummyMain:
         self.script = False
 
 
-def test_fix_pileup_success(tmp_path) -> None:
+def test_fix_pileup_success(tmp_path: "pathlib.Path") -> None:
     """``fix_pileup`` rewrites the pile-up path and keeps the original card."""
     # Setup directories
     ma5dir = tmp_path / "ma5"
@@ -123,7 +123,7 @@ def test_fix_pileup_success(tmp_path) -> None:
     assert "Pileup/pileup1.root" in new_text
 
 
-def test_fix_pileup_missing_pileup_returns_false(tmp_path) -> None:
+def test_fix_pileup_missing_pileup_returns_false(tmp_path: "pathlib.Path") -> None:
     """``fix_pileup`` fails when the pile-up file does not exist."""
     # Setup ma5dir but do NOT create pileup file
     ma5dir = tmp_path / "ma5"
@@ -142,7 +142,7 @@ def test_fix_pileup_missing_pileup_returns_false(tmp_path) -> None:
     assert ok is False
 
 
-def test_check_xml_scipy_methods_returns_et_module(tmp_path) -> None:
+def test_check_xml_scipy_methods_returns_et_module(tmp_path: "pathlib.Path") -> None:
     """``check_xml_scipy_methods`` returns a working ElementTree-like module."""
     main = _DummyMain(tmp_path)
     rc = RunRecast(main, str(tmp_path))
@@ -158,7 +158,7 @@ def test_check_xml_scipy_methods_returns_et_module(tmp_path) -> None:
     assert root.find("child").text == "1"
 
 
-def test_parse_info_file_and_header_info_file(tmp_path) -> None:
+def test_parse_info_file_and_header_info_file(tmp_path: "pathlib.Path") -> None:
     """``parse_info_file`` reads the luminosity and region data of an info file."""
     # Create pad analyzer info file structure
     pad = tmp_path / "pad"

@@ -22,7 +22,7 @@ def comb_sqr(*args, rnd: int = None) -> float:
 
 
 def error_dict_setup(
-    dataset, systematics: list[list[float]], linear_comb: bool
+    dataset: "Any", systematics: list[list[float]], linear_comb: bool
 ) -> dict[str, float]:
     """Build the relative cross-section variations of a dataset.
 

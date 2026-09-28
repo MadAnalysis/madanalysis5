@@ -1417,7 +1417,7 @@ class RunRecast:
         return ET
 
     def parse_info_file(
-        self, etree, analysis: str, extrapolated_lumi: Union[str, float]
+        self, etree: "Any", analysis: str, extrapolated_lumi: Union[str, float]
     ) -> tuple[float, list, dict]:
         """Read the information file ``<analysis>.info`` of an analysis.
 
@@ -1520,7 +1520,7 @@ class RunRecast:
         return True
 
     def header_info_file(
-        self, etree, analysis: str, extrapolated_lumi: Union[str, float]
+        self, etree: "Any", analysis: str, extrapolated_lumi: Union[str, float]
     ) -> "tuple[float, list, dict] | tuple[int, int, int]":
         """Decode the XML information file of an analysis.
 
@@ -1755,7 +1755,7 @@ class RunRecast:
 
         return lumi, regions, regiondata
 
-    def pyhf_info_file(self, info_root) -> dict:
+    def pyhf_info_file(self, info_root: "Any") -> dict:
         """Build and validate the full-likelihood configurations declared in an information file.
 
         Args:
@@ -1820,7 +1820,7 @@ class RunRecast:
 
         return pyhf_config
 
-    def write_cls_header(self, xs: float, out) -> None:
+    def write_cls_header(self, xs: float, out: "TextIO") -> None:
         """Write the column header of a ``CLs_output.dat`` file.
 
         Args:

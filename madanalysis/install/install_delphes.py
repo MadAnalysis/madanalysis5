@@ -481,7 +481,7 @@ class InstallDelphes:
 
 
 
-    def ProtectBundledFastJet(self, filename) -> bool:
+    def ProtectBundledFastJet(self, filename: "str") -> bool:
         """Prevent the symbols of the FastJet copy bundled with Delphes from being interposed.
 
         On Linux, ``-Wl,-Bsymbolic`` is added to ``DELPHES_LIBS`` in the given Makefile.

@@ -495,7 +495,7 @@ class HF_Signal(HistFactory):
                 return []
         return HF
 
-    def validate_bins(self, background: "HF_Background", HF: list = None):
+    def validate_bins(self, background: "HF_Background", HF: list = None) -> "bool":
         """Check that the signal patch is compatible with the background workspace.
 
         Args:
