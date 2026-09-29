@@ -1,0 +1,37 @@
+#TITLE Object selection and cutflows with multiple event weights
+#MODE PARTON
+
+import samples/lljj.lhe.gz as testset
+set testset.weighted_events = true
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu-
+
+# No explicit regions. Compare collections before and after object filtering.
+plot N(lep) 6 0 6
+plot PT(lep) 40 0 200
+plot N(j) 10 0 10
+plot PT(j) 40 0 200
+
+select (lep) PT > 20
+reject (lep) ABSETA > 2.5
+select (j) PT > 30
+reject (j) ABSETA > 2.5
+
+plot N(lep) 6 0 6
+plot PT(lep) 40 0 200
+plot N(j) 10 0 10
+plot PT(j) 40 0 200
+
+# Event cuts expose the changes to the object collections in the cutflow.
+# Unlike the ttbar test, require two leptons and no b-parton selection.
+select N(lep) == 2
+select N(j) >= 2
+select PT(j[1]) > 50
+select M(lep[1] lep[2]) > 80
+plot M(lep[1] lep[2]) 40 0 200
+plot PT(lep[1]) 40 0 200
+plot PT(j[1]) 40 0 300
+plot M(j[1] j[2]) 40 0 500
+
+submit

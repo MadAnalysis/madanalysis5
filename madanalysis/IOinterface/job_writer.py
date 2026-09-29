@@ -822,8 +822,7 @@ class JobWriter(object):
         # NOTE: always true (all running modes are listed).
         if self.main.mode in [
             MA5RunningType.RECO,
-            MA5RunningType.HADRON,
-            MA5RunningType.PARTON,
+            MA5RunningType.HADRON
         ]:
             file.write("\n  // Initializing PhysicsService for MC\n")
             file.write("  PHYSICS->mcConfig().Reset();\n")

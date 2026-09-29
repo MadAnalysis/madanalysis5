@@ -27,11 +27,11 @@
 
 This script supports two workflows.
 
-1. Direct comparison mode
+1. Direct comparison of existing files without running MA5:
    Compare a reference ``histos.saf`` file against a produced histogram file.
 
    Usage:
-       python HistoChecks.py compare <reference.saf> <produced.saf>
+       python3 HistoChecks.py compare <reference.saf> <produced.saf>
 
 2. Run-and-compare mode
    Given a validation name ``NAME``
@@ -42,7 +42,7 @@ This script supports two workflows.
    - if the output file is not available, it is downloaded from github
 
    Usage:
-       python HistoChecks.py run <name>
+       python HistoChecks.py run <NAME>
 
 The comparison is based on the *bin content* only. For each line of a SAF
 <Data> block, the bin content is defined as the sum of the first two columns,

@@ -1,0 +1,31 @@
+#TITLE Event-level cutflow regression
+#MODE PARTON
+# Input: positive nominal weights
+
+import samples/ttbar_sl_1.lhe.gz as testset
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu-
+
+# No explicit regions: exercise the default region.
+plot MET 40 0 200
+
+# Both cuts must preserve the initial event count.
+select N(lep) >= 0
+reject MET < 0
+
+# Multiplicity, an ordered object, and nested logical conditions.
+select N(lep) >= 1
+select PT(lep[1]) > 20
+select MET > 20 and (N(j) >= 2 or N(b) >= 1)
+reject MET > 100 and PT(lep[1]) < 30
+plot MET 40 0 200
+plot PT(lep[1]) 40 0 200
+
+# Reject every remaining event, then verify that later counters/histograms
+# stay empty. The histogram before this cut must have surviving entries.
+select MET < 0
+select N(lep) >= 0
+plot MET 40 0 200
+
+submit

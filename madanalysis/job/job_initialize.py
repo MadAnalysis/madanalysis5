@@ -74,6 +74,15 @@ def WriteJobInitialize(file: TextIO,main: Main) -> None:
     file.write('                      const std::map<std::string,std::string>& parameters)\n')
     file.write('{\n')
 
+    # mcConfig initialization
+    if main.mode==MA5RunningType.PARTON:
+        file.write('  // Initializing PhysicsService for MC\n') 
+        file.write('  PHYSICS->mcConfig().Reset();\n\n')
+        WriteHadronicList(file,main)
+        file.write('\n')
+        WriteInvisibleList(file,main)
+        file.write('\n')
+
     # recConfig initialization
     if main.mode==MA5RunningType.RECO:
         file.write('  // Initializing PhysicsService for RECO\n') 
