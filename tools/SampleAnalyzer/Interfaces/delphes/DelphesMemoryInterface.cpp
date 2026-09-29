@@ -154,15 +154,21 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat &mySample, Eve
     TObjArray *sources = candidate->GetCandidates();
     const Candidate *source = sources->GetEntriesFast() == 0 ? 0 : dynamic_cast<const Candidate *>(sources->At(0));
 
+    if (source == 0)
+        throw std::runtime_error("DelphesMemoryInterface: missing track/lepton source candidate");
+
+    // Event-local identity shared by a track and its reconstructed lepton,
+    // including pileup particles absent from the input MC collection.
+    particle->delphesTags_.push_back(static_cast<MAuint64>(source->GetUniqueID()));
+    particle->mc_ = 0;
+
+    // Delphes generates pileup internally: these particles have no counterpart
+    // in myEvent.mc(), so their MC association remains null.
     const auto found = MCParticleIndices_.find(source);
-
-    if (found == MCParticleIndices_.end())
-        throw std::runtime_error("DelphesMemoryInterface: track/lepton generator association does not point to an input MC particle");
-
-    particle->mc_ = &myEvent.mc()->particles()[found->second];
-
-    // Event-local identity shared by a track and its reconstructed lepton.
-    particle->delphesTags_.push_back(static_cast<MAuint64>(found->second) + 1);
+    if (found != MCParticleIndices_.end())
+        particle->mc_ = &myEvent.mc()->particles()[found->second];
+    else if (!source->IsPU)
+        throw std::runtime_error("DelphesMemoryInterface: non-pileup source is not an input MC particle");
   };
 
     // --------------Jet collection
