@@ -187,11 +187,9 @@ class InstallFastjet:
         # Input
         initial_env = os.environ.get("CXXFLAGS", "")
         os.environ["CXXFLAGS"] = initial_env + " -std=c++11 -fPIC "
-        theCommands = [
-            "./configure",
-            "--prefix=" + self.installdir,
-            "--enable-allplugins",
-        ]
+        theCommands = [ "./configure", "--prefix=" + self.installdir, "--enable-allplugins"]
+        if self.main.archi_info.has_root and self.main.archi_info.root_compiler:
+            theCommands.append("CXX=" +  self.main.archi_info.root_compiler)
         log.debug("Configuring fastjet with prefix %s", self.installdir)
         log.debug("Configuring fastjet with CXXFLAGS %s", os.environ["CXXFLAGS"])
         logname = os.path.normpath(self.installdir + "/configuration.log")
