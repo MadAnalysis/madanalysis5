@@ -154,18 +154,8 @@ class CmdSubmit(CmdBase):
             for i in range(last_submit_cmd + 1, len(history)):
                 newhistory.append(history[i])
 
-        ReAnalyzeCmdList = [
-            "plot",
-            "select",
-            "reject",
-            "remove",
-            "set main.clustering",
-            "set main.merging",
-            "define",
-            "set main.recast",
-            "import",
-            "set main.isolation",
-        ]
+        ReAnalyzeCmdList = [ "plot", "select", "reject", "remove", "set main.clustering", "swap",
+          "set main.merging", "define", "set main.recast", "import", "set main.isolation" ]
 
         # Determining if we have to resubmit the job
         for cmd in newhistory:

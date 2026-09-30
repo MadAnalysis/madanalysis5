@@ -256,18 +256,14 @@ def find_outputs(analysis_dir: Path) -> tuple:
     return regions[0], histos
 
 
-def run_ma5_script(name: str, ma5dir: Path, reference_prefix: str | None = None) -> tuple:
+def run_ma5_script(name: str, ma5dir: Path) -> tuple:
     # Locate the requested validation script.
     script = ma5dir / "validation" / "scripts" / f"{name}.ma5"
-    if not script.is_file():
-        raise FileNotFoundError(f"Missing MA5 script: {script}")
-
-    # Reference filenames may use a different prefix from the script name.
-    prefix = name if reference_prefix is None else reference_prefix
+    if not script.is_file(): raise FileNotFoundError(f"Missing MA5 script: {script}")
 
     # Record existing jobs so that only the newly created output is selected.
-    reference_region = ensure_reference_file(prefix + "_region", ma5dir)
-    reference_histos = ensure_reference_file(prefix + "_histos", ma5dir)
+    reference_region = ensure_reference_file(name + "_region", ma5dir)
+    reference_histos = ensure_reference_file(name + "_histos", ma5dir)
 
     # Reject incomplete references before launching a potentially expensive job.
     read_cutflows(reference_region)
@@ -304,7 +300,6 @@ def main() -> int:
     modes = parser.add_subparsers(dest="mode", required=True)
     run = modes.add_parser("run", help="Run one cutflow script and compare both outputs.")
     run.add_argument("name", help="Name of the validation script, without .ma5.")
-    run.add_argument("--reference-prefix", help="Reference filename prefix; defaults to the script name.")
     compare = modes.add_parser("compare", help="Compare cutflows, optionally with a pair of histogram files.")
     for name in ("reference_region", "produced_region"):
         compare.add_argument(name, type=Path)
@@ -317,7 +312,7 @@ def main() -> int:
         parser.error("Provide both histogram paths or omit both.")
     try:
         if args.mode == "run":
-            files = run_ma5_script(args.name, Path(__file__).resolve().parent.parent, reference_prefix=args.reference_prefix)
+            files = run_ma5_script(args.name, Path(__file__).resolve().parent.parent)
         else:
             files = tuple(getattr(args, name).resolve() if getattr(args, name) is not None else None for name in (
                 "reference_region", "produced_region", "reference_histos", "produced_histos"))

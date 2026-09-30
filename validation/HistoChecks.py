@@ -85,15 +85,16 @@ RESET = "\033[0m"
 # ---------------------------------------------------------------------------
 #  Ensure the reference output SAF filesexists locally
 # ---------------------------------------------------------------------------
-def ensure_reference_file(name: str, ma5dir: Path) -> Path:
+def ensure_reference_file(name: str, ma5dir: Path, output_dir: Path | None = None) -> Path:
     """Ensure validation/outputs/<name>.saf exists locally.
 
     If missing, download <name>.saf.gz from the validation_data GitHub repo
-    and decompress it locally.
+    and decompress it locally. An optional output directory allows other
+    validation drivers to use an explicitly supplied reference location.
     """
 
     # Init and safety
-    local_dir = ma5dir / "validation" / "outputs"
+    local_dir = output_dir if output_dir is not None else ma5dir / "validation" / "outputs"
     local_dir.mkdir(parents=True, exist_ok=True)
     local_saf = local_dir / f"{name}.saf"
     if local_saf.exists(): return local_saf
@@ -363,7 +364,7 @@ def main() -> int:
             reference = args.reference.resolve()
             produced = args.produced.resolve()
         elif args.mode == "run":
-            ma5dir = Path.cwd().parent.resolve()
+            ma5dir = Path(__file__).resolve().parent.parent
             reference, produced = run_ma5_script(args.name, ma5dir)
             print(f"{BOLD}Reference:{RESET} {reference}")
             print(f"{BOLD}Produced :{RESET} {produced}")
