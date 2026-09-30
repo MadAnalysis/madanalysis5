@@ -814,14 +814,11 @@ void SampleAnalyzer::PrepareForExecution(SampleFormat &mySample, EventFormat &my
         weights = WeightCollection(1, 1.0);
 
     // Preserve the collection size
-    // FIXME: the local 'weights' (and the --no_event_weight option) is never used: the analyses always
-    // receive the event weights, and nothing is initialised when there is no MC event.
     if (cfg_.IsNoEventWeight())
         weights = 1.0;
 
-    if (myEvent.mc() != 0)
-        for (auto &analyzer : analyzers_)
-            analyzer->Manager()->InitializeForNewEvent(myEvent.mc()->weights());
+    for (auto &analyzer : analyzers_)
+        analyzer->Manager()->InitializeForNewEvent(weights);
 }
 
 /**

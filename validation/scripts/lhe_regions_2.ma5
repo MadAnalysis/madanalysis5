@@ -1,0 +1,28 @@
+#TITLE Weighted and unit-weight cutflows on the same events
+#MODE PARTON
+# This input has multiple weights, but only positive nominal weights.
+# Compare the nominal counters against main; full-weight comparisons
+# require references from a version supporting those additional weights.
+
+import samples/lljj.lhe.gz as weighted
+import samples/lljj.lhe.gz as unweighted
+set weighted.weighted_events = true
+set unweighted.weighted_events = false
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu-
+define_region loose tight
+
+plot N(lep) 6 0 6
+select N(lep) >= 2
+select PT(lep[1]) > 20
+plot M(lep[1] lep[2]) 40 0 400
+select PT(lep[1]) > 50 {tight}
+select M(lep[1] lep[2]) > 100 {tight}
+plot PT(lep[1]) 40 0 200 {loose}
+plot PT(lep[1]) 40 0 200 {tight}
+
+# Both datasets must have identical nominal event counts at every cut.
+# For unweighted, nominal sumW = sumW2 = event count, with no negative
+# contribution. The same must hold for each stored unit-weight variation.
+submit
