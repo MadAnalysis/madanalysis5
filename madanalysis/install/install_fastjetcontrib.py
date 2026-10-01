@@ -129,6 +129,8 @@ class InstallFastjetContrib:
         # TODO: figure out how to give `-std=c++11 -fPIC` together to CXXFLAGS
         # using " or ' doesn't work on linux systems
         theCommands = ['./configure', '--fastjet-config=' + self.bindir, 'CXXFLAGS=-fPIC']
+        if self.main.archi_info.has_root and self.main.archi_info.root_compiler:
+            theCommands.append("CXX=" + self.main.archi_info.root_compiler)
         logname=os.path.normpath(self.installdir+'/configuration_contrib.log')
         # Execute
         logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
