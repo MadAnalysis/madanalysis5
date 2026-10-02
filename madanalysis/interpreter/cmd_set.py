@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Interpreter command ``set``: modify the attributes of the objects."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.system.config_checker            import ConfigChecker
 from madanalysis.system.user_info                 import UserInfo
 from madanalysis.enumeration.ma5_running_type     import MA5RunningType
@@ -34,12 +41,32 @@ import logging
 from six.moves import range
 
 class CmdSet(CmdBase.CmdBase):
-    """Command SET"""
+    """Command ``set <object>.<attribute> = <value>``.
 
-    def __init__(self,main):
+    Objects: ``main`` and its sub-objects (``main.fastsim``, ``main.isolation``,
+    ``main.fom``, ``main.merging``, ``main.recast`` and ``main.recast.add``), datasets,
+    jet collections and items of the selection (``selection[i].<attribute>``).
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Register the ``set`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         CmdBase.CmdBase.__init__(self,main,"set")
 
-    def do_other(self,object,operator,value):
+    def do_other(self,object: str,operator: str,value: str) -> None:
+        """Set an attribute of a dataset or of a jet collection.
+
+        For datasets, a trailing ``+n``/``-n`` (``n`` from 0 to 4) is interpreted as a colour
+        shade (e.g. ``red+2``).
+
+        Args:
+            object (``str``): ``<name>.<attribute>``.
+            operator (``str``): must be ``=``.
+            value (``str``): new value.
+        """
         # Looking for '='
         if operator!='=' :
             logging.getLogger('MA5').error("syntax error with the command 'set'.")
@@ -91,7 +118,17 @@ class CmdSet(CmdBase.CmdBase):
             return
 
 
-    def do_main(self,args):
+    def do_main(self,args: list[str]) -> None:
+        """Set an attribute of ``main`` or of one of its sub-objects.
+
+        Setting ``main.recast``, ``main.recast.*`` or ``main.fastsim.*`` temporarily
+        re-detects Delphes and Delphes-MA5tune. Switching the recasting mode on disables
+        the fast-simulation package (and vice versa). ``set main.mode = parton`` switches
+        to parton level and reloads the particles.
+
+        Args:
+            args (``list[str]``): ``[<object>, '=', <value>, ...]``.
+        """
 
         # Looking for '='
         if args[1]!='=' :
@@ -240,7 +277,12 @@ class CmdSet(CmdBase.CmdBase):
             self.help()
             return
 
-    def do_selection(self,args):
+    def do_selection(self,args: list[str]) -> None:
+        """Set an attribute of an item of the selection (``selection [ i ] .<attribute> = <value>``).
+
+        Args:
+            args (``list[str]``): split arguments.
+        """
         # set selection [ i ] .variable = value
         #     0         1 2 3 4         5 6
 
@@ -269,8 +311,18 @@ class CmdSet(CmdBase.CmdBase):
         return
 
 
-    def do(self,args,line=""):
+    def do(self,args: list[str],line: str = "") -> None:
+        """Execute the ``set`` command.
 
+        The raw line is re-split so that quoted values are kept as single arguments and
+        signs (``+``/``-``) are glued to their neighbours.
+
+        Args:
+            args (``list[str]``): split arguments (unused).
+            line (``str``, default ``""``): raw command line.
+        """
+
+        # NOTE: only one quoted block is correctly isolated below.
         # Isolating " " or ' '
         first=True
         arguments=[]
@@ -325,12 +377,27 @@ class CmdSet(CmdBase.CmdBase):
             return
 
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``set`` command."""
         logging.getLogger('MA5').info("   Syntax: set <object>.<variable> = <value>")
         logging.getLogger('MA5').info("   Modifies or sets an attribute of an object to a specific value.")
 
 
-    def complete_name2(self,text,object,subobject,variable,withValue):
+    def complete_name2(self,text: str,object: str,subobject: str,variable: str,withValue: bool) -> list[str]:
+        """Complete ``main.<subobject>.<attribute>`` or its value.
+
+        Args:
+            text (``str``): word being completed.
+            object (``str``): object name (only ``main`` is supported).
+            subobject (``str``): sub-object name (``isolation``, ``fom``, ``fastsim``,
+                ``merging``, ``recast``).
+            variable (``str``): attribute name.
+            withValue (``bool``): complete the value instead of the attribute.
+
+        Returns:
+            ``list[str]``:
+            Possible completions.
+        """
         # Main object
         if object.lower()=='main':
             if not withValue:
@@ -358,13 +425,26 @@ class CmdSet(CmdBase.CmdBase):
                     output = self.main.merging.user_GetValues(variable)
                 elif subobject=="recast":
                     output = self.main.recasting.user_GetValues(variable)
+                # FIXME: UnboundLocalError on 'output' for an unknown sub-object.
                 return self.finalize_complete(text,output)
         # Other cases
         else:
             return []
 
 
-    def complete_name(self,text,object,variable,withValue):
+    def complete_name(self,text: str,object: str | None,variable: str | None,withValue: bool | None) -> list[str]:
+        """Complete an object name, ``<object>.<attribute>`` or its value.
+
+        Args:
+            text (``str``): word being completed.
+            object (``str | None``): object name (``None`` to list the objects).
+            variable (``str | None``): attribute name (``None`` to list the objects).
+            withValue (``bool | None``): complete the value instead of the attribute.
+
+        Returns:
+            ``list[str]``:
+            Possible completions.
+        """
         # Only object name
         if variable==None:
             output = ["main"]
@@ -436,7 +516,19 @@ class CmdSet(CmdBase.CmdBase):
             return []
 
 
-    def complete(self,text,line,begidx,endidx):
+    def complete(self,text: str,line: str,begidx: int,endidx: int) -> list[str]:
+        """Tab completion of the ``set`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str]``:
+            Possible completions.
+        """
         # set  object.variable = value
         # 0    1               2 3 
         args = line.split()

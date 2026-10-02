@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file Configuration.h
+ * @brief Run-time configuration of SampleAnalyzer (command-line options and versions).
+ */
+
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
@@ -38,6 +43,13 @@
 namespace MA5
 {
 
+/**
+ * @brief Configuration of a SampleAnalyzer run, decoded from the command line.
+ *
+ * Syntax: `SampleAnalyzer [options] <filelist>`. Recognised options are
+ * `--check_event`, `--no_event_weight`, `--ma5_version="<version>;<date>"` and any
+ * `--<name>=<value>` pair, stored in the option map passed to the analyses.
+ */
 class Configuration
 {
 
@@ -46,24 +58,24 @@ class Configuration
   // -------------------------------------------------------------
   private:
 
-    /// SampleAnalyzer version
+    /** @brief Version of SampleAnalyzer (defined in Configuration.cpp). */
     static const std::string sampleanalyzer_version_;
     static const std::string sampleanalyzer_date_;  
 
-    /// Python interface version
+    /** @brief Version of the Python interface (from `--ma5_version`). */
     std::string pythoninterface_version_;
     std::string pythoninterface_date_;
 
-    /// option : check event mode
+    /** @brief Option `--check_event`: check the compliance of the event file. */
     MAbool check_event_;
 
-    /// option : veto to event weights
+    /** @brief Option `--no_event_weight`: ignore the event weights. */
     MAbool no_event_weight_;
 
-    /// input list name
+    /** @brief Name of the file containing the list of samples. */
     std::string input_list_name_;
 
-    /// input options
+    /** @brief Additional `--<name>=<value>` options. */
     std::map<std::string, std::string> options_;
 
   // -------------------------------------------------------------
@@ -71,44 +83,76 @@ class Configuration
   // -------------------------------------------------------------
  public:
 
-    /// Constructor without arguments
+    /** @brief Constructor (resets the options). */
     Configuration()
     { Reset(); }
 
-    /// Destructor
+    /** @brief Destructor. */
     ~Configuration()
     { }
 
-    /// Initialization
+    /**
+     * @brief Decode the command-line arguments.
+     *
+     * @param argc number of arguments.
+     * @param argv arguments (argv[0] is the program name).
+     * @return false if the syntax is wrong or no (or several) sample lists are given, true otherwise.
+     */
     MAbool Initialize(MAint32 &argc, MAchar *argv[]);
  
-    /// Printing the configuration status
+    /** @brief Print the versions and the non-default options. */
     void Display();
 
-    /// Help message
+    /** @brief Print the command-line syntax. */
     void PrintSyntax();
 
-    /// Accessor to the sampleanalyzer date
+    /**
+     * @brief Accessor to the release date of SampleAnalyzer.
+     *
+     * @return the date.
+     */
     const std::string& GetSampleAnalyzerDate() const
     {return sampleanalyzer_date_;}
 
-    /// Accessor to the sampleanalyzer version
+    /**
+     * @brief Accessor to the version of SampleAnalyzer.
+     *
+     * @return the version.
+     */
     const std::string& GetSampleAnalyzerVersion() const
     {return sampleanalyzer_version_;}
 
-    /// Accessor to the python interface date
+    /**
+     * @brief Accessor to the release date of the Python interface.
+     *
+     * @return the date (see the FIXME).
+     */
     const std::string& GetPythonInterfaceDate() const
+    // FIXME: returns sampleanalyzer_date_ instead of pythoninterface_date_.
     {return sampleanalyzer_date_;}
 
-    /// Accessor to the python interface version
+    /**
+     * @brief Accessor to the version of the Python interface.
+     *
+     * @return the version (see the FIXME).
+     */
     const std::string& GetPythonInterfaceVersion() const
+    // FIXME: returns sampleanalyzer_version_ instead of pythoninterface_version_.
     {return sampleanalyzer_version_;}
 
-    /// Accessor to the input name
+    /**
+     * @brief Accessor to the name of the sample-list file.
+     *
+     * @return the file name, as given on the command line.
+     */
     const std::string& GetInputFileName() const
     {return input_list_name_;}
 
-    /// Accessor to the input name
+    /**
+     * @brief Get the name of the sample list without path and extension.
+     *
+     * @return the base name.
+     */
     const std::string GetInputName() const
     {
       std::string name;
@@ -124,13 +168,21 @@ class Configuration
       else return name.substr(0,found);
     }
 
-    /// Function to write a string in lower case
+    /**
+     * @brief Convert a string to lower case (in place).
+     *
+     * @param word string to convert.
+     */
     static void Lower(std::string& word);
 
-    /// Decode MA5 version
+    /**
+     * @brief Decode the option `--ma5_version="<version>;<date>"`.
+     *
+     * @param option the full option string.
+     */
     void DecodeMA5version(const std::string& option);
 
-    /// Reset
+    /** @brief Reset the options to their default values. */
     void Reset()
     {
       no_event_weight_ = false;
@@ -138,19 +190,35 @@ class Configuration
       input_list_name_ = "";
     }
  
-    /// Accessor to Input Name
+    /**
+     * @brief Accessor to the name of the sample-list file.
+     *
+     * @return the file name.
+     */
     const std::string& GetInputListName() const
     { return input_list_name_; }
 
-    /// Accessor to NoEventWeight
+    /**
+     * @brief Is the option `--no_event_weight` set?
+     *
+     * @return true if the event weights must be ignored.
+     */
     MAbool IsNoEventWeight() const
     { return no_event_weight_; }
 
-    /// Accessor to CheckEvent
+    /**
+     * @brief Is the option `--check_event` set?
+     *
+     * @return true if the event file must be checked.
+     */
     MAbool IsCheckEvent() const
     { return check_event_; }
 
-    /// Accessor to options
+    /**
+     * @brief Accessor to the additional `--<name>=<value>` options.
+     *
+     * @return a copy of the option map.
+     */
     std::map<std::string, std::string> Options() const {return options_;}
 
 };

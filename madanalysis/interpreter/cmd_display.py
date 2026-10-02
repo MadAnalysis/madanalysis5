@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,18 +22,43 @@
 ################################################################################
 
 
+"""Interpreter command ``display``: show objects and their properties."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 import madanalysis.interpreter.cmd_base as CmdBase
 import logging
 from six.moves import range
 
 class CmdDisplay(CmdBase.CmdBase):
-    """Command DISPLAY"""
+    """Command ``display <object>[.<property>]``.
 
-    def __init__(self,main):
+    Objects: ``main`` (and its sub-objects ``fastsim``, ``isolation``, ``merging``,
+    ``fom``), ``selection``, ``selection[i]``, datasets, regions, (multi)particles, SFS
+    modules (``tagger``, ``smearer``, ...) and ``jet_algorithm``.
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Register the ``display`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         CmdBase.CmdBase.__init__(self,main,"display")
 
-    def do_other(self,object):
+    def do_other(self,object: str) -> None:
+        """Display a named object or one of its properties (``name[.sub][.property]``).
+
+        The dots of ``fastsim.bjet_id.`` and ``fastsim.tau_id.`` are protected so that these
+        prefixes are kept together.
+
+        Args:
+            object (``str``): dotted name of the object.
+        """
 
         # Looking for one dot in the name
         object = object.replace('fastsim.bjet_id.','fastsim.bjet_idXXX')
@@ -75,6 +100,7 @@ class CmdDisplay(CmdBase.CmdBase):
                     self.main.merging.user_DisplayParameter(objs[2])
                 elif objs[1].lower()=='fom':
                     self.main.fom.user_DisplayParameter(objs[2])
+                # NOTE: dead branch (all other cases are handled above).
                 else:
                     self.main.user_DisplayParameter(objs[2])
                 return
@@ -85,6 +111,7 @@ class CmdDisplay(CmdBase.CmdBase):
                 self.main.selection.Display()
                 return
             else:
+                # NOTE: message copied from the 'set' command.
                 logging.getLogger('MA5').error("'selection' has no variable to be set.")
                 return
 
@@ -119,7 +146,12 @@ class CmdDisplay(CmdBase.CmdBase):
         logging.getLogger('MA5').error("no object called '"+objs[0]+"' found.")
 
 
-    def do_selection(self,args):
+    def do_selection(self,args: list[str]) -> None:
+        """Display an item of the selection (``selection [ i ] [.property]``).
+
+        Args:
+            args (``list[str]``): split arguments (4 or 5 words).
+        """
         # Looking for '=', '[' and ']' 
         if args[0]!='selection' or args[1]!='[' or not args[2].isdigit() or \
                args[3]!=']' :
@@ -147,7 +179,13 @@ class CmdDisplay(CmdBase.CmdBase):
 
         return
 
-    def do(self,args):
+    def do(self,args: list[str]) -> None:
+        """Execute the ``display`` command.
+
+        Args:
+            args (``list[str]``): arguments of the command (split by
+                :meth:`~madanalysis.interpreter.interpreter_base.InterpreterBase.split_arg`).
+        """
         # Checking argument number
         if len(args)>0 and args[0].lower() in ['tagger','smearer', 'reco_efficiency', 'jes', 'energy_scaling', 'scaling']:
             return self.main.superfastsim.display(args)
@@ -170,12 +208,25 @@ class CmdDisplay(CmdBase.CmdBase):
             return
 
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``display`` command."""
         logging.getLogger('MA5').info("   Syntax: display <object name>")
         logging.getLogger('MA5').info("   Syntax 2: display <object name>.<properties>")
         logging.getLogger('MA5').info("   Displays the definition of an object, or one of its properties.")
 
-    def complete(self,text,line,begidx,endidx):
+    def complete(self,text: str,line: str,begidx: int,endidx: int) -> list[str]:
+        """Tab completion of the ``display`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str]``:
+            Possible completions.
+        """
         # set  object.variable = value
         # 0    1               2 3 
         args = line.split()
@@ -208,7 +259,18 @@ class CmdDisplay(CmdBase.CmdBase):
             return []
         
 
-    def complete_name(self,text,object,variable):
+    def complete_name(self,text: str,object: str | None,variable: str | None) -> list[str]:
+        """Propose object names or ``object.property`` completions.
+
+        Args:
+            text (``str``): word being completed.
+            object (``str | None``): object name (``None`` to list the objects).
+            variable (``str | None``): property being typed (``None`` to list the objects).
+
+        Returns:
+            ``list[str]``:
+            Possible completions.
+        """
         
         # Only object name
         if variable==None:

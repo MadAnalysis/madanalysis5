@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file VariableR.h
+ * @brief Variable-R jet clustering (FastJet contrib VariableR).
+ */
+
 #ifndef MADANALYSIS5_VARIABLER_H
 #define MADANALYSIS5_VARIABLER_H
 
@@ -29,11 +34,14 @@
 
 namespace MA5 {
     namespace Substructure {
+        /** @brief Variable-R jet clustering (FastJet contrib VariableRPlugin, effective radius R ~ rho/pT). */
         class VariableR : public ClusterBase {
             public:
 
+                /** @brief Distance measure: C/A-like (p=0), kt-like (p=1) or anti-kt-like (p=-1). */
                 enum ClusterType {CALIKE, KTLIKE, AKTLIKE};
 
+                /** @brief Clustering strategy of the VariableR plugin. */
                 enum Strategy {
                     Best,      ///< currently N2Tiled or N2Plain for FJ>3.2.0, Native for FastJet<3.2.0
                     N2Tiled,   ///< the default (faster in most cases) [requires FastJet>=3.2.0]
@@ -42,10 +50,10 @@ namespace MA5 {
                     Native     ///< original local implemtation of the clustering [the default for FastJet<3.2.0]
                 };
 
-                /// Constructor without argument
+                /** @brief Constructor without argument (call Initialize() before use). */
                 VariableR() {}
 
-                /// Destructor
+                /** @brief Destructor. */
                 ~VariableR() {}
 
                 //============================//
@@ -55,7 +63,17 @@ namespace MA5 {
                 // Hence it would be optimum execution to initialize the algorithm during the initialisation
                 // of the analysis
 
-                // Constructor with arguments
+                /**
+                 * @brief Constructor with arguments (calls Initialize()).
+                 *
+                 * @param rho mass scale of the effective radius (R ~ rho/pT).
+                 * @param minR minimum jet radius.
+                 * @param maxR maximum jet radius.
+                 * @param clusterType distance measure.
+                 * @param strategy clustering strategy.
+                 * @param ptmin minimum jet pT.
+                 * @param isExclusive exclusive (true) or inclusive (false) jets.
+                 */
                 VariableR(
                     MAfloat32 rho,                                  // mass scale for effective radius (i.e. R ~ rho/pT)
                     MAfloat32 minR,                                 //minimum jet radius
@@ -67,7 +85,17 @@ namespace MA5 {
                 )
                 { Initialize(rho, minR, maxR, clusterType, strategy, ptmin, isExclusive); }
 
-                // Initialization method
+                /**
+                 * @brief Create the VariableR plugin and set the clustering options.
+                 *
+                 * @param rho mass scale of the effective radius (R ~ rho/pT).
+                 * @param minR minimum jet radius.
+                 * @param maxR maximum jet radius.
+                 * @param clusterType distance measure.
+                 * @param strategy clustering strategy.
+                 * @param ptmin minimum jet pT.
+                 * @param isExclusive exclusive (true) or inclusive (false) jets.
+                 */
                 void Initialize(
                     MAfloat32 rho,
                     MAfloat32 minR,

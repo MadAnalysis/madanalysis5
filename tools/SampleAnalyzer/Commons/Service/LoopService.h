@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LoopService.h
+ * @brief Recursive navigation in the Monte Carlo history (LOOP), protected against infinite loops.
+ */
+
 #ifndef LOOP_SERVICE_H
 #define LOOP_SERVICE_H
 
@@ -38,20 +43,18 @@
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 
-// ShortCut to access to LoopService
+/** @brief Shortcut to the LoopService singleton. */
 #define LOOP MA5::LoopService::GetInstance()   
 
 
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class LoopService contains static methods used for converting
-/// all types into string type.
-///
-/// LoopService is a singleton-pattern-based class : only one instance.
-/// Getting the only one instance : LoopService::GetInstance()
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Singleton implementing recursive tests on the mother chain of Monte Carlo particles.
+ *
+ * The number of recursive calls is bounded to protect against cyclic histories.
+ */
 class LoopService
 {
   // -------------------------------------------------------------
@@ -59,13 +62,13 @@ class LoopService
   // -------------------------------------------------------------
  private :
 
-  /// Pointer to the unique instance of LoopService
+  /** @brief Unique instance. */
   static LoopService* Service_;
 
-  /// Threshold to the number of calls
+  /** @brief Maximum number of recursive calls. */
   MAuint32 NcallThreshold_;
 
-  /// Current number of calls
+  /** @brief Current number of recursive calls. */
   MAuint32 Ncalls_;
 
   // -------------------------------------------------------------
@@ -73,35 +76,46 @@ class LoopService
   // -------------------------------------------------------------
  private:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   LoopService() 
   {}
 
-  /// Destructor
+  /** @brief Destructor. */
   ~LoopService()
   {}
 
-  /// (Re)initialzing the streamer
+  /** @brief Reset the call counter. */
   void Initialize()
   { Ncalls_=0; }
 
  public:
 
-  /// Getting the unique instance of LoopService
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static LoopService* GetInstance()
   {
     if (Service_==0) Service_ = new LoopService;
     return Service_;
   }
 
-  /// Deleting the unique instance of Convert Service
+  /** @brief Delete the unique instance. */
   static void Kill()
   {
     if (Service_!=0) delete Service_;
     Service_=0;
   }
 
-  /// Determing if a photon coming from signal
+  /**
+   * @brief Does a photon come from a tau decay (i.e. is it irrelevant for the photon selection)?
+   *
+   * @param part photon.
+   * @param mySample sample (generator-specific patches).
+   * @param Threshold maximum number of recursive calls.
+   * @return true if a tau is found among the ancestors.
+   */
   MAbool IrrelevantPhoton(const MCParticleFormat* part, 
                           const SampleFormat& mySample,
                           MAuint32 Threshold = 100000)
@@ -111,7 +125,14 @@ class LoopService
     return IrrelevantPhoton_core(part,mySample);
   }
 
-  /// Determing if a particle coming from hadron decay
+  /**
+   * @brief Does a particle come from a hadron decay?
+   *
+   * @param part particle.
+   * @param mySample sample (generator-specific patches).
+   * @param Threshold maximum number of recursive calls.
+   * @return true if a hadron is found among the ancestors.
+   */
   MAbool ComingFromHadronDecay(const MCParticleFormat* part, 
                                const SampleFormat& mySample,
                                MAuint32 Threshold = 100000)
@@ -124,15 +145,31 @@ class LoopService
 
  private:
 
-  /// Determing if a photon coming from signal
+  /**
+   * @brief Recursive part of IrrelevantPhoton().
+   *
+   * @param part particle.
+   * @param mySample sample.
+   * @return true if a tau is found among the ancestors.
+   */
   MAbool IrrelevantPhoton_core(const MCParticleFormat* part, 
                                const SampleFormat& mySample);
 
-  /// Determing if a particle coming from hadron decay
+  /**
+   * @brief Recursive part of ComingFromHadronDecay().
+   *
+   * @param part particle.
+   * @param mySample sample.
+   * @return true if a hadron is found among the ancestors.
+   */
   MAbool ComingFromHadronDecay_core(const MCParticleFormat* part, 
                                     const SampleFormat& mySample);
 
-  /// Threshold
+  /**
+   * @brief Count a recursive call.
+   *
+   * @return true (with a warning) if the maximum number of calls is exceeded.
+   */
   MAbool ReachThreshold()
   {
     try

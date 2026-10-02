@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,12 +22,27 @@
 ################################################################################
 
 
+"""Configuration of the Delphes fast-simulation package (``set main.fastsim.*``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.enumeration.ma5_running_type         import MA5RunningType
 import os
 import logging
 
 class DelphesConfiguration:
+    """Settings of the Delphes detector simulation run inside SampleAnalyzer.
+
+    Attributes:
+        detector (``str``): detector card family (``cms``, ``atlas``, ``cms-ma5tune``, ``atlas-ma5tune``).
+        output (``bool``): whether the Delphes ROOT file is written.
+        pileup (``str``): path to a ``.pileup`` file (empty = no pile-up).
+        card (``str``): name of the Delphes card selected by :meth:`SetCard` (``delphes_<detector>[_pileup].tcl`` or ``ma5_<detector>[_pileup].tcl``).
+        rootfile (``str``): user-defined name of the output ROOT file (empty = default).
+        skim_genparticles / skim_tracks / skim_towers / skim_eflow (``bool``): whether the
+            corresponding Delphes collections are dropped from the output.
+    """
 
     userVariables = { "detector" : ["cms","atlas","cms-ma5tune","atlas-ma5tune"],\
                       "output": ["true","false"],\
@@ -38,7 +53,8 @@ class DelphesConfiguration:
                       "skim_eflow" : ["true","false"],\
                       "rootfile" : ["none"] }
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise a CMS-like detector without pile-up."""
         self.detector          = "cms"
         self.output            = True
         self.pileup            = ""
@@ -50,7 +66,8 @@ class DelphesConfiguration:
         self.rootfile          = ""
         self.SetCard()
 
-    def SetCard(self):
+    def SetCard(self) -> None:
+        """Select the Delphes card from the detector and the presence of pile-up."""
         if self.detector=='cms' and self.pileup=="":
             self.card = "delphes_cms.tcl"
         elif self.detector=='cms' and self.pileup!="":
@@ -68,7 +85,8 @@ class DelphesConfiguration:
         elif self.detector=='atlas-ma5tune' and self.pileup!="":
             self.card = "ma5_atlas_pileup.tcl"
         
-    def Display(self):
+    def Display(self) -> None:
+        """Log all parameters."""
         self.user_DisplayParameter("detector")
         self.user_DisplayParameter("output")
         self.user_DisplayParameter("rootfile")
@@ -79,7 +97,12 @@ class DelphesConfiguration:
         self.user_DisplayParameter("skim_eflow")
 
 
-    def user_DisplayParameter(self,parameter):
+    def user_DisplayParameter(self,parameter: str) -> None:
+        """Log the value of one parameter.
+
+        Args:
+            parameter (``str``): name of the parameter.
+        """
         if parameter=="detector":
             logging.getLogger('MA5').info(" detector : "+self.detector)
             return
@@ -92,6 +115,7 @@ class DelphesConfiguration:
             return
         elif parameter=="rootfile":
             if self.rootfile not in ['', "none"]:
+                # FIXME: 'msg' is undefined here (UnboundLocalError); self.rootfile was probably intended.
                 logging.getLogger('MA5').info(" ROOT outputfile: "+msg)
             return
         elif parameter=="pileup":
@@ -133,7 +157,13 @@ class DelphesConfiguration:
             logging.getLogger('MA5').error("parameter '"+parameter+"' is unknown")
             return
 
-    def SampleAnalyzerConfigString(self):
+    def SampleAnalyzerConfigString(self) -> dict[str, str]:
+            """Get the options passed to the SampleAnalyzer detector interface.
+
+            Returns:
+                ``dict[str, str]``:
+                ``output`` (``'0'``/``'1'``) and optionally ``rootfile``.
+            """
             mydict = {}
             if self.output:
                 mydict['output'] = '1'
@@ -143,11 +173,26 @@ class DelphesConfiguration:
                 mydict['rootfile'] = self.rootfile
             return mydict
 
-    def user_SetParameter(self,parameter,value,datasets,level):
+    def user_SetParameter(self,parameter: str,value: str,datasets: Any,level: int) -> bool | None:
+        """Set a parameter (``set main.fastsim.<parameter> = <value>``).
+
+        Args:
+            parameter (``str``): name of the parameter (see :attr:`userVariables`).
+            value (``str``): value typed by the user (``pileup`` accepts ``none`` or a
+                quoted/unquoted path to an existing ``.pileup`` file).
+            datasets (``DatasetCollection``): datasets of the session (unused).
+            level (``int``): running mode (unused).
+
+        Returns:
+            ``bool | None``:
+            ``False`` for some invalid values, ``None`` otherwise.
+        """
         
         # algorithm
         if parameter=="detector":
 
+            # FIXME: the detector name is stored with the user's case, but SetCard compares lower-case
+            # names: e.g. 'CMS' is accepted while the card is not updated.
             if value.lower()=="cms":
                 self.detector=value
                 self.SetCard()
@@ -263,11 +308,26 @@ class DelphesConfiguration:
             return
 
         
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the settable parameters.
+
+        Returns:
+            ``list[str]``:
+            Keys of :attr:`userVariables`.
+        """
         return list(DelphesConfiguration.userVariables.keys())
 
 
-    def user_GetValues(self,variable):
+    def user_GetValues(self,variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            Suggested values, or an empty list.
+        """
         table = []
         try:
             table.extend(DelphesConfiguration.userVariables[variable])

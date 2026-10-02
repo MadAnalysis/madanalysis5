@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file RecParticleFormat.h
+ * @brief Base class of the reconstructed objects.
+ */
 
 #ifndef RecParticleFormat_h
 #define RecParticleFormat_h
@@ -52,6 +57,13 @@ class DetectorDelphesMA5tune;
 class RecLeptonFormat;
 class DelphesMemoryInterface;
 
+/**
+ * @brief Base class of the reconstructed objects (jets, leptons, photons, taus, tracks, ...).
+ *
+ * In addition to the kinematics, it stores the number of tracks, the ratio of the
+ * hadronic to electromagnetic energies, the matched Monte Carlo particle, the
+ * Delphes references and the production vertex.
+ */
 class RecParticleFormat : public ParticleBaseFormat
 {
   friend class LHEReader;
@@ -68,10 +80,15 @@ class RecParticleFormat : public ParticleBaseFormat
   // -------------------------------------------------------------
  protected:
 
+  /** @brief Number of tracks. */
   MAuint16 ntracks_;   /// number of tracks
+  /** @brief Ratio of the hadronic to electromagnetic energies. */
   MAfloat32               HEoverEE_;    /// hadronic energy over electromagnetic energy
+  /** @brief Matched Monte Carlo particle (may be null). */
   const MCParticleFormat* mc_ ;         /// mother generated particle
+  /** @brief Delphes references (unique identifiers of the underlying objects). */
   std::vector<MAuint64>   delphesTags_; /// tag reference for Delphes
+  /** @brief Production vertex. */
   MALorentzVector         vertex_prod_; /// information on the production vertex
 
   // -------------------------------------------------------------
@@ -79,15 +96,15 @@ class RecParticleFormat : public ParticleBaseFormat
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor (members reset). */
   RecParticleFormat()
   { Reset(); }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~RecParticleFormat()
   {}
 
-  /// Clear all information
+  /** @brief Reset all the members. */
   virtual void Reset()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
@@ -95,13 +112,14 @@ class RecParticleFormat : public ParticleBaseFormat
     HEoverEE_=0.;
     closest_approach_.SetXYZ(0.,0.,0.);
     d0_=0.; d0_approx_=0.;
+    // FIXME: d0_approx_ is reset twice and dz_approx_ is not reset.
     dz_=0.; d0_approx_=0.;
     vertex_prod_.Reset();
     mc_=0;
     ntracks_ = 0;
   }
 
-  /// Print particle informations
+  /** @brief Print the object properties (an error is raised if there is no matched Monte Carlo particle). */
   virtual void Print() const
   {
     INFO << "momentum=(" << /*set::setw(8)*/"" << std::left << momentum_.Px()
@@ -121,16 +139,32 @@ class RecParticleFormat : public ParticleBaseFormat
     }    
   }
 
-  /// Accessor to matched Monte Carlo particle 
+  /**
+   * @brief Accessor to the matched Monte Carlo particle.
+   *
+   * @return the particle, or 0.
+   */
   const MCParticleFormat* mc() const {return mc_;}
 
-  /// Mutator relatied to matched Monte Carlo particle
+  /**
+   * @brief Set the matched Monte Carlo particle.
+   *
+   * @param mc particle.
+   */
   void setMc(const MCParticleFormat* mc) {mc_=mc;}
 
-  /// Accessor to hadronic energy / electromagnetic energy ratio
+  /**
+   * @brief Accessor to the ratio of the hadronic to electromagnetic energies.
+   *
+   * @return the ratio.
+   */
   const MAfloat32& HEoverEE() const {return HEoverEE_;}
 
-  /// Accessor to electromagnetic energy / hadronic energy ratio
+  /**
+   * @brief Accessor to the ratio of the electromagnetic to hadronic energies.
+   *
+   * @return the ratio (0 if the hadronic/EM ratio vanishes).
+   */
   const MAfloat32 EEoverHE() const 
   {
     if (HEoverEE_!=0) return 1./HEoverEE_; 
@@ -141,20 +175,46 @@ class RecParticleFormat : public ParticleBaseFormat
 //  virtual const MAuint16 ntracks() const
 //  { return 0; }
 
-  /// Accessor to the isolation tag
+  /**
+   * @brief Is the object isolated? (overridden by the derived classes)
+   *
+   * @return false by default.
+   */
   virtual const MAbool isolated() const
   { return false; }
 
-  /// Accessor to the electric charge
+  /**
+   * @brief Accessor to the electric charge (overridden by the derived classes).
+   *
+   * @return 0 by default.
+   */
   virtual const MAint32 charge() const
   { return 0; }
 
-  /// Accessor to the number of tracks
+  /**
+   * @brief Accessor to the number of tracks.
+   *
+   * @return the number of tracks.
+   */
   const MAuint16 ntracks() const
   {return ntracks_;}
 
+  /**
+   * @brief Accessor to the Delphes references.
+   *
+   * @return the references.
+   */
   const std::vector<MAuint64>& delphesTags() const {return delphesTags_;}
 
+  /**
+   * @brief Check whether the object shares a Delphes reference with a list.
+   *
+   * Despite its name, the method returns true when a common reference is found
+   * (i.e. when the objects are NOT unique).
+   *
+   * @param delphesTags references to compare with.
+   * @return true if a reference is shared.
+   */
   MAbool isDelphesUnique(const std::vector<MAuint64>& delphesTags) const
   {
     for (MAuint32 i=0;i<delphesTags_.size();i++)
@@ -165,14 +225,35 @@ class RecParticleFormat : public ParticleBaseFormat
     return false;
   }
 
+  /**
+   * @brief Check whether the object shares a Delphes reference with another object.
+   *
+   * @param part other object.
+   * @return true if a reference is shared.
+   */
   MAbool isDelphesUnique(const RecParticleFormat* part) const
   { return isDelphesUnique(part->delphesTags()); }
 
+  /**
+   * @brief Check whether the object shares a Delphes reference with another object.
+   *
+   * @param part other object.
+   * @return true if a reference is shared.
+   */
   MAbool isDelphesUnique(const RecParticleFormat& part) const
   { return isDelphesUnique(part.delphesTags()); }
 
-  // Accessor and modifier for the production vertex
+  /**
+   * @brief Accessor to the production vertex.
+   *
+   * @return the vertex.
+   */
   const MALorentzVector& ProductionVertex() const { return vertex_prod_; }
+  /**
+   * @brief Set the production vertex.
+   *
+   * @param v vertex.
+   */
   void setProductionVertex(const MALorentzVector& v) { vertex_prod_=v; }
 
 };

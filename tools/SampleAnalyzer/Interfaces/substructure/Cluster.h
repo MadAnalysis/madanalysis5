@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file Cluster.h
+ * @brief Jet clustering with a standard algorithm (anti-kt, C/A, kt).
+ */
+
 #ifndef MADANALYSIS5_CLUSTER_H
 #define MADANALYSIS5_CLUSTER_H
 
@@ -29,6 +34,7 @@
 
 namespace MA5 {
     namespace Substructure{
+        /** @brief Jet clustering with a standard FastJet algorithm (anti-kt, Cambridge/Aachen, kt). */
         class Cluster : public ClusterBase {
 
             // -------------------------------------------------------------
@@ -36,10 +42,10 @@ namespace MA5 {
             // -------------------------------------------------------------
             public:
 
-                /// Constructor without argument
+                /** @brief Constructor without argument (call Initialize() before use). */
                 Cluster() {}
 
-                /// Destructor
+                /** @brief Destructor. */
                 ~Cluster() {}
 
                 //============================//
@@ -49,10 +55,27 @@ namespace MA5 {
                 // Hence it would be optimum execution to initialize the algorithm during the initialisation
                 // of the analysis
 
-                // Constructor with arguments
+                /**
+                 * @brief Constructor with arguments (calls Initialize()).
+                 *
+                 * @param algorithm clustering algorithm.
+                 * @param radius jet radius.
+                 * @param ptmin minimum jet pT.
+                 * @param isExclusive if true, return exclusive jets (dcut = ptmin^2); otherwise inclusive jets with pT >= ptmin.
+                 */
                 Cluster(Algorithm algorithm, MAfloat32 radius, MAfloat32 ptmin=0., MAbool isExclusive = false)
                 { Initialize(algorithm, radius, ptmin, isExclusive); }
 
+                /**
+                 * @brief Set the jet definition and the clustering options.
+                 *
+                 * @param algorithm clustering algorithm.
+                 * @param radius jet radius.
+                 * @param ptmin minimum jet pT.
+                 * @param isExclusive exclusive (true) or inclusive (false) jets.
+                 */
+                // FIXME: Initialize() is declared but never defined: Cluster.cpp contains a stale copy of a
+                //   NullSmearer class instead, so using Substructure::Cluster fails at link time.
                 void Initialize(
                     Algorithm algorithm, MAfloat32 radius, MAfloat32 ptmin=0., MAbool isExclusive = false
                 );

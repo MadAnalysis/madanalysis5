@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file ClusterAlgoBase.h
+ * @brief Interface of the jet-clustering algorithms.
+ */
 
 #ifndef CLUSTER_ALGO_BASE_H
 #define CLUSTER_ALGO_BASE_H
@@ -43,6 +48,7 @@
 namespace MA5
 {
 
+/** @brief Abstract base class of the jet-clustering algorithms (FastJet plugins). */
 class ClusterAlgoBase
 {
 //---------------------------------------------------------------------------------
@@ -50,16 +56,16 @@ class ClusterAlgoBase
 //---------------------------------------------------------------------------------
   protected :
 
-    /// Jet clustering algorithm
+    /** @brief Name of the jet clustering algorithm. */
     std::string JetAlgorithm_;
 
-    /// Pt min for the jets
+    /** @brief Minimum transverse momentum of the jets. */
     MAfloat64 Ptmin_;
 
-    /// Is the jet clustering exclusive ?
+    /** @brief Is the clustering exclusive? */
     MAbool Exclusive_;
 
-    /// Exclusive id for tau-elec-photon-jet
+    /** @brief Exclusive identification (objects used as taus, electrons or photons are removed from the jets). */
     MAbool ExclusiveId_;
 
 
@@ -68,7 +74,11 @@ class ClusterAlgoBase
 //---------------------------------------------------------------------------------
   public :
 
-    /// Constructor with algorithm
+    /**
+     * @brief Constructor.
+     *
+     * @param Algo name of the clustering algorithm.
+     */
     ClusterAlgoBase(std::string Algo)
     {
       JetAlgorithm_=Algo;
@@ -78,23 +88,51 @@ class ClusterAlgoBase
       ExclusiveId_ = false;
     }
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~ClusterAlgoBase() {}
 
-    /// Jet clustering
+    /**
+     * @brief Cluster the jets of an event (primary jet collection).
+     *
+     * @param mySample current sample.
+     * @param myEvent event (the reconstructed jets are filled).
+     * @param smearer detector smearer applied to the jets or their constituents.
+     * @return false in case of error.
+     */
     virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent,
                            SmearerBase* smearer)=0;
 
-    // Extra Jet clustering
+    /**
+     * @brief Cluster an additional jet collection.
+     *
+     * @param myEvent event.
+     * @param JetID identifier of the jet collection.
+     * @return false in case of error.
+     */
     virtual MAbool Cluster(EventFormat& myEvent, std::string JetID)=0;
 
-    /// Set parameter
+    /**
+     * @brief Set a parameter of the algorithm.
+     *
+     * @param key parameter name.
+     * @param value parameter value.
+     * @return false if the parameter is unknown or invalid.
+     */
     virtual MAbool SetParameter(const std::string& key, const std::string& value)=0;
 
-    /// Initialization
+    /**
+     * @brief Initialise the algorithm.
+     *
+     * @return false in case of error.
+     */
     virtual MAbool Initialize()=0;
 
-    /// Putting the string in lower case
+    /**
+     * @brief Convert a string to lower case.
+     *
+     * @param word string.
+     * @return the lower-case string.
+     */
     static std::string Lower(const std::string& word)
     {
       std::string result;
@@ -104,13 +142,21 @@ class ClusterAlgoBase
       return result;
     }
 
-    /// GetName
+    /**
+     * @brief Accessor to the name of the algorithm.
+     *
+     * @return the name.
+     */
     virtual std::string GetName()=0;
 
-    /// Print parameters
+    /** @brief Print the parameters of the algorithm. */
     virtual void PrintParam()=0;
 
-    /// Accessor to the jet clusterer parameters
+    /**
+     * @brief Accessor to the parameters of the algorithm.
+     *
+     * @return a printable summary of the parameters.
+     */
     virtual std::string GetParameters()=0;
 
 

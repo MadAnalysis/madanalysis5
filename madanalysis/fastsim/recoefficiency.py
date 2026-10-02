@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,19 +22,37 @@
 ################################################################################
 
 
+"""Reconstruction efficiencies of the SFS (``define reco_efficiency``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 class RecoEfficiency:
+    """Reconstruction efficiencies of the SFS.
+
+    Each rule is stored in :attr:`rules` as ``{key: {'id_reco', 'efficiencies': {n: {'function':
+    AST, 'bounds': AST}}}}``: several (function, bounds) pairs can be attached to the
+    same object, each applying in its own domain.
+    """
 
     # Initialization
-    def __init__(self):
+    def __init__(self) -> None:
+        """Create an empty set of rules."""
         self.logger = logging.getLogger('MA5');
         self.rules = {}
 
 
     # Adding a rule to the reconstruction efficiencies
     # The bounds and function are written as ASTs
-    def add_rule(self, id_reco, function, bounds):
+    def add_rule(self, id_reco: str, function: Any, bounds: Any) -> None:
+        """Add a reconstruction efficiency.
+
+        Args:
+            id_reco (``str``): PDG code (or label) of the reconstructed object.
+            function (``AST``): efficiency formula.
+            bounds (``AST``): domain of validity of the formula.
+        """
         ## Checking wether the object is supported
         if not self.is_supported(id_reco):
             return
@@ -52,7 +70,9 @@ class RecoEfficiency:
             'bounds': bounds }
 
 
-    def display(self):
+    def display(self) -> None:
+        """Log the defined reconstruction efficiencies (the C++ translation is logged at debug level).
+        """
         self.logger.info('************************************************')
         self.logger.info(' Information on the reconstruction efficiencies ')
         self.logger.info('************************************************')
@@ -73,7 +93,16 @@ class RecoEfficiency:
             self.logger.info('  --------------------')
 
 
-    def is_supported(self, id_reco):
+    def is_supported(self, id_reco: str) -> bool:
+        """Check whether a reconstruction efficiency can be defined for an object.
+
+        Args:
+            id_reco (``str``): PDG code or label (``e``, ``mu``, ``ta``, ``j``, ``a``, ``track``).
+
+        Returns:
+            ``bool``:
+            ``True`` if supported (an error is logged otherwise).
+        """
         supported = {'e':'11', 'mu':'13', 'ta':'15', 'j':'21', 'a':'22', 'track':'track'}
         if id_reco in (list(supported.keys())+list(supported.values())):
             return True

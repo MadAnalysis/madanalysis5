@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // SampleHeader headers
+/**
+ * @file DelphesDataFormat2.cpp
+ * @brief Implementation of MA5::DelphesDataFormat2.
+ */
+
 #include "SampleAnalyzer/Interfaces/delphes/DelphesDataFormat2.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
@@ -60,6 +65,7 @@ DelphesDataFormat2::DelphesDataFormat2()
 // -----------------------------------------------------------------------------
 DelphesDataFormat2::~DelphesDataFormat2()
 {
+  // NOTE: Event_ is not deleted.
   if (FatJet_!=0)       delete FatJet_;
   if (Jet_!=0)          delete Jet_;
   if (Electron_!=0)     delete Electron_;

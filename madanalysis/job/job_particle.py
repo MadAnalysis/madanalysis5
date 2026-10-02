@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,16 @@
 ################################################################################
 
 
+"""Collection of the particle containers needed by the plots and cuts of the selection."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.multiparticle.extraparticle import ExtraParticle
+    from madanalysis.selection.condition_sequence import ConditionSequence
 from madanalysis.enumeration.argument_type    import ArgumentType
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
@@ -32,7 +41,23 @@ import logging
 import sys
 from six.moves import range
 
-def GetParticles(main):
+def GetParticles(main: Main) -> list[list[Any]]:
+    """List the particle containers required by the selection.
+
+    Each (multi)particle used by a histogram or a cut is associated with the options
+    of the item (ranking, status code, regions). For PT-ranked particles, the
+    corresponding unranked container (option ``'PTordering'``) is added. Duplicates are
+    removed.
+
+    Args:
+        main (``Main``): session state.
+
+    Returns:
+        ``list[list[Any]]``:
+        Items ``[particle, rank, statuscode, regions]`` with ``particle`` an
+        :class:`~madanalysis.multiparticle.extraparticle.ExtraParticle`, ``rank`` and
+        ``statuscode`` strings and ``regions`` a list of region names.
+    """
 
     # Getting list of particle/multiparticle
     part_list   = []
@@ -95,7 +120,16 @@ def GetParticles(main):
     # End
     return final_list
 
-def ExtractPart(args,obs,part_list,option_list,option):
+def ExtractPart(args: list[Any],obs: ObservableBase,part_list: list[ExtraParticle],option_list: list[list[Any]],option: list[Any]) -> None:
+    """Append the particles appearing in the arguments of an observable.
+
+    Args:
+        args (``list[Any]``): arguments of the observable.
+        obs (``ObservableBase``): observable (gives the argument types).
+        part_list (``list[ExtraParticle]``): list of particles to extend (in place).
+        option_list (``list[list[Any]]``): list of options to extend (in place).
+        option (``list[Any]``): options ``[rank, statuscode, regions]`` of the item.
+    """
 
     # Loop over arguments of the observable
     for iarg in range(len(args)):
@@ -113,7 +147,18 @@ def ExtractPart(args,obs,part_list,option_list,option):
                 part_list.append(part)
                 option_list.append(option)
 
-def LoopOverConditions(partType,current,part_list,option_list,option):
+def LoopOverConditions(partType: int | None,current: ConditionSequence,part_list: list[ExtraParticle],option_list: list[list[Any]],option: list[Any]) -> None:
+    """Append (recursively) the particles appearing in a sequence of conditions.
+
+    Args:
+        partType (``int | None``): type of the candidate for a candidate cut (the first
+            argument of the observables is then the candidate), ``None`` for an event
+            cut.
+        current (``ConditionSequence``): sequence of conditions.
+        part_list (``list[ExtraParticle]``): list of particles to extend (in place).
+        option_list (``list[list[Any]]``): list of options to extend (in place).
+        option (``list[Any]``): options ``[rank, statuscode, regions]`` of the cut.
+    """
 
     i=0
     while i<len(current.sequence):

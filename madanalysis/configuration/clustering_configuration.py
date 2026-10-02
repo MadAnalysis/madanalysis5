@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,12 @@
 ################################################################################
 
 
+"""Global jet-clustering configuration (``set main.fastsim.*`` when the package is ``fastjet``).
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.configuration.clustering_kt import ClusteringKt
 from madanalysis.configuration.clustering_antikt import ClusteringAntiKt
 from madanalysis.configuration.clustering_genkt import ClusteringGenKt
@@ -39,6 +44,17 @@ import logging
 
 
 class ClusteringConfiguration:
+    """Jet-clustering configuration: algorithm and flavour identification.
+
+    Attributes:
+        algorithm (``str``): name of the clustering algorithm (``antikt`` by default, or
+            ``none``).
+        clustering: algorithm-specific configuration (``Clustering*`` object, ``0`` when
+            the algorithm is ``none``).
+        beauty / charm / tau: b-, c- and tau-identification configurations.
+        exclusive_id (``bool``): whether an object can be identified as a single type only.
+        JetID (``str``): identifier of the primary jet collection (``"Ma5Jet"``).
+    """
 
     userVariables = {
         "algorithm": [
@@ -65,7 +81,8 @@ class ClusteringConfiguration:
         "photon_isocone_radius": ["0.5"],
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise an anti-kT clustering with default identifications."""
         self.algorithm = "antikt"
         self.clustering = ClusteringAntiKt()
         self.beauty = BeautyIdentification()
@@ -74,7 +91,8 @@ class ClusteringConfiguration:
         self.exclusive_id = True
         self.JetID = "Ma5Jet"
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log the clustering and identification parameters."""
         self.user_DisplayParameter("algorithm")
         if self.algorithm != "none":
             logging.getLogger("MA5").info("  + Jet ID : " + self.JetID)
@@ -84,7 +102,12 @@ class ClusteringConfiguration:
             self.charm.Display()
             self.tau.Display()
 
-    def user_DisplayParameter(self, parameter):
+    def user_DisplayParameter(self, parameter: str) -> None:
+        """Log the value of one parameter (dispatched to the relevant sub-configuration).
+
+        Args:
+            parameter (``str``): name of the parameter.
+        """
         if parameter == "algorithm":
             logging.getLogger("MA5").info(" clustering algorithm : " + self.algorithm)
             return
@@ -105,7 +128,14 @@ class ClusteringConfiguration:
             else:
                 self.clustering.user_DisplayParameter(parameter)
 
-    def SampleAnalyzerConfigString(self):
+    def SampleAnalyzerConfigString(self) -> dict[str, str]:
+        """Get all options passed to the SampleAnalyzer jet clusterer.
+
+        Returns:
+            ``dict[str, str]``:
+            Merged options of the algorithm and of the identifications (empty if the
+            algorithm is ``none``).
+        """
         if self.algorithm != "none":
             mydict = {}
             mydict["JetID"] = self.JetID
@@ -121,7 +151,24 @@ class ClusteringConfiguration:
         else:
             return {}
 
-    def user_SetParameter(self, parameter, value, datasets, level):
+    def user_SetParameter(self, parameter: str, value: str, datasets: Any, level: int) -> bool | None:
+        """Set a clustering parameter.
+
+        Changing the algorithm is only allowed in reco mode and when the datasets are
+        compatible (no LHCO/ROOT files when switching it on; no LHE/HEP/HepMC files when
+        switching it off). Other parameters are dispatched to the identification or
+        algorithm sub-configurations.
+
+        Args:
+            parameter (``str``): name of the parameter.
+            value (``str``): value typed by the user.
+            datasets (``DatasetCollection``): datasets of the session.
+            level (``int``): running mode.
+
+        Returns:
+            ``bool | None``:
+            Result of the sub-configuration setter, or ``None``.
+        """
 
         # algorithm
         if parameter == "algorithm":
@@ -210,6 +257,7 @@ class ClusteringConfiguration:
                 self.clustering = ClusteringSisCone()
             elif value == "none":
                 self.algorithm = "none"
+                # NOTE: 0 (not None) is used as 'no clustering' sentinel.
                 self.clustering = 0
             else:
                 logging.getLogger("MA5").error("algorithm called '" + value + "' is not found.")
@@ -247,7 +295,14 @@ class ClusteringConfiguration:
             return self.clustering.user_SetParameter(parameter, value)
 
 
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of all settable parameters.
+
+        Returns:
+            ``list[str]``:
+            Global, algorithm and identification parameters (only ``algorithm`` if the
+            clustering is switched off).
+        """
         if self.algorithm != "none":
             table = list(ClusteringConfiguration.userVariables.keys())
             table.extend(self.clustering.user_GetParameters())
@@ -258,7 +313,16 @@ class ClusteringConfiguration:
             table = ["algorithm"]
         return table
 
-    def user_GetValues(self, variable):
+    def user_GetValues(self, variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            Suggested values collected from all sub-configurations.
+        """
         table = []
         if self.algorithm != "none":
             try:
@@ -285,4 +349,5 @@ class ClusteringConfiguration:
             if variable == "algorithm":
                 table.extend(ClusteringConfiguration.userVariables["algorithm"])
         return table
+        # NOTE: unreachable duplicate return.
         return table

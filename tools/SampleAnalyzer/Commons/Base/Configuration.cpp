@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // STL headers
+/**
+ * @file Configuration.cpp
+ * @brief Implementation of MA5::Configuration (command-line decoding).
+ */
+
 #include <algorithm>
 #include <fstream>
 #include <locale>
@@ -37,8 +42,8 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "2.0.9";
-const std::string Configuration::sampleanalyzer_date_ = "2025/10/27";
+const std::string Configuration::sampleanalyzer_version_ = "2.1.0";
+const std::string Configuration::sampleanalyzer_date_ = "2026/09/25";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------
@@ -73,6 +78,7 @@ void Configuration::Lower(std::string &word)
 // -----------------------------------------------------------------------------
 void Configuration::DecodeMA5version(const std::string &option)
 {
+  // skip the prefix '--ma5_version=' (14 characters)
   std::string stamp = option.substr(14, std::string::npos);
   std::size_t result = stamp.find(";");
   try
@@ -122,6 +128,7 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
   {
     // converting const characters into string
     std::string argument = std::string(argv[i]);
+    // NOTE: the argument is lowered for the option tests; options and file names keep the raw argv.
     Lower(argument);
 
     // safety : skip empty string
@@ -147,6 +154,7 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
       else
       {
         std::string arg = argv[i];
+        // NOTE: npos is truncated to 32 bits here; it still compares greater than the length.
         MAuint32 loc = arg.find("=");
         if (loc == 0 || loc > arg.length())
         {

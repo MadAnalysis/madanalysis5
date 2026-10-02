@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file DelphesMemoryInterface.h
+ * @brief Transfer of the Delphes output (in memory) to the MA5 data format.
+ */
+
 #ifndef DELPHES_MEMORY_INTERFACE_h
 #define DELPHES_MEMORY_INTERFACE_h
 
@@ -40,14 +45,19 @@
 
 
 class TObjArray;
-class TFolder;
+class Delphes;
+class Candidate;
 
 namespace MA5
 {
 
+/** @brief Reads the Delphes output arrays (TFolder "Delphes/Export") of DetectorDelphes and fills RecEventFormat. */
 class DelphesMemoryInterface
 {
  public : 
+
+  /// Original Delphes candidates mapped to MC particle indices for this event.
+  std::map<const Candidate*, MAuint32> MCParticleIndices_;
 
   /// Pointers to data
   TObjArray* Jet_;
@@ -66,27 +76,28 @@ class DelphesMemoryInterface
   TObjArray* EFlowPhoton_;
   TObjArray* EFlowNeutral_;
 
-   // Switch for MA5card
+  /** @brief Whether the MA5-tuned collections (JetMA5, ElectronMA5, ...) are used. */
   MAbool delphesMA5card_;
 
-  /// Constructor without arguments
+  /** @brief Constructor (all pointers set to 0). */
   DelphesMemoryInterface();
 
-  /// Destructor
+  /** @brief Destructor (the arrays belong to Delphes). */
   ~DelphesMemoryInterface();
 
-  /// Initialize with delphesFolder
-  void Initialize(TFolder* delphesFolder);
+  /// Initialize access to the collections produced by Delphes
+  void Initialize(Delphes* delphes, const std::map<std::string,std::string>& table, MAbool MA5card);
 
-  /// Print -- DEBUG --
-  static void Print(TFolder* delphesFolder);
+  TObjArray* GetCollection(Delphes* delphes, const std::map<std::string,std::string>& table, const std::string& name);
 
-  void Initialize(TFolder* delphesFolder, const std::map<std::string,std::string>& table, MAbool MA5card);
 
-  TObjArray* GetCollection(TFolder* delphesFolder, 
-                           const std::map<std::string,std::string>& table,
-                           const std::string& name);
-
+  /**
+   * @brief Fill the reconstructed event (jets, taus, leptons, photons, tracks, towers, e-flow objects, MET and HT).
+   *
+   * @param mySample current sample.
+   * @param myEvent current event.
+   * @return true.
+   */
   MAbool TransfertDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent);
 
 };

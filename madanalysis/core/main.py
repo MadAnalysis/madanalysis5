@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,18 @@
 ################################################################################
 
 
+"""Global state of a MadAnalysis 5 session.
+
+The :class:`Main` object created in :func:`madanalysis.core.launcher.MainSession` is the
+single container of the session state. It is passed to (and mutated by) virtually
+every component: the interpreter commands, the job writers, the layout/report
+generators and the recasting machinery. It also owns the logic checking the system
+configuration (:meth:`Main.CheckConfig`, :meth:`Main.CheckConfig2`) and building the
+SampleAnalyzer C++ libraries (:meth:`Main.BuildLibrary`).
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 from madanalysis.multiparticle.multiparticle_collection import MultiParticleCollection
 from madanalysis.dataset.dataset_collection import DatasetCollection
 from madanalysis.selection.selection import Selection
@@ -56,6 +67,29 @@ import traceback as tb
 
 
 class Main:
+    """Session state of MadAnalysis 5 (the ``main`` object of the interpreter).
+
+    The attributes that can be modified by the user with ``set main.<attribute> =
+    <value>`` are listed in :attr:`userVariables`. The most important attributes are:
+
+    * ``mode`` (:class:`~madanalysis.enumeration.ma5_running_type.MA5RunningType`):
+      parton, hadron or reco running mode;
+    * ``archi_info`` / ``session_info``: detected system configuration;
+    * ``datasets``, ``multiparticles``, ``regions``, ``selection``: user-defined
+      datasets, (multi)particles, signal regions and plots/cuts;
+    * ``fastsim`` / ``superfastsim`` / ``jet_collection``: detector simulation
+      (FastJet, Delphes, SFS) and extra jet collections;
+    * ``recasting``, ``merging``, ``isolation``, ``fom``: sub-configurations;
+    * ``lumi``, ``normalize``, ``stack``, ``graphic_render``, ``output``,
+      ``random_seed``: global settings of the analysis and of the reports;
+    * ``forced`` / ``script`` / ``developer_mode`` / ``expertmode``: running options;
+    * ``repeatSession``: set to ``True`` to request a restart of the session;
+    * ``lastjob_name`` / ``lastjob_status``: last submitted job (for ``resubmit``).
+
+    .. note::
+        ``forced``, ``version`` and ``date`` also exist as **class** attributes;
+        ``Main.forced`` is read by components that do not have access to the instance.
+    """
     userVariables = {
         "currentdir": [],
         "normalize": ["none", "lumi", "lumi_weight"],
@@ -71,7 +105,15 @@ class Main:
     version = ""
     date = ""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise a session in parton-level mode with default settings.
+
+        .. note::
+            ``currentdir`` is a property: the assignment below calls
+            :meth:`set_currentdir`, which changes directory (to the current one) and
+            logs the current directory.
+        """
+        # NOTE: 'currentdir' is a property (see set_currentdir): this assignment calls os.chdir.
         self.currentdir = os.getcwd()
         self.firstdir = os.getcwd()
         self.archi_info = ArchitectureInfo()
@@ -94,7 +136,15 @@ class Main:
         self.redirectSAlogger = False
         self.random_seed = None
 
-    def ResetParameters(self):
+    def ResetParameters(self) -> None:
+        r"""Reset the sub-configurations and global analysis settings to their defaults.
+
+        Recreates the merging, fastsim, SFS, jet collection, recasting, figure-of-merit
+        and isolation configurations, and resets the luminosity (10 fb\ :sup:`-1`), the
+        stacking method, the output file, the graphical renderer and the
+        normalisation (``none`` in reco mode, ``lumi_weight`` otherwise). Datasets,
+        multiparticles, regions and the selection are **not** reset.
+        """
         self.merging = MergingConfiguration()
         self.fastsim = FastsimConfiguration()
         self.superfastsim = SuperFastSim()
@@ -115,29 +165,68 @@ class Main:
             self.normalize = NormalizeType.LUMI_WEIGHT
         self.superfastsim.InitObservables(self.observables)
 
-    def InitObservables(self, mode):
+    def InitObservables(self, mode: int) -> None:
+        """Rebuild the list of observables available for a given running mode.
+
+        Args:
+            mode (``int``): running mode, a value of
+                :class:`~madanalysis.enumeration.ma5_running_type.MA5RunningType`.
+        """
         self.observables = ObservableManager(mode)
         self.superfastsim.InitObservables(self.observables)
 
-    def IsGoodFormat(self, file):
+    def IsGoodFormat(self, file: str) -> bool:
+        """Check whether an event file can be read in the current session.
+
+        Args:
+            file (``str``): name of the event file.
+
+        Returns:
+            ``bool``:
+            ``True`` if the file extension is among the allowed ones of
+            :meth:`GetSampleFormat`, ``False`` otherwise.
+        """
         allowed, forbidden = self.GetSampleFormat()
         for item in allowed:
             if file.endswith(item):
                 return True
         return False
 
-    def PrintErrorFormat(self, file):
+    def PrintErrorFormat(self, file: str) -> str:
+        """Get the reason why an event file cannot be read in the current session.
+
+        Args:
+            file (``str``): name of the event file.
+
+        Returns:
+            ``str``:
+            The error message associated with the (forbidden) file extension, or
+            ``"The file format is unknown"`` if the extension is not referenced.
+        """
         allowed, forbidden = self.GetSampleFormat()
         for item in forbidden:
             if file.endswith(item[0]):
                 return item[1]
         return "The file format is unknown"
 
-    def GetSampleFormat(self):
+    def GetSampleFormat(self) -> tuple[list[str], list[list[str]]]:
+        """Get the event-file extensions allowed and forbidden in the current session.
+
+        The result depends on the running mode, on the recasting status, on the
+        selected fast-simulation package and on the availability of zlib (``.gz``
+        files) and Delphes/ROOT (``.root`` files). Every extension is also accepted
+        with the ``.fifo`` suffix (named pipes).
+
+        Returns:
+            ``tuple[list[str], list[list[str]]]``:
+            The list of allowed extensions, and the list of ``[extension,
+            error_message]`` pairs for the forbidden ones.
+        """
 
         # Initializing containers
         allowed = []
         forbidden = []
+        # NOTE: 'errormsg' is never used.
         errormsg = []
 
         # Adding format according to MA5 level mode
@@ -247,7 +336,8 @@ class Main:
 
         return allowed, forbidden
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log all the settings of the session (``display main`` command)."""
         self.logger.info(" *********************************")
         self.logger.info("            main program          ")
         self.logger.info(" *********************************")
@@ -275,7 +365,14 @@ class Main:
         self.recasting.Display()
         self.logger.info(" *********************************")
 
-    def user_DisplayParameter(self, parameter):
+    def user_DisplayParameter(self, parameter: str) -> None:
+        """Log the value of one ``main`` parameter (``display main.<parameter>``).
+
+        Args:
+            parameter (``str``): name of the parameter (``currentdir``,
+                ``stacking_method``, ``normalize``, ``graphic_render``, ``outputfile``,
+                ``lumi`` or ``recast``).
+        """
         if parameter == "currentdir":
             self.logger.info(" currentdir = " + self.get_currentdir())
         elif parameter == "stacking_method":
@@ -318,7 +415,17 @@ class Main:
         else:
             self.logger.error("'main' has no parameter called '" + parameter + "'")
 
-    def user_GetValues(self, variable):
+    def user_GetValues(self, variable: str) -> list[str]:
+        """Get the possible values of a ``main`` parameter (used for tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            Possible values (directories for ``currentdir``), or an empty list if
+            the parameter is unknown or takes free values.
+        """
         if variable == "currentdir":
             return CmdBase.directory_complete()
         else:
@@ -327,10 +434,33 @@ class Main:
             except:
                 return []
 
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the parameters that can be set with ``set main.<name>``.
+
+        Returns:
+            ``list[str]``:
+            Keys of :attr:`userVariables`.
+        """
         return list(Main.userVariables.keys())
 
-    def user_SetParameter(self, parameter, value):
+    def user_SetParameter(self, parameter: str, value: str) -> bool | None:
+        """Set a ``main`` parameter (``set main.<parameter> = <value>``).
+
+        Supported parameters: ``currentdir``, ``random_seed``, ``stacking_method``,
+        ``normalize``, ``graphic_render``, ``lumi`` and ``outputfile`` (``.lhe``/
+        ``.lhco``, optionally gzipped and quoted). Other ``main`` sub-objects
+        (``fastsim``, ``recast``, ``merging``, ...) are handled in
+        :mod:`madanalysis.interpreter.cmd_set`.
+
+        Args:
+            parameter (``str``): name of the parameter.
+            value (``str``): value as typed by the user.
+
+        Returns:
+            ``bool | None``:
+            ``False`` for most errors, ``None`` on success (and for some errors, see
+            the FIXME notes in the code).
+        """
         # currentdir
         if parameter == "currentdir":
             self.set_currentdir(value)
@@ -402,12 +532,14 @@ class Main:
         elif parameter == "lumi":
             try:
                 tmp = float(value)
+            # FIXME: returns None on error while other parameters return False.
             except:
                 self.logger.error("'lumi' is a positive float value")
                 return
             if tmp > 0:
                 self.lumi = tmp
             else:
+                # FIXME: returns None on error while other parameters return False.
                 self.logger.error("'lumi' is a positive float value")
                 return
 
@@ -444,6 +576,8 @@ class Main:
                 elif self.mode == MA5RunningType.PARTON:
                     self.logger.error("LHCO format is not available in PARTON mode.")
                     return False
+                # FIXME: dead branch; the fast-simulation package can only be set in RECO mode, so an
+                # LHCO output is always refused in HADRON mode.
                 elif self.mode == MA5RunningType.HADRON:
                     if self.fastsim.package == "none":
                         self.logger.error(
@@ -463,13 +597,28 @@ class Main:
                 return False
 
         # other
+        # FIXME: returns None for an unknown parameter while other errors return False.
         else:
             self.logger.error("'main' has no parameter called '" + parameter + "'")
 
-    def get_currentdir(self):
+    def get_currentdir(self) -> str:
+        """Getter of the :attr:`currentdir` property.
+
+        Returns:
+            ``str``:
+            The current working directory of the Python process.
+        """
         return os.getcwd()
 
-    def set_currentdir(self, dir):
+    def set_currentdir(self, dir: str) -> None:
+        """Setter of the :attr:`currentdir` property: change the working directory.
+
+        An error is logged (but no exception raised) if the directory is not
+        accessible. The (possibly unchanged) current directory is then logged.
+
+        Args:
+            dir (``str``): new working directory (``~`` is expanded).
+        """
         theDir = os.path.expanduser(dir)
         try:
             os.chdir(theDir)
@@ -482,7 +631,12 @@ class Main:
 
     currentdir = property(get_currentdir, set_currentdir)
 
-    def AutoSetGraphicalRenderer(self):
+    def AutoSetGraphicalRenderer(self) -> None:
+        """Select the graphical renderer automatically.
+
+        ROOT is preferred, then Matplotlib; if none of them is available, no figure
+        is produced.
+        """
         self.logger.debug("Function AutoSetGraphicalRenderer:")
         self.logger.debug("   - ROOT is there:       " + str(self.session_info.has_root))
         self.logger.debug(
@@ -501,7 +655,22 @@ class Main:
             + "\x1b[0m"
         )
 
-    def CheckConfig(self, debug=False):
+    def CheckConfig(self, debug: bool = False) -> bool:
+        """First configuration check, performed before building SampleAnalyzer.
+
+        Checks the architecture, reads the user options
+        (``madanalysis/input/installation_options.dat``), the session information,
+        the mandatory packages (Python, compiler, make) and the optional data-processing
+        packages (zlib, FastJet, ROOT, Delphes, ...), then creates the temporary
+        folders.
+
+        Args:
+            debug (``bool``, default ``False``): enable debug printouts.
+
+        Returns:
+            ``bool``:
+            ``True`` if all checks succeeded, ``False`` otherwise.
+        """
         checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
 
         if not checkup.CheckArchitecture():
@@ -518,7 +687,20 @@ class Main:
             return False
         return True
 
-    def CheckConfig2(self, debug=False):
+    def CheckConfig2(self, debug: bool = False) -> bool:
+        """Second configuration check, performed after building SampleAnalyzer.
+
+        Checks the optional reinterpretation packages (SciPy, Spey, pyhf, PADs) and
+        graphical packages (ROOT, Matplotlib, LaTeX), selects the graphical renderer
+        and checks whether a newer MadAnalysis 5 release is available.
+
+        Args:
+            debug (``bool``, default ``False``): enable debug printouts.
+
+        Returns:
+            ``bool``:
+            ``True`` if all checks succeeded, ``False`` otherwise.
+        """
         checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
 
         # Read user options
@@ -539,7 +721,30 @@ class Main:
         # Ok
         return True
 
-    def BuildLibrary(self, forced=False):
+    def BuildLibrary(self, forced: bool = False) -> bool:
+        """Build (if needed) the SampleAnalyzer libraries and test programs.
+
+        A rebuild is triggered when the libraries are missing, when the system
+        configuration differs from the one saved in ``tools/architecture.ma5``, when
+        the test program ``TestSampleAnalyzer`` fails, or when ``forced`` is ``True``.
+        The list of components depends on the detected packages (zlib, FastJet,
+        fjcontrib/substructure, HEPTopTagger, Delphes, Delphes-MA5tune, ROOT). For
+        each component, the project is cleaned, compiled, linked and checked, and
+        test programs are executed.
+
+        As a side effect, the environment variable ``FASTJET_FLAG`` is set
+        (``-DMA5_FASTJET_MODE`` when FastJet is available).
+
+        Args:
+            forced (``bool``, default ``False``): force the rebuild.
+
+        Raises:
+            ``SystemExit``: if any building step fails.
+
+        Returns:
+            ``bool``:
+            ``True`` when the libraries are ready.
+        """
         builder = LibraryBuilder(self.archi_info)
         UpdateNeed = False
         FirstUse, Missing = builder.checkMA5()
@@ -558,6 +763,7 @@ class Main:
         if not rebuild:
             self.logger.info("  => MadAnalysis libraries found.")
 
+            # NOTE: FirstUse is set when the test program is missing, but the test is still run below.
             # Test the program
             if not os.path.isfile(
                 self.archi_info.ma5dir + "/tools/SampleAnalyzer/Bin/TestSampleAnalyzer"
@@ -609,6 +815,8 @@ class Main:
             sys.exit()
 
         # Library to compiles
+        # NOTE: element [2] below is the component keyword understood by LibraryWriter
+        # (Makefile name / folder selection).
         # |- [0] = unique name
         # |- [1] = title of the library to display
         # |- [2] =

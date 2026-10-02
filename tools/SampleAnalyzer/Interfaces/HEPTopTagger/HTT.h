@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file HTT.h
+ * @brief Interface to the HEPTopTagger (v2) top tagger.
+ */
+
 #ifndef MADANALYSIS5_HTT_H
 #define MADANALYSIS5_HTT_H
 
@@ -35,13 +40,21 @@ namespace fastjet {
 
 namespace MA5 {
     namespace Substructure {
+        /**
+         * @brief Wrapper of the HEPTopTagger (Plehn, Spannowsky, Takeuchi and Zerwas, arXiv:1006.2833; HEPTopTagger2, arXiv:1503.05921).
+         *
+         * Configure it with an InputParameters structure, run it on a (fat) jet with Execute()
+         * and query the tagging result and the top candidate with the accessors.
+         */
         class HTT {
 
         protected:
+            /** @brief HEPTopTagger instance (owned). */
             fastjet::HEPTopTagger::HEPTopTagger* _tagger;
 
         public:
 
+            /** @brief Selection of the top candidate among the triplets of subjets. */
             enum Mode {
                 EARLY_MASSRATIO_SORT_MASS,     // applies 2D mass plane requirements then select the candidate which minimizes |m_cand-mt|
                 LATE_MASSRATIO_SORT_MASS,      // selects the candidate which minimizes |m_cand-mt|
@@ -50,6 +63,7 @@ namespace MA5 {
                 TWO_STEP_FILTER                // only analyzes the candidate built with the highest pT(t) after unclustering
             };
 
+            /** @brief Configuration of the tagger (the default values are those of HEPTopTagger). */
             struct InputParameters {
                 Mode mode = EARLY_MASSRATIO_SORT_MASS; // execution mode
 
@@ -82,6 +96,8 @@ namespace MA5 {
 
                 // set top mass ratio range
                 MAfloat32 fw = 0.15;
+                // NOTE: the mass-ratio range is computed from the default values of fw, W_mass and top_mass when the
+                //   structure is created; changing these members afterwards does not update it.
                 MAfloat32 mass_ratio_range_min = (1.-fw)*W_mass/top_mass;
                 MAfloat32 mass_ratio_range_max = (1.+fw)*W_mass/top_mass;
 
@@ -95,71 +111,146 @@ namespace MA5 {
                 MAfloat32 prun_rcut = .5; // set_prun_rcut
             };
 
-            // Constructor without arguments
+            /** @brief Constructor without argument (call Initialize() before use). */
+            // FIXME: _tagger is left uninitialised, while the destructor deletes it.
             HTT() {}
 
-            // Destructor
+            /** @brief Destructor (deletes the tagger). */
             ~HTT();
 
             //============================//
             //        Initialization      //
             //============================//
 
+            /**
+             * @brief Constructor with arguments (calls Initialize()).
+             *
+             * @param param tagger configuration.
+             */
             HTT(HTT::InputParameters& param) { Initialize(param); }
 
+            /**
+             * @brief Create and configure the tagger.
+             *
+             * @param param tagger configuration.
+             */
             void Initialize(HTT::InputParameters& param);
 
             //====================//
             //       Execute      //
             //====================//
 
-            // Method run top tagger.
+            /**
+             * @brief Run the tagger on a jet.
+             *
+             * @param jet jet to tag (its constituents are used).
+             */
             void Execute(const RecJetFormat *jet);
 
             //======================//
             //       Accessors      //
             //======================//
 
-            // accessor to top jet
+            /**
+             * @brief Accessor to the top candidate.
+             *
+             * The returned jet(s) are allocated on the heap and owned by the caller.
+             *
+             * @return the top candidate.
+             */
             const RecJetFormat * top() const;
 
-            //accessor to bottom jet
+            /**
+             * @brief Accessor to the b subjet of the top candidate.
+             *
+             * The returned jet(s) are allocated on the heap and owned by the caller.
+             *
+             * @return the b subjet of the top candidate.
+             */
             const RecJetFormat * b() const;
 
-            //accessor to W jet
+            /**
+             * @brief Accessor to the W candidate.
+             *
+             * The returned jet(s) are allocated on the heap and owned by the caller.
+             *
+             * @return the W candidate.
+             */
             const RecJetFormat * W() const;
 
-            //accessor to leading subjet from W
+            /**
+             * @brief Accessor to the leading subjet of the W candidate.
+             *
+             * The returned jet(s) are allocated on the heap and owned by the caller.
+             *
+             * @return the leading subjet of the W candidate.
+             */
             const RecJetFormat * W1() const;
 
-            //accessor to second leading subjet from W
+            /**
+             * @brief Accessor to the second leading subjet of the W candidate.
+             *
+             * The returned jet(s) are allocated on the heap and owned by the caller.
+             *
+             * @return the second leading subjet of the W candidate.
+             */
             const RecJetFormat * W2() const;
 
-            // accessor to PT ordered subjets
+            /**
+             * @brief Accessor to the three pT-ordered subjets of the top candidate.
+             *
+             * The returned jet(s) are allocated on the heap and owned by the caller.
+             *
+             * @return the subjets.
+             */
             std::vector<const RecJetFormat *> subjets() const;
 
-            // print tagger information
+            /** @brief Print information on the last tagging. */
             void get_info() const;
 
-            // print tagger settings
+            /** @brief Print the tagger settings. */
             void get_settings() const;
 
-            // accessor to pruned mass
+            /**
+             * @brief Accessor to the pruned mass.
+             *
+             * @return the pruned mass.
+             */
             MAfloat32 pruned_mass() const;
 
-            // accessor to unfiltered mass
+            /**
+             * @brief Accessor to the unfiltered mass.
+             *
+             * @return the unfiltered mass.
+             */
             MAfloat32 unfiltered_mass() const;
 
-            // accessor to delta top
+            /**
+             * @brief Accessor to the difference between the reconstructed and the true top mass.
+             *
+             * @return the mass difference.
+             */
             MAfloat32 delta_top() const;
 
-            // Is given jet tagged
+            /**
+             * @brief Whether the jet is top-tagged.
+             *
+             * @return true if tagged.
+             */
             MAbool is_tagged() const;
 
-            // top mass window requirement passed?
+            /**
+             * @brief Whether the top mass window requirement is satisfied.
+             *
+             * @return true if satisfied.
+             */
             MAbool is_maybe_top() const;
 
-            // 2D mass plane requirements passed?
+            /**
+             * @brief Whether the 2D mass-plane requirements are satisfied.
+             *
+             * @return true if satisfied.
+             */
             MAbool is_masscut_passed() const;
         };
     }

@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -22,12 +22,32 @@
 ################################################################################
 
 
+"""Session information that does not require a rebuild of SampleAnalyzer when it changes.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 
 
 class SessionInfo:
-    def __init__(self):
+    """Session information (not stored with the libraries).
+
+    Attributes:
+        editor (``str``): text editor used to edit cards.
+        username (``str``): user name.
+        tmpdir / downloaddir (``str``): temporary and download folders.
+        has_root / has_matplotlib / has_gnuplot / has_pdflatex / has_latex / has_dvipdf
+            (``bool``): graphical and report packages.
+        has_spey / has_simplify (``bool``): statistics packages.
+        has_web (``bool``): whether web access is allowed.
+        has_pad / has_padma5 / has_padsfs (``bool``): installed PADs, with their
+            ``*_build_path`` and ``*_original_bins``.
+        gcc_header_search_path / gcc_library_search_path (``list[str]``): search paths of
+            the compiler.
+    """
+    def __init__(self) -> None:
+        """Initialise an empty session information."""
         self.editor = ""
         self.username = ""
         self.tmpdir = ""
@@ -52,20 +72,54 @@ class SessionInfo:
         self.pad_original_bins = []
         self.logger = logging.getLogger("MA5")
 
-    def dump(self):
+    def dump(self) -> None:
+        """Log all attributes at debug level."""
         for item in self.__dict__:
             self.logger.debug(item + "\t" + str(self.__dict__[item]))
 
-    def __eq__(self, other):
+    def __eq__(self, other: SessionInfo) -> bool:
+        """Compare all attributes with another object.
+
+        Args:
+            other (``SessionInfo``): object to compare with.
+
+        Returns:
+            ``bool``:
+            ``True`` if all attributes are equal.
+        """
         return self.__dict__ == other.__dict__
 
-    def __neq__(self, other):
+    def __neq__(self, other: SessionInfo) -> bool:
+        """Negation of :meth:`__eq__`.
+
+        .. note::
+            Python uses ``__ne__``, not ``__neq__``: this method is never called implicitly
+            (``!=`` already falls back to the negation of ``__eq__``).
+
+        Args:
+            other (``SessionInfo``): object to compare with.
+
+        Returns:
+            ``bool``:
+            ``True`` if at least one attribute differs.
+        """
         return not self.__eq__(other)
 
-    def save(self, filename):
+    def save(self, filename: str) -> bool:
+        """Pickle the session information into a file.
+
+        Args:
+            filename (``str``): destination file.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # Open the file
         try:
+            # FIXME: pickle requires a binary file ('wb'); in text mode pickle.dump raises a TypeError
+            # (caught below, so save() always returns False).
             file = open(filename, "w")
         except:
             self.logger.error(
@@ -89,10 +143,22 @@ class SessionInfo:
         # Return the operation status
         return test
 
-    def load(self, filename):
+    def load(self, filename: str) -> bool:
+        """Load the session information from a pickle file.
+
+        Only the attributes existing in the current object are copied.
+
+        Args:
+            filename (``str``): pickle file.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # Open the file
         try:
+            # FIXME: pickle requires a binary file ('rb').
             file = open(filename, "r")
         except:
             self.logger.error(

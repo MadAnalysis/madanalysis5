@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,20 +22,35 @@
 ################################################################################
 
 
+"""State of a ``<block>`` while parsing a SAF file line by line."""
+
+from __future__ import annotations
+
 class SafBlockStatus():
-    def __init__(self):
+    """Status of a SAF block during parsing.
+
+    Attributes:
+        activated (``bool``): ``True`` between the opening and closing tags.
+        Nactivated (``int``): number of times the block has been opened.
+        Nlines (``int``): number of lines read inside the current block.
+    """
+    def __init__(self) -> None:
+        """Initialise a closed block."""
         self.activated  = False
         self.Nactivated = 0
         self.Nlines     = 0
 
-    def activate(self):
+    def activate(self) -> None:
+        """Mark the block as opened (opening tag found)."""
         self.activated  =  True
         self.Nactivated += 1
 
-    def desactivate(self):
+    def desactivate(self) -> None:
+        """Mark the block as closed (closing tag found) and reset the line counter."""
         self.activated = False
         self.Nlines    = 0
 
-    def newline(self):
+    def newline(self) -> None:
+        """Count a line read inside the block."""
         self.Nlines += 1
 

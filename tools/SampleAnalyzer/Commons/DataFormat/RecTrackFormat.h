@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file RecTrackFormat.h
+ * @brief Reconstructed track.
+ */
 
 #ifndef RecTrackFormat_h
 #define RecTrackFormat_h
@@ -50,6 +55,7 @@ class DetectorDelphes;
 class DetectorDelphesMA5tune;
 class DelphesMemoryInterface;
 
+/** @brief Reconstructed track. */
 class RecTrackFormat : public RecParticleFormat
 {
 
@@ -70,10 +76,15 @@ class RecTrackFormat : public RecParticleFormat
   // -------------------------------------------------------------
  protected:
 
+  /** @brief PDG code (-1: taken from the matched Monte Carlo particle). */
   MAint32 pdgid_;   /// PDG identity code
+  /** @brief Electric charge (false: -1, true: +1). */
   MAbool charge_;      /// electric charge
+  /** @brief Pseudorapidity at the entrance of the calorimeter (Delphes). */
   MAfloat64 etaOuter_;  /// eta @ first layer of calo
+  /** @brief Azimuthal angle at the entrance of the calorimeter (Delphes). */
   MAfloat64 phiOuter_;  /// phi @ first layer of calo
+  /** @brief Isolation cones of various radii. */
   std::vector<IsolationConeType> isolCones_; // isolation cones
 
   // -------------------------------------------------------------
@@ -81,15 +92,15 @@ class RecTrackFormat : public RecParticleFormat
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor (members reset). */
   RecTrackFormat()
   { Reset(); }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~RecTrackFormat()
   {}
 
-  /// Dump information
+  /** @brief Print the track properties. */
   virtual void Print() const
   {
     INFO << "pdgid = " << pdgid_ << ", "  
@@ -99,7 +110,7 @@ class RecTrackFormat : public RecParticleFormat
     ParticleBaseFormat::Print();
   }
 
-  /// Clear all information
+  /** @brief Reset all the members. */
   virtual void Reset()
   {
     pdgid_    = -1;
@@ -111,42 +122,76 @@ class RecTrackFormat : public RecParticleFormat
     isolCones_.clear();
   }
 
-  /// Accessor to the pdgid
+  /**
+   * @brief Accessor to the PDG code.
+   *
+   * @return the PDG code, taken from the matched Monte Carlo particle if not set.
+   */
   const MAint32 pdgid() const
   {
     // @JACK: use MC pdgid if there is no PDGID smearing
     //        setter can be used for PDGID smearing.
+    // NOTE: dereferences mc_ without checking that it is not null.
     if (pdgid_ == -1) return mc_->pdgid();
     else return pdgid_;
   }
 
-  // Setter for pdgid
+  /**
+   * @brief Set the PDG code (e.g. for PDG-code smearing).
+   *
+   * @param v PDG code.
+   */
   void setPdgid(MAint32 v)   {pdgid_=v;}
 
-  /// Accessor to etaCalo (only for Delphes)
+  /**
+   * @brief Accessor to the pseudorapidity at the calorimeter (Delphes only).
+   *
+   * @return the pseudorapidity.
+   */
   const MAfloat64& etaCalo() const
   {return etaOuter_;}
 
-  /// Accessor to etaCalo (only for Delphes)
+  /**
+   * @brief Accessor to the azimuthal angle at the calorimeter (Delphes only).
+   *
+   * @return the azimuthal angle.
+   */
   const MAfloat64& phiCalo() const
   {return phiOuter_;}
 
-  /// Accessor to charge
+  /**
+   * @brief Accessor to the electric charge.
+   *
+   * @return +1 or -1.
+   */
   virtual const MAint32 charge() const
   {if (charge_) return +1; else return -1;}
 
-  /// Mutator related to the electric charge
+  /**
+   * @brief Set the electric charge.
+   *
+   * @param charge charge (> 0: positive, otherwise negative).
+   */
   virtual void SetCharge(MAint32 charge)
   { if (charge>0) charge_=true; else charge_=false; }
 
-  /// giving a new isolation cone entry
+  /**
+   * @brief Append a new isolation cone.
+   *
+   * @return a pointer to the new cone.
+   */
   IsolationConeType* GetNewIsolCone()
   {
     isolCones_.push_back(IsolationConeType());
     return &isolCones_.back();
   }
 
-  // Accessor to Isolation cone with speciffic radius. (only for SFS)
+  /**
+   * @brief Get the isolation cone of a given radius, created if needed (SFS only).
+   *
+   * @param radius radius of the cone.
+   * @return a pointer to the cone.
+   */
   IsolationConeType* GetIsolCone(MAfloat32 radius)
   {
     for (MAuint32 i=0; i<isolCones_.size(); i++)
@@ -157,7 +202,11 @@ class RecTrackFormat : public RecParticleFormat
     return &isolCones_.back();
   }
 
-  /// get the collection of isolation cones
+  /**
+   * @brief Accessor to the isolation cones.
+   *
+   * @return the cones.
+   */
   const std::vector<IsolationConeType>& isolCones() const
   { return isolCones_; }
 

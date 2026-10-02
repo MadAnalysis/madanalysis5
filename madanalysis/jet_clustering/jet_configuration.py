@@ -21,30 +21,41 @@
 #  
 ################################################################################
 
+"""Definition of an additional jet collection (``define jet_algorithm``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 from typing import Text, Dict
 
 class JetConfiguration:
+    """A jet definition: identifier, clustering algorithm and its parameters.
+
+    The algorithm parameters are stored as plain attributes (``radius``, ``ptmin``, ...),
+    which are listed by :meth:`user_GetParameters`.
+
+    Attributes:
+        JetID (``str``): identifier of the jet collection.
+        algorithm (``str``): name of the clustering algorithm.
+    """
     
     userVariables = ['antikt','cambridge', 'genkt','kt',
                      'gridjet', 'cdfjetclu','cdfmidpoint','siscone',
                      "VariableR"]
 
     def __init__(self,JetID: Text = 'Ma5Jet', algorithm: Text = '', options: Dict = None):
-        """
-        Parameters
-        ----------
-        JetID : STR
-            Jet identification =>  event.rec()->jet("MA5Jet")
-        algorithm: STR
-            Clustering algorithm
-        options: DICT
-            options such as radius, ptmin etc.
+        """Create a jet definition.
 
-        The instance names are used directly in C++ implementation
-        hence change in instance name will require change in C++ portion
-        as well.
+        The attribute names are used directly when writing the C++ configuration of the
+        extra jet collections; renaming them requires the corresponding change on the C++
+        side.
+
+        Args:
+            JetID (``Text``, default ``'Ma5Jet'``): identifier of the jet collection
+                (``event.rec()->jets("<JetID>")`` in C++).
+            algorithm (``Text``, default ``''``): clustering algorithm (see
+                :attr:`userVariables`); nothing is configured for unknown algorithms.
+            options (``Dict``, default ``None``): algorithm options (radius, ptmin, ...).
         """
         self.JetID     = JetID
 
@@ -56,7 +67,13 @@ class JetConfiguration:
             self.SetDefaultAlgorithm(algorithm, options)
 
 
-    def SetDefaultAlgorithm(self,algorithm: Text, options: Dict):
+    def SetDefaultAlgorithm(self,algorithm: Text, options: Dict) -> None:
+        """Configure an algorithm with its default parameters overridden by ``options``.
+
+        Args:
+            algorithm (``Text``): name of the algorithm.
+            options (``Dict``): user options.
+        """
         if   algorithm == 'antikt'      : self.DefaultAntikT(options)
         elif algorithm == 'cambridge'   : self.DefaultCambridgeAchen(options)
         elif algorithm == 'genkt'       : self.DefaultGenkT(options)
@@ -68,22 +85,50 @@ class JetConfiguration:
         elif algorithm == 'VariableR'   : self.DefaultVariableR(options)
 
     def DefaultAntikT(self,kwargs: Dict) -> None:
+        """Configure the anti-kT algorithm.
+
+        The parameters (default values) are: ``radius`` (0.4), ``ptmin`` (5). Missing options take their default value.
+
+        Args:
+            kwargs (``Dict``): user options.
+        """
         self.algorithm = 'antikt'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
 
     def DefaultkT(self,kwargs: Dict) -> None:
+        """Configure the kT algorithm.
+
+        The parameters (default values) are: ``radius`` (0.4), ``ptmin`` (5), ``exclusive`` (False). Missing options take their default value.
+
+        Args:
+            kwargs (``Dict``): user options.
+        """
         self.algorithm = 'kt'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
         self.exclusive = kwargs.get('exclusive',       False)
 
     def DefaultCambridgeAchen(self,kwargs: Dict) -> None:
+        """Configure the Cambridge/Aachen algorithm.
+
+        The parameters (default values) are: ``radius`` (0.4), ``ptmin`` (5). Missing options take their default value.
+
+        Args:
+            kwargs (``Dict``): user options.
+        """
         self.algorithm = 'cambridge'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
 
     def DefaultGenkT(self,kwargs: Dict) -> None:
+        """Configure the generalised kT algorithm.
+
+        The parameters (default values) are: ``radius`` (0.4), ``ptmin`` (5), ``exclusive`` (False), ``p`` (-1). Missing options take their default value.
+
+        Args:
+            kwargs (``Dict``): user options.
+        """
         self.algorithm = 'genkt'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
@@ -91,11 +136,25 @@ class JetConfiguration:
         self.p         = kwargs.get('p',               -1)
 
     def DefaultGridJet(self,kwargs: Dict) -> None:
+        """Configure the GridJet algorithm.
+
+        The parameters (default values) are: ``ymax`` (3), ``ptmin`` (5). Missing options take their default value.
+
+        Args:
+            kwargs (``Dict``): user options.
+        """
         self.algorithm = 'gridjet'
         self.ymax      = kwargs.get('ymax',            3.)
         self.ptmin     = kwargs.get('ptmin',           5.)
 
     def DefaultSisCone(self,kwargs: Dict) -> None:
+        """Configure the SISCone algorithm.
+
+        The parameters (default values) are: ``radius`` (0.4), ``ptmin`` (5), ``input_ptmin`` (5), ``overlap`` (0.5), ``npassmax`` (1). Missing options take their default value.
+
+        Args:
+            kwargs (``Dict``): user options.
+        """
         self.algorithm   = 'siscone'
         self.radius      = kwargs.get('radius',        0.4)
         self.ptmin       = kwargs.get('ptmin',         5.)
@@ -104,6 +163,13 @@ class JetConfiguration:
         self.npassmax    = kwargs.get('npassmax',      1.)
 
     def DefaultCDF(self,kwargs: Dict) -> None:
+        """Configure the CDF JetClu algorithm.
+
+        The parameters (default values) are: ``radius`` (0.4), ``ptmin`` (5), ``overlap`` (0.5), ``seed`` (1), ``iratch`` (0). Missing options take their default value.
+
+        Args:
+            kwargs (``Dict``): user options.
+        """
         self.algorithm = 'cdfjetclu'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
@@ -112,6 +178,13 @@ class JetConfiguration:
         self.iratch    = kwargs.get('iratch',          0.)
 
     def DefaultCDFMidPoint(self,kwargs: Dict) -> None:
+        """Configure the CDF MidPoint algorithm.
+
+        The parameters (default values) are: ``radius`` (0.4), ``ptmin`` (5), ``overlap`` (0.5), ``seed`` (1), ``iratch`` (0), ``areafraction`` (1). Missing options take their default value.
+
+        Args:
+            kwargs (``Dict``): user options.
+        """
         self.algorithm    = 'cdfmidpoint'
         self.radius       = kwargs.get('radius',       0.4)
         self.ptmin        = kwargs.get('ptmin',        5.)
@@ -121,6 +194,13 @@ class JetConfiguration:
         self.areafraction = kwargs.get('areafraction', 1.)
 
     def DefaultVariableR(self, kwargs: Dict) -> None:
+        """Configure the variable-R algorithm.
+
+        The parameters (default values) are: ``rho`` (2000), ``minR`` (0), ``maxR`` (2), ``ptmin`` (20), ``exclusive`` (False), ``clustertype`` (``AKTLIKE``; or ``CALIKE``, ``KTLIKE``), ``strategy`` (``Best``; or ``N2Tiled``, ``N2Plain``, ``NNH``, ``Native``). Missing options take their default value.
+
+        Args:
+            kwargs (``Dict``): user options.
+        """
         self.algorithm   = 'VariableR'
         self.rho         = float(kwargs.get('rho', 2000.))
         self.minR        = float(kwargs.get('minR', 0.))
@@ -132,18 +212,49 @@ class JetConfiguration:
         strategy = kwargs.get('strategy', "Best")
         self.strategy = strategy if strategy in ["Best", "N2Tiled", "N2Plain", "NNH", "Native"] else "Best"
 
-    def GetJetAlgorithms(self):
+    def GetJetAlgorithms(self) -> list[str]:
+        """Get the supported clustering algorithms.
+
+        Returns:
+            ``list[str]``:
+            :attr:`userVariables`.
+        """
         return self.userVariables
 
-    def user_GetValues(self, parameter: Text):
+    def user_GetValues(self, parameter: Text) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            parameter (``Text``): name of the parameter.
+
+        Raises:
+            ``KeyError``: if the parameter is not defined for the current algorithm.
+
+        Returns:
+            ``list[str]``:
+            The algorithms for ``algorithm``, otherwise the current value.
+        """
         if parameter == 'algorithm':
             return self.GetJetAlgorithms()
         else:
+            # NOTE: KeyError for unknown parameters.
             return [str(self.__dict__[parameter])]
 
     def user_SetParameter(self, parameter: Text, value: Text) -> None:
+        """Set a parameter (``set <JetID>.<parameter> = <value>``).
+
+        Changing ``algorithm`` reconfigures the jet definition, keeping the options that are
+        relevant for the new algorithm. All parameters except ``exclusive``, ``strategy`` and
+        ``clustertype`` are converted to floats. Errors are logged.
+
+        Args:
+            parameter (``Text``): name of the parameter.
+            value (``Text``): value typed by the user.
+        """
         if parameter not in ['algorithm','JetID']:
             if parameter not in self.__dict__.keys():
+                # NOTE: AttributeError if the object was created with an unknown algorithm
+                # ('self.algorithm' is then undefined).
                 logging.getLogger('MA5').error("Option '"+parameter+"' is not available for "+self.algorithm+' algorithm.')
                 logging.getLogger('MA5').error("Available options are : "+\
                                                ', '.join([x for x in self.__dict__.keys() if x!='JetID']))
@@ -162,6 +273,8 @@ class JetConfiguration:
                     if value in strategy:
                         self.strategy = value
                     else:
+                        # FIXME: JetConfiguration has no 'logger' attribute (AttributeError); use
+                        # logging.getLogger('MA5') as elsewhere in this method (same issue below).
                         self.logger.error(f"Invalid strategy: {value}")
                         self.logger.error("Available types are: " + ", ".join(strategy))
                         return
@@ -200,11 +313,18 @@ class JetConfiguration:
                 # logging.getLogger('MA5').warning(self.JetID+' has been reset.')
         return
 
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the settable parameters.
+
+        Returns:
+            ``list[str]``:
+            Attribute names except ``JetID``.
+        """
         return [x for x in self.__dict__.keys() if x != 'JetID']
 
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log the algorithm and its parameters."""
         key_order  = ['JetID','algorithm']+[x for x in ['radius','ptmin'] if x in self.__dict__.keys()]
         key_order += [x for x in self.__dict__.keys() if x not in key_order]
         for key in key_order:

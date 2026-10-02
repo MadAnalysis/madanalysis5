@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file MABoost.h
+ * @brief Lorentz boost.
+ */
+
 #ifndef MABoost_h
 #define MABoost_h
 
@@ -40,6 +45,7 @@
 namespace MA5
 {
 
+    /** @brief Lorentz boost defined by a velocity vector (bx, by, bz). */
     class MABoost
     {
 
@@ -48,15 +54,16 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     protected:
-        /// @brief value of the velocity on x-axis (px / E)
+        /** @brief Velocity along x (px/E). */
         MAdouble64 bx_;
 
-        /// @brief value of the velocity on y-axis (py / E)
+        /** @brief Velocity along y (py/E). */
         MAdouble64 by_;
 
-        /// @brief value of the velocity on z-axis (pz / E)
+        /** @brief Velocity along z (pz/E). */
         MAdouble64 bz_;
 
+        /** @brief Squared velocity, Lorentz factor and (gamma-1)/beta^2. */
         MAdouble64 b2_;
         MAdouble64 gamma_;
         MAdouble64 gamma2_;
@@ -65,7 +72,7 @@ namespace MA5
         //                      method members
         // -------------------------------------------------------------
     public:
-        // Constructors
+        /** @brief Constructor (all members set to zero, i.e. gamma = 0: not the identity). */
         MABoost()
         {
             bx_ = 0.;
@@ -76,29 +83,38 @@ namespace MA5
             gamma2_ = 0;
         }
 
-        /// @brief Initialise the boost vector
-        /// @param bx value of the velocity on x-axis (px / E)
-        /// @param by value of the velocity on y-axis (py / E)
-        /// @param bz value of the velocity on z-axis (pz / E)
+        /**
+         * @brief Constructor from a velocity.
+         *
+         * @param bx velocity along x (px/E).
+         * @param by velocity along y (py/E).
+         * @param bz velocity along z (pz/E).
+         */
         MABoost(MAdouble64 bx, MAdouble64 by, MAdouble64 bz)
         {
             setBoostVector(bx, by, bz);
         }
 
-        /// @brief Initialise boost vector with LorentzVector
-        /// @param q lorentz vector
+        /**
+         * @brief Constructor from a four-vector (velocity = p/E).
+         *
+         * @param q four-vector.
+         */
         MABoost(const MALorentzVector &q)
         {
             setBoostVector(q);
         }
 
-        // Destructor
+        /** @brief Destructor. */
         ~MABoost() {}
 
-        /// @brief Setting the boost vector
-        /// @param bx value of the velocity on x-axis
-        /// @param by value of the velocity on y-axis
-        /// @param bz value of the velocity on z-axis
+        /**
+         * @brief Set the velocity.
+         *
+         * @param bx velocity along x.
+         * @param by velocity along y.
+         * @param bz velocity along z.
+         */
         void setBoostVector(MAdouble64 bx, MAdouble64 by, MAdouble64 bz)
         {
             // boost component
@@ -112,8 +128,11 @@ namespace MA5
             gamma2_ = b2_ > 0 ? (gamma_ - 1.0) / b2_ : 0.0;
         }
 
-        /// @brief Setting the boost vector
-        /// @param q Lorentz vector input
+        /**
+         * @brief Set the velocity from a four-vector (p/E).
+         *
+         * @param q four-vector (warning if E = 0).
+         */
         void setBoostVector(const MALorentzVector &q)
         {
             try
@@ -125,28 +144,46 @@ namespace MA5
             catch (const std::exception &e)
             {
                 MANAGE_EXCEPTION(e);
+                // FIXME: 'MABoost();' creates a temporary object: the members of this boost are not reset.
                 MABoost();
             }
         }
 
-  // Get the boost vector
+  /**
+   * @brief Accessor to the velocity vector.
+   *
+   * @return the velocity.
+   */
   MAVector3 BoostVector() const { return MAVector3(bx_, by_, bz_); }
 
 
-        /// @brief Accessor to Beta
-        /// @return beta value
+        /**
+         * @brief Accessor to beta (see the FIXME).
+         *
+         * @return beta squared (b2_), not beta.
+         */
+        // FIXME: returns the squared velocity instead of beta.
         const MAdouble64 beta() const { return b2_; }
 
-        /// @brief Accessor to gamma
-        /// @return gamma value
+        /**
+         * @brief Accessor to the Lorentz factor.
+         *
+         * @return gamma.
+         */
         const MAdouble64 gamma() const { return gamma_; }
 
-        /// @brief Accessor to beta vector
-        /// @return beta vector as MAVector3
+        /**
+         * @brief Accessor to the velocity vector.
+         *
+         * @return the velocity.
+         */
         const MAVector3 velocity() const { return MAVector3(bx_, by_, bz_); }
 
-        /// @brief Boost a given lorentz vector
-        /// @param p lorentz vector to be boosted
+        /**
+         * @brief Boost a four-vector in place.
+         *
+         * @param p four-vector.
+         */
         void boost(MALorentzVector &p) const
         {
             MAdouble64 bp = bx_ * p.X() + by_ * p.Y() + bz_ * p.Z();
@@ -156,9 +193,12 @@ namespace MA5
             p.SetT(gamma_ * (p.T() + bp));
         }
 
-        /// @brief Boost the given lorentz vector
-        /// @param q lorentz vector
-        /// @return boosted lorentz vector
+        /**
+         * @brief Boost a four-vector.
+         *
+         * @param q four-vector.
+         * @return the boosted four-vector.
+         */
         MALorentzVector operator*(const MALorentzVector &q) const
         {
             MALorentzVector q2 = q;

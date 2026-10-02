@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // SampleAnalyser headers
+/**
+ * @file ClusterAlgoCDFMidpoint.cpp
+ * @brief Implementation of MA5::ClusterAlgoCDFMidpoint.
+ */
+
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
 
 // FastJet headers
@@ -109,6 +114,7 @@ MAbool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::s
 MAbool ClusterAlgoCDFMidpoint::Initialize()
 {
   // Creating plugin
+  // NOTE: the plugin is never deleted (the jet definition does not own it).
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::CDFMidPointPlugin(R_, OverlapThreshold_, 
                                            SeedThreshold_, ConeAreaFraction_);
 

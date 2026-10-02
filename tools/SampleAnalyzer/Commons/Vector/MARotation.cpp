@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file MARotation.cpp
+ * @brief Compilation unit of the rotation and boost headers.
+ */
+
 #include "SampleAnalyzer/Commons/Vector/MARotation3axis.h"
 #include "SampleAnalyzer/Commons/Vector/MARotation3euler.h"
 #include "SampleAnalyzer/Commons/Vector/MARotationGeneral.h"

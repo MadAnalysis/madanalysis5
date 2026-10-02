@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,23 @@
 ################################################################################
 
 
+"""Configuration of the recasting mode (``set main.recast = on`` and ``set main.recast.*``).
+
+In recasting mode, the events are processed by one or several detector simulations
+(Delphes, Delphes-MA5tune or SFS) and by the corresponding analyses of the Public
+Analysis Database (PAD, PADForMA5tune, PADForSFS). The analyses to run are listed in a
+*recasting card* (``Input/recasting_card.dat`` of the job directory) whose lines read::
+
+    <analysis>  <v1.1|v1.2|vSFS>  <on|off>  <detector card>  # description
+
+where ``v1.1`` refers to the PADForMA5tune, ``v1.2`` to the PAD and ``vSFS`` to the
+PADForSFS. The detector card associated with each analysis is given in
+``tools/<PAD>/Input/recast_config.dat``.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 
 import glob
 import logging
@@ -35,6 +51,35 @@ from madanalysis.enumeration.ma5_running_type import MA5RunningType
 
 
 class RecastConfiguration:
+    """Settings of the recasting mode.
+
+    Attributes:
+        status (``str``): ``"on"`` or ``"off"``.
+        delphes / ma5tune (``bool``): whether Delphes / Delphes-MA5tune are available.
+        pad / padtune / padsfs (``bool``): whether the PAD / PADForMA5tune / PADForSFS are
+            installed.
+        card_path (``str``): user-provided recasting card (empty = generated card).
+        store_root / store_events (``bool``): keep the (reconstructed) event files.
+        TACO_output (``str``): output file of the TACO mode (empty = disabled).
+        global_likelihoods_switch (``bool``): use full/simplified likelihoods when available.
+        simplify_likelihoods (``bool``): simplify full likelihoods (``simplify`` package).
+        systematics (``list[tuple[float, float]]``): relative (up, down) systematic
+            uncertainties on the signal.
+        extrapolated_luminosities (``list[float]``): luminosities (fb^-1) to extrapolate to.
+        THerror_combination (``str``): ``"linear"`` or ``"quadratic"`` combination of
+            theory uncertainties.
+        error_extrapolation (``str | list[float]``): ``"linear"``, ``"sqrt"`` or
+            user-defined ``[syst, stat]`` relative background uncertainties for the
+            extrapolation.
+        stat_only_mode / stat_only_dir: recompute the statistics from an existing job
+            directory (currently disabled in the interface).
+        analysis_only_mode (``bool``): only compute the signal-region efficiencies.
+        DelphesDic (``dict[str, list[str]]``): detector card -> analyses, read from the
+            ``recast_config.dat`` files of the installed PADs.
+        description (``dict[str, str]``): analysis -> description, read from the
+            ``analysis_description.dat`` files.
+        ma5dir (``str``): MadAnalysis 5 installation folder.
+    """
 
     userVariables = {
         "status": ["on", "off"],
@@ -50,7 +95,13 @@ class RecastConfiguration:
         "TACO_output": "",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise a disabled recasting configuration and read the PAD metadata.
+
+        The files ``tools/<PAD>/Input/recast_config.dat`` and
+        ``tools/<PAD>/Input/analysis_description.dat`` of every installed PAD are parsed to
+        fill :attr:`DelphesDic` and :attr:`description`.
+        """
         self.status = "off"
         self.delphes = False
         self.ma5tune = False
@@ -113,7 +164,8 @@ class RecastConfiguration:
         self.card_path = ""
         self.logger = logging.getLogger("MA5")
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log the recasting settings."""
         self.user_DisplayParameter("status")
         if self.status == "on":
             self.user_DisplayParameter("delphes")
@@ -124,6 +176,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("card_path")
             self.user_DisplayParameter("store_events")
             self.user_DisplayParameter("TACO_output")
+            # FIXME: user_DisplayParameter handles 'extrapolated_luminosity' (singular): nothing is displayed.
             self.user_DisplayParameter("extrapolated_luminosities")
             self.user_DisplayParameter("systematics")
             self.user_DisplayParameter("THerror_combination")
@@ -132,7 +185,12 @@ class RecastConfiguration:
             #            self.user_DisplayParameter("stat_only_mode")
             self.user_DisplayParameter("analysis_only_mode")
 
-    def user_DisplayParameter(self, parameter):
+    def user_DisplayParameter(self, parameter: str) -> None:
+        """Log the value of one setting.
+
+        Args:
+            parameter (``str``): name of the setting.
+        """
         if parameter == "status":
             self.logger.info(f" recasting mode: {self.status}")
         elif parameter == "delphes":
@@ -234,8 +292,26 @@ class RecastConfiguration:
         return
 
     def user_SetParameter(
-        self, parameters, values, level, archi_info, session_info, datasets
-    ):
+        self, parameters: str | list[str], values: str | list[str], level: int, archi_info: Any, session_info: Any, datasets: Any
+    ) -> None:
+        """Set a recasting setting (``set main.recast[.<parameter>] = <value>``).
+
+        Switching the recasting on requires the reco mode and Spey, and at least one of
+        the PAD/Delphes, PADForMA5tune/Delphes-MA5tune or PADForSFS combinations.
+        Switching it off is refused if hadron-level (HEP/HepMC) datasets are imported.
+        The ``add`` keyword appends systematic uncertainties
+        (``set main.recast.add.systematics = up [down]``) or extrapolated luminosities
+        (``set main.recast.add.extrapolated_luminosity = L1 [L2 ...]``).
+
+        Args:
+            parameters (``str | list[str]``): name of the setting, or the list of dotted
+                name components after ``main.recast`` (to support ``add``).
+            values (``str | list[str]``): value, or list of value tokens.
+            level (``int``): running mode.
+            archi_info (``ArchitectureInfo``): detected configuration.
+            session_info (``SessionInfo``): session information (PAD availability).
+            datasets (``DatasetCollection``): datasets of the session.
+        """
         # Make sure that previous features are unchanged:  the 'add' keyword is properly dealt with
         if isinstance(parameters, list):
             parameter = parameters[0]
@@ -272,7 +348,7 @@ class RecastConfiguration:
                 if (
                     not archi_info.has_delphes
                     or not session_info.has_pad
-                    or not archi_info.has_spey
+                    or not session_info.has_spey
                 ):
                     self.logger.warning(
                         "Delphes and/or the PAD are not installed (or deactivated): "
@@ -281,7 +357,7 @@ class RecastConfiguration:
                 else:
                     canrecast = True
 
-                if not archi_info.has_spey:
+                if not session_info.has_spey:
                     self.logger.warning("Recast module requires Spey package.")
                     self.logger.warning(
                         "Installation instructions can be found at https://spey.readthedocs.io/"
@@ -296,7 +372,7 @@ class RecastConfiguration:
                 if (
                     not archi_info.has_delphesMA5tune
                     or not session_info.has_padma5
-                    or not archi_info.has_spey
+                    or not session_info.has_spey
                 ):
                     self.logger.warning(
                         "DelphesMA5tune and/or the PADForMA5tune are not installed "
@@ -427,7 +503,8 @@ class RecastConfiguration:
         # Error extrapolation
         elif parameter == "error_extrapolation":
 
-            def error_message():
+            def error_message() -> None:
+                """Log the allowed syntaxes of ``error_extrapolation``."""
                 self.logger.error(
                     "When extrapolating to different luminosities, uncertainties"
                 )
@@ -479,12 +556,14 @@ class RecastConfiguration:
                 return
 
         elif parameter == "stat_only_mode":
+            # FIXME: after 'false', execution continues to the directory test below and logs an error.
             if value.lower() == "false":
                 self.stat_only_mode = False
             if os.path.isdir(os.path.join(value, "Output/SAF")):
                 self.stat_only_dir = value
                 self.stat_only_mode = True
             else:
+                # FIXME: missing f-prefix: '{value}' is printed literally.
                 self.logger.error("{value} is not a valid directory.")
                 return
         elif parameter == "analysis_only_mode":
@@ -503,7 +582,17 @@ class RecastConfiguration:
             self.logger.error(f"The recast module has no parameter called '{parameter}'")
             return
 
-    def user_GetParameters(self, var=""):
+    def user_GetParameters(self, var: str = "") -> list[str]:
+        """Get the names of the settable parameters (tab completion).
+
+        Args:
+            var (``str``, default ``""``): ``"add"`` to get the parameters of the ``add``
+                keyword.
+
+        Returns:
+            ``list[str]``:
+            Parameter names (empty if the recasting mode is off).
+        """
         if self.status == "on":
             if var == "add":
                 table = ["extrapolated_luminosity", "systematics"]
@@ -523,13 +612,36 @@ class RecastConfiguration:
             table = []
         return table
 
-    def user_GetValues(self, variable):
+    def user_GetValues(self, variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            Suggested values, or an empty list.
+        """
         table = []
         if variable in RecastConfiguration.userVariables:
             table.extend(RecastConfiguration.userVariables[variable])
         return table
 
-    def CreateCard(self, dirname, write=True):
+    def CreateCard(self, dirname: str, write: bool = True) -> bool:
+        """Create (or check and copy) the recasting card of a job.
+
+        Without a user card, a card listing all analyses of the installed PADs (all
+        switched ``on``) is written; otherwise the user card is checked with
+        :meth:`CheckCard` and copied.
+
+        Args:
+            dirname (``str``): job directory.
+            write (``bool``, default ``True``): whether the generated card is written.
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` if the user card is missing or invalid.
+        """
         # using an existing card
         if self.card_path == "":
             if self.padtune and self.ma5tune:
@@ -549,7 +661,21 @@ class RecastConfiguration:
                 return False
         return True
 
-    def CheckCard(self, dirname):
+    def CheckCard(self, dirname: str) -> bool:
+        """Validate a user-provided recasting card and copy it into the job directory.
+
+        Each analysis must exist in the relevant PAD (read from ``Build/Main/main.cpp``
+        for the PAD and PADForMA5tune, from the analysis files for the PADForSFS) and be
+        associated with the detector card defined in ``recast_config.dat``.
+
+        Args:
+            dirname (``str``): job directory.
+
+        Returns:
+            ``bool``:
+            ``True`` if the card is valid and has been copied to
+            ``<dirname>/Input/recasting_card.dat``.
+        """
         self.logger.info("   Checking the recasting card...")
         ToLoopOver = []
         padlist = []
@@ -621,6 +747,7 @@ class RecastConfiguration:
             myline = line.split()
             myana = myline[0]
             myver = myline[1]
+            # NOTE: IndexError for card lines with fewer than 4 fields.
             mydelphes = myline[3]
             # checking the presence of the analysis and the delphes card
             if myver == "v1.2":
@@ -709,7 +836,20 @@ class RecastConfiguration:
             return False
         return True
 
-    def CreateMyCard(self, dirname, padtype, write=True):
+    def CreateMyCard(self, dirname: str, padtype: str, write: bool = True) -> list[str] | None:
+        """Generate the recasting-card lines of one PAD.
+
+        Args:
+            dirname (``str``): job directory.
+            padtype (``str``): ``"PAD"``, ``"PADForMA5tune"`` or ``"PADForSFS"``.
+            write (``bool``, default ``True``): append the lines to
+                ``<dirname>/Input/recasting_card.dat`` (with a header if the file does not
+                exist yet) instead of returning them.
+
+        Returns:
+            ``list[str] | None``:
+            The sorted card lines if ``write`` is ``False``, ``None`` otherwise.
+        """
         thecard = []
         if write:
             exist = os.path.isfile(dirname + "/Input/recasting_card.dat")
@@ -783,13 +923,25 @@ class RecastConfiguration:
         thecard.sort()
         if write:
             card = open(dirname + "/Input/recasting_card.dat", "a")
+            # NOTE: the last line has no newline, so '#' is appended to it (inside its comment).
             card.write("\n".join(thecard))
             card.write("#\n")
             card.close()
         else:
             return thecard
 
-    def CheckFile(self, dirname, dataset):
+    def CheckFile(self, dirname: str, dataset: Any) -> bool:
+        """Check that the CLs output of a dataset has been produced.
+
+        Args:
+            dirname (``str``): job directory (replaced by :attr:`stat_only_dir` in
+                stat-only mode).
+            dataset (``Dataset``): the dataset.
+
+        Returns:
+            ``bool``:
+            ``True`` if ``Output/SAF/<dataset>/CLs_output.dat`` exists.
+        """
         dirname = self.stat_only_dir if self.stat_only_mode else dirname
         filename = os.path.normpath(
             dirname + "/Output/SAF/" + dataset.name + "/CLs_output.dat"
@@ -806,7 +958,14 @@ class RecastConfiguration:
             return False
         return True
 
-    def collect_outputs(self, dirname, datasets):
+    def collect_outputs(self, dirname: str, datasets: Any) -> None:
+        """Merge the CLs outputs of all datasets into ``Output/SAF/CLs_output_summary.dat``.
+
+        Args:
+            dirname (``str``): job directory (replaced by :attr:`stat_only_dir` in
+                stat-only mode).
+            datasets (``DatasetCollection``): datasets of the session.
+        """
         dirname = self.stat_only_dir if self.stat_only_mode else dirname
         filename = os.path.normpath(
             os.path.join(dirname, "Output/SAF/CLs_output_summary.dat")

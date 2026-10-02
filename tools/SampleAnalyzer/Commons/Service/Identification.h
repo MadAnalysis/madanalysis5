@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file Identification.h
+ * @brief Identification of Monte Carlo particles (status, hadronic, invisible, B/C hadrons) and of isolated muons.
+ */
+
 #ifndef IDENTIFICATION_SERVICE_h
 #define IDENTIFICATION_SERVICE_h
 
@@ -37,75 +42,139 @@
 namespace MA5
 {
 
+/**
+ * @brief Identification methods (PHYSICS->Id).
+ *
+ * The status codes of the initial and final states can be adapted to the generator
+ * with SetInitialState()/SetFinalState().
+ */
 class Identification
 {
   // -------------------------------------------------------------
   //                       data members
   // -------------------------------------------------------------
   private:
+    /** @brief Status codes of the final-state and initial-state particles. */
     MAint32 finalstate_;
     MAint32 initialstate_;
+    /** @brief Monte Carlo configuration (hadronic and invisible PDG codes). */
     MCconfig mcConfig_;
+    /** @brief Reconstruction configuration (isolation). */
     RECconfig recConfig_;
 
   public:
 
-    /// Constructor
+    /** @brief Constructor (initial state: -1, final state: 1). */
     Identification()
     {
       initialstate_=-1; finalstate_=1;
     }
 
-    /// Destructor
+    /** @brief Destructor. */
     ~Identification() { }
 
-    /// Accessors to the config objects
+    /**
+     * @brief Accessor to the Monte Carlo configuration.
+     *
+     * @return the configuration.
+     */
     const MCconfig& mcConfig() const
     {  return mcConfig_; }
+    /**
+     * @brief Accessor to the Monte Carlo configuration.
+     *
+     * @return the configuration.
+     */
     MCconfig& mcConfig()
     {  return mcConfig_; }
+    /**
+     * @brief Accessor to the reconstruction configuration.
+     *
+     * @return the configuration.
+     */
     const RECconfig& recConfig() const
     { return recConfig_; }
+    /**
+     * @brief Accessor to the reconstruction configuration.
+     *
+     * @return the configuration.
+     */
     RECconfig& recConfig()
     { return recConfig_; }
 
-  /// Is Initial State
+  /**
+   * @brief Is the particle in the initial state (status -1 or 11-19)?
+   *
+   * @param part particle.
+   * @return true for an initial-state particle.
+   */
+  // NOTE: the reference and pointer versions of IsInitialState/IsInterState use different definitions
+  // (the pointer versions use initialstate_).
   MAbool IsInitialState(const MCParticleFormat& part) const
   {
     return (part.statuscode()==-1 || (part.statuscode()>=11 && part.statuscode()<=19));
   }
 
-  /// Is Final State
+  /**
+   * @brief Is the particle in the final state?
+   *
+   * @param part particle.
+   * @return true for a final-state particle.
+   */
   MAbool IsFinalState(const MCParticleFormat& part) const
   {
     return (part.statuscode()==finalstate_);
   }
 
-  /// Is Inter State
+  /**
+   * @brief Is the particle an intermediate state (neither initial nor final)?
+   *
+   * @param part particle.
+   * @return true for an intermediate particle.
+   */
   MAbool IsInterState(const MCParticleFormat& part) const
   {
     return (!IsInitialState(part) && !IsFinalState(part));
   }
 
-  /// Is Initial State
+  /**
+   * @brief Is the particle in the initial state (status equal to initialstate_)?
+   *
+   * @param part particle.
+   * @return true for an initial-state particle.
+   */
   MAbool IsInitialState(const MCParticleFormat* part) const
   {
     return (part->statuscode()==initialstate_);
   }
 
-  /// Is Final State
+  /**
+   * @brief Is the particle in the final state?
+   *
+   * @param part particle.
+   * @return true for a final-state particle.
+   */
   MAbool IsFinalState(const MCParticleFormat* part) const
   {
     return (part->statuscode()==finalstate_);
   }
 
-  /// Is Inter State
+  /**
+   * @brief Is the particle an intermediate state?
+   *
+   * @param part particle.
+   * @return true for an intermediate particle.
+   */
   MAbool IsInterState(const MCParticleFormat* part) const
   {
     return (part->statuscode()!=finalstate_ && part->statuscode()!=initialstate_);
   }
 
-  /// Set Initial State
+  /**
+   * @brief Take the initial-state status code from the first particle of an event.
+   *
+   * @param myEvent Monte Carlo event.
+   */
   void SetInitialState(const MCEventFormat* myEvent)
   {
     if (myEvent==0) return; 
@@ -113,7 +182,11 @@ class Identification
     initialstate_=myEvent->particles()[0].statuscode(); 
   }
 
-  /// Set Final State
+  /**
+   * @brief Take the final-state status code from the last particle of an event.
+   *
+   * @param myEvent Monte Carlo event.
+   */
   void SetFinalState(const MCEventFormat* myEvent)
   {
     if (myEvent==0) return; 
@@ -121,67 +194,118 @@ class Identification
     finalstate_=myEvent->particles()[myEvent->particles().size()-1].statuscode(); 
   }
 
-  /// Is hadronic ?
+  /**
+   * @brief Is the reconstructed object a jet?
+   *
+   * @param part object.
+   * @return true for a jet.
+   */
   inline MAbool IsHadronic(const RecParticleFormat* part) const
   {
     if (dynamic_cast<const RecJetFormat*>(part)==0) return false;
     else return true;
   }
 
-  /// Is invisible ?
+  /**
+   * @brief Is the reconstructed object invisible?
+   *
+   * @param part object.
+   * @return always false.
+   */
   inline MAbool IsInvisible(const RecParticleFormat* part) const
   {
     return false;
   }
 
+  /**
+   * @brief Is the reconstructed object a jet?
+   *
+   * @param part object.
+   * @return true for a jet.
+   */
   inline MAbool IsHadronic(const RecParticleFormat& part) const
   {
     return IsHadronic(&part);
   }
 
-  /// Is invisible ?
+  /**
+   * @brief Is the reconstructed object invisible?
+   *
+   * @param part object.
+   * @return always false.
+   */
   inline MAbool IsInvisible(const RecParticleFormat& part) const
   {
     return IsInvisible(&part);
   }
 
 
-  /// Is hadronic ?
+  /**
+   * @brief Is the particle hadronic (PDG code in the `hadronic` multiparticle)?
+   *
+   * @param part particle.
+   * @return true if hadronic.
+   */
   inline MAbool IsHadronic(const MCParticleFormat& part) const
   {
     std::set<MAint32>::iterator found = mcConfig_.hadronic_ids_.find(part.pdgid());
     if (found==mcConfig_.hadronic_ids_.end()) return false; else return true;
   }
 
-  /// Is hadronic ?
+  /**
+   * @brief Is the PDG code hadronic (in the `hadronic` multiparticle)?
+   *
+   * @param pdgid PDG code.
+   * @return true if hadronic.
+   */
   inline MAbool IsHadronic(MAint32 pdgid) const
   {
     std::set<MAint32>::iterator found = mcConfig_.hadronic_ids_.find(pdgid);
     if (found==mcConfig_.hadronic_ids_.end()) return false; else return true;
   }
 
-  /// Is hadronic ?
+  /**
+   * @brief Is the particle hadronic?
+   *
+   * @param part particle (0 allowed).
+   * @return true if hadronic.
+   */
   inline MAbool IsHadronic(const MCParticleFormat* part) const
   {
     if (part==0) return false;
     return IsHadronic(*part);
   }
 
-  /// Is invisible ?
+  /**
+   * @brief Is the particle invisible (PDG code in the `invisible` multiparticle)?
+   *
+   * @param part particle.
+   * @return true if invisible.
+   */
   inline MAbool IsInvisible(const MCParticleFormat& part) const
   {
     std::set<MAint32>::iterator found = mcConfig_.invisible_ids_.find(part.pdgid());
     if (found==mcConfig_.invisible_ids_.end()) return false; else return true;
   }
 
-  /// Is invisible ?
+  /**
+   * @brief Is the particle invisible?
+   *
+   * @param part particle (0 allowed).
+   * @return true if invisible.
+   */
   inline MAbool IsInvisible(const MCParticleFormat* part) const
   {
     if (part==0) return false;
     return IsInvisible(*part);
   }
 
-  ///Is B Hadron ?
+  /**
+   * @brief Is the PDG code a B hadron?
+   *
+   * @param pdg PDG code.
+   * @return true for a B hadron.
+   */
   MAbool IsBHadron(MAint32 pdg)
   {
     MAuint32 apdg = std::abs(pdg);
@@ -192,20 +316,35 @@ class Identification
                     ( apdg>=20500 && apdg <=20599 ) );
   }
 
-  ///Is B Hadron ?
+  /**
+   * @brief Is the particle a B hadron?
+   *
+   * @param part particle.
+   * @return true for a B hadron.
+   */
   MAbool IsBHadron(const MCParticleFormat& part)
   {
     return IsBHadron(part.pdgid());
   }
 
-  ///Is B Hadron ?
+  /**
+   * @brief Is the particle a B hadron?
+   *
+   * @param part particle (0 allowed).
+   * @return true for a B hadron.
+   */
   MAbool IsBHadron(const MCParticleFormat* part)
   {
     if (part==0) return false;
     return IsBHadron(part->pdgid());
   }
 
-  ///Is C Hadron ?
+  /**
+   * @brief Is the PDG code a C hadron?
+   *
+   * @param pdg PDG code.
+   * @return true for a C hadron.
+   */
   MAbool IsCHadron(MAint32 pdg)
   {
     MAuint32 apdg = std::abs(pdg);
@@ -216,20 +355,40 @@ class Identification
                     ( apdg>=20400 && apdg <=20499 ) );
   }
 
-  ///Is C Hadron ?
+  /**
+   * @brief Is the particle a C hadron?
+   *
+   * @param part particle.
+   * @return true for a C hadron.
+   */
   MAbool IsCHadron(const MCParticleFormat& part)
   {
     return IsCHadron(part.pdgid());
   }
 
-  ///Is C Hadron ?
+  /**
+   * @brief Is the particle a C hadron?
+   *
+   * @param part particle (0 allowed).
+   * @return true for a C hadron.
+   */
   MAbool IsCHadron(const MCParticleFormat* part)
   {
     if (part==0) return false;
     return IsCHadron(part->pdgid());
   }
 
-  /// Muon isolation
+  /**
+   * @brief Is the muon isolated?
+   *
+   * With the DeltaR method, the muon must be separated from all the jets; with the
+   * SumPT method, the isolation sums of the muon are compared with the thresholds of
+   * the reconstruction configuration.
+   *
+   * @param muon muon.
+   * @param event reconstructed event.
+   * @return true if isolated (false for null pointers).
+   */
   MAbool IsIsolatedMuon(const RecLeptonFormat* muon,
                         const RecEventFormat* event) const
   {
@@ -257,7 +416,13 @@ class Identification
     return true;
   } 
 
-  /// Muon isolation
+  /**
+   * @brief Is the muon isolated?
+   *
+   * @param part muon.
+   * @param event reconstructed event.
+   * @return true if isolated.
+   */
   MAbool IsIsolatedMuon(const RecLeptonFormat& part,
                         const RecEventFormat* event) const
   {

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // STL headers
+/**
+ * @file SampleAnalyzer.cpp
+ * @brief Implementation of MA5::SampleAnalyzer.
+ */
+
 #include <string>
 #include <sys/stat.h>
 
@@ -189,15 +194,13 @@ void SampleAnalyzer::CheckDatatypes() const
 }
 
 /// Initialization of the SampleAnalyzer
-MAbool SampleAnalyzer::Initialize(MAint32 argc, MAchar **argv,
-								  const std::string &pdgFileName)
+MAbool SampleAnalyzer::Initialize(MAint32 argc, MAchar **argv, const std::string &pdgFileName)
 {
-	// Initializing general pointers
-	myReader_ = 0;
+    // Initializing general pointers
+    myReader_ = 0;
 
-	// Configuration
-	if (!cfg_.Initialize(argc, argv))
-		return false;
+    // Configuration
+    if (!cfg_.Initialize(argc, argv)) return false;
 
 	// Displaying configuration
 	cfg_.Display();
@@ -216,6 +219,7 @@ MAbool SampleAnalyzer::Initialize(MAint32 argc, MAchar **argv,
 	if (!input)
 	{
 		ERROR << "The file list '" << filename << "' is not existing." << endmsg;
+		// FIXME: returns 1 (true) although the file list does not exist: the error is not propagated.
 		return 1;
 	}
 
@@ -304,7 +308,12 @@ AnalyzerBase *SampleAnalyzer::InitializeAnalyzer(const std::string &name,
 	return myAnalysis;
 }
 
-/// Post initialization: creation of the output directory structure
+/**
+ * @brief Create a directory if it does not exist.
+ *
+ * @param dirname path.
+ * @return 0 if created, 1 if it already exists, -1 in case of error.
+ */
 inline MAint32 CreateDir(std::string dirname)
 {
 	struct stat myStat;
@@ -561,6 +570,7 @@ DetectorBase *SampleAnalyzer::InitializeDetector(
 	}
 
 	// Check if the SAF directory exists -> if not: create it
+	// FIXME: '../SAF' instead of '../Output/SAF' (inconsistent with the other output directories).
 	dirname = "../SAF";
 	if (CreateDir(dirname) == -1)
 	{
@@ -602,6 +612,7 @@ DetectorBase *SampleAnalyzer::InitializeDetector(
 	prm2["outputdir"] = newoutdirname;
 
 	// Initialize (specific to the detector)
+	// NOTE: std::getenv can return a null pointer; ma5dir is unused.
 	std::string ma5dir = std::getenv("MA5_BASE");
 	//  std::string config = ma5dir+"/tools/SampleAnalyzer/"+configFile;
 	std::string config = configFile;
@@ -685,6 +696,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat &mySample)
 			value = static_cast<MAfloat64>(length) / (1024. * 1024. * 1024. * 1024.);
 			unit = 5;
 		}
+		// FIXME: 'if' instead of 'else if': files larger than 1e12 bytes are displayed in Go.
 		if (length > 1e9)
 		{
 			value = static_cast<MAfloat64>(length) / (1024. * 1024. * 1024.);
@@ -789,7 +801,33 @@ StatusCode::Type SampleAnalyzer::NextEvent(SampleFormat &mySample, EventFormat &
 	return StatusCode::KEEP;
 }
 
-/// Home made functions to make reasonnable filenames
+/// @brief Prepare analyzers for the execution by initialising the weights
+/// @param mySample sample dataset
+/// @param myEvent event dataset
+void SampleAnalyzer::PrepareForExecution(SampleFormat &mySample, EventFormat &myEvent)
+{
+    // Safety
+    WeightCollection weights;
+    if (myEvent.mc() != 0)
+        weights = myEvent.mc()->weights();
+    else
+        weights = WeightCollection(1, 1.0);
+
+    // Preserve the collection size
+    if (cfg_.IsNoEventWeight())
+        weights = 1.0;
+
+    for (auto &analyzer : analyzers_)
+        analyzer->Manager()->InitializeForNewEvent(weights);
+}
+
+/**
+ * @brief Replace all the occurrences of a substring.
+ *
+ * @param name string (modified).
+ * @param In substring to replace.
+ * @param Out replacement.
+ */
 inline void ReplaceAll(std::string &name, const std::string &In, const std::string &Out)
 {
 	size_t pos = name.find(In);
@@ -800,6 +838,12 @@ inline void ReplaceAll(std::string &name, const std::string &In, const std::stri
 	}
 }
 
+/**
+ * @brief Turn a region name into a valid file name.
+ *
+ * @param name region name.
+ * @return the cleaned name.
+ */
 inline std::string CleanName(const std::string &name)
 {
 	std::string tmp = name;
@@ -994,6 +1038,12 @@ void SampleAnalyzer::FillSummary(SampleFormat &summary,
 		summary.mc()->xsection_ = 0;
 		summary.mc()->xsection_error_ = 0;
 	}
+
+	/// ! this assumes all the weight identifiers are the same through out the sample set
+	// NOTE: assumes that the last sample has Monte Carlo information (null pointer otherwise) and that
+	// the list of samples is not empty.
+	for (auto &name_map : samples.back().mc()->WeightNames())
+		summary.mc()->SetWeightName(name_map.first, name_map.second);
 }
 
 /// Updating the progress bar

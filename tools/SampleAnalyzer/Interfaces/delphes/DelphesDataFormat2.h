@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file DelphesDataFormat2.h
+ * @brief Alternative Delphes data container (unused).
+ */
+
 #ifndef DELPHES_DATA_FORMAT2_h
 #define DELPHES_DATA_FORMAT2_h
 
@@ -40,6 +45,7 @@
 namespace MA5
 {
 
+/** @brief Alternative container of Delphes arrays (not used anywhere in SampleAnalyzer). */
 struct DelphesDataFormat2
 {
   /// Pointers to data
@@ -58,13 +64,13 @@ struct DelphesDataFormat2
   TClonesArray* EFlowPhoton_;
   TClonesArray* EFlowNeutral_;
 
-   // Switch for MA5card
+  /** @brief Whether the file was produced with an MA5-tuned Delphes card. */
   MAbool delphesMA5card_;
 
-  /// Constructor without arguments
+  /** @brief Constructor (all pointers set to 0). */
   DelphesDataFormat2();
 
-  /// Destructor
+  /** @brief Destructor (deletes the arrays). */
   ~DelphesDataFormat2();
 
 

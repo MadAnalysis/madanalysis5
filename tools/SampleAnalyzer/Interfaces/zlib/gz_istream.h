@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file gz_istream.h
+ * @brief Input stream for gzip-compressed files.
+ */
+
 #ifndef GZ_ISTREAM_H
 #define GZ_ISTREAM_H
 
@@ -37,6 +42,7 @@ namespace MA5
 //                      CLASS GZ_ISTREAM
 // -------------------------------------------------------------
 
+/** @brief Input stream for gzip-compressed files. */
 class gz_istream : public gz_streambase, public std::istream
 {
   // -------------------------------------------------------------
@@ -49,28 +55,46 @@ class gz_istream : public gz_streambase, public std::istream
  public:
 
 
-  /// Constructor without arguments
+  /** @brief Constructor. */
   gz_istream() : std::istream(&buf)
   {}
 
-  /// Constructor with arguments
+  /**
+   * @brief Constructor opening a file.
+   *
+   * @param name file name.
+   * @param open_mode std::ios mode (std::ios::in by default).
+   */
   gz_istream( const MAchar* name, MAint32 open_mode = std::ios::in)
       : gz_streambase( name, open_mode), std::istream( &buf) 
   {}
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~gz_istream()
   {}
 
-  /// Read buffer
+  /**
+   * @brief Accessor to the stream buffer.
+   *
+   * @return the buffer.
+   */
   gz_streambuf* rdbuf()
   { return gz_streambase::rdbuf(); }
 
-  /// open a gzip file
+  /**
+   * @brief Open a gzip file.
+   *
+   * @param name file name.
+   * @param open_mode std::ios mode.
+   */
   void open( const MAchar* name, MAint32 open_mode = std::ios::in)
   { gz_streambase::open( name, open_mode); }
 
-  /// get position of the cursor in the file
+  /**
+   * @brief Position in the compressed file (used by the progress bar).
+   *
+   * @return the position in bytes.
+   */
   virtual std::streampos tellg()
   { return buf.tellg(); }
 

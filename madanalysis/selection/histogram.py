@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Definition of a histogram (``plot`` command)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.selection.instance_name          import InstanceName
 from madanalysis.enumeration.combination_type     import CombinationType
 from madanalysis.enumeration.observable_type      import ObservableType
@@ -34,6 +38,26 @@ import six
 from six.moves import range
 
 class Histogram():
+    """A histogram of an observable, possibly restricted to some regions.
+
+    The options that can be set on a histogram are listed in :attr:`userVariables`; the
+    shortcuts accepted between square brackets in the ``plot`` command are listed in
+    :attr:`userShortcuts`.
+
+    Attributes:
+        observable (``ObservableBase``): the observable.
+        arguments (``list``): arguments of the observable (``ParticleObject`` instances or
+            numbers).
+        nbins (``int``): number of bins.
+        xmin / xmax (``float``): range of the x-axis.
+        ymin / ymax (``float | list``): range of the y-axis (``[]`` = automatic).
+        logX / logY (``bool``): logarithmic axes.
+        rank (``str``): ordering of the particles.
+        statuscode (``str``): particle status selection.
+        stack (``int``): :class:`~madanalysis.enumeration.stacking_method_type.StackingMethodType` code.
+        titleX / titleY (``str``): user-defined axis titles.
+        regions (``list[str]``): regions the histogram is attached to.
+    """
 
     userVariables = { "nbins" : [], \
                       "xmin"  : [], \
@@ -69,7 +93,18 @@ class Histogram():
                      "superimpose": ["stacking_method","superimpose"], \
                      "normalize2one" : ["stacking_method","normalize2one"]}
 
-    def __init__(self,observable,arguments,nbins,xmin,xmax,regions=[]):
+    # NOTE: mutable default argument 'regions=[]'.
+    def __init__(self,observable: Any,arguments: list,nbins: int,xmin: float,xmax: float,regions: list[str] = []) -> None:
+        """Create a histogram with default options.
+
+        Args:
+            observable (``ObservableBase``): the observable.
+            arguments (``list``): arguments of the observable.
+            nbins (``int``): number of bins.
+            xmin (``float``): lower bound of the x-axis.
+            xmax (``float``): upper bound of the x-axis.
+            regions (``list[str]``, default ``[]``): regions the histogram is attached to.
+        """
         self.observable = observable
         self.arguments  = arguments
         self.nbins      = nbins
@@ -86,26 +121,67 @@ class Histogram():
         self.titleY     = ""
         self.regions    = regions
 
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the settable options.
+
+        Returns:
+            ``list[str]``:
+            Keys of :attr:`userVariables`.
+        """
         return list(Histogram.userVariables.keys())
 
-    def user_GetShortcuts(self):
+    def user_GetShortcuts(self) -> list[str]:
+        """Get the option shortcuts.
+
+        Returns:
+            ``list[str]``:
+            Keys of :attr:`userShortcuts`.
+        """
         return list(Histogram.userShortcuts.keys())
 
-    def user_GetValues(self,variable):
+    def user_GetValues(self,variable: str) -> list[str]:
+        """Get the possible values of an option.
+
+        Args:
+            variable (``str``): name of the option.
+
+        Returns:
+            ``list[str]``:
+            Possible values, or an empty list.
+        """
         try:
             return Histogram.userVariables[variable]
         except:
             return []
 
-    def user_SetShortcuts(self,name):
+    def user_SetShortcuts(self,name: str) -> bool:
+        """Apply an option shortcut (e.g. ``logY`` or ``interstate``).
+
+        Args:
+            name (``str``): shortcut.
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` otherwise.
+        """
         if name in list(Histogram.userShortcuts.keys()):
             return self.user_SetParameter(Histogram.userShortcuts[name][0],Histogram.userShortcuts[name][1])
         else:
             logging.getLogger('MA5').error("option '" + name + "' is unknown.")
             return False
 
-    def user_SetParameter(self,variable,value):
+    def user_SetParameter(self,variable: str,value: str | list[str]) -> bool:
+        """Set an option of the histogram.
+
+        Args:
+            variable (``str``): name of the option (see :attr:`userVariables`).
+            value (``str | list[str]``): value (quoted string for the axis titles, list of
+                region names for ``regions``).
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` otherwise.
+        """
         # nbins variable
         if variable == "nbins":
             try:
@@ -126,6 +202,9 @@ class Histogram():
             except:
                 logging.getLogger('MA5').error("variable 'xmin' must be a float value")
                 return False
+            # FIXME: when xmax is already a float (always after construction), a valid xmin is checked
+            # but never stored: the else-branch below is only reached when xmax is not a float.
+            # Same issue for xmax, ymin and ymax below.
             if isinstance(self.xmax, float):
                 if tmp > self.xmax:
                     logging.getLogger('MA5').error("'xmin' value must be less than 'xmax' value")
@@ -234,12 +313,14 @@ class Histogram():
                 self.titleY = value[1:-1]
             else:
                 logging.getLogger('MA5').error("'"+value+"' is not a string, as necessary for the variable 'titleY'.")
+                # NOTE: the '# other' comment at the end of the previous line is misplaced.
                 return False        # other
         # regions
         elif variable == "regions":
             if isinstance(value,list) and all([isinstance(name,str) for name in value]):
                 self.regions = value
             else:
+                # FIXME: TypeError if 'value' is not a string.
                 logging.getLogger('MA5').error("'"+value+"' is not a list of strings, ;"+\
                      "as necessary for the variable 'regions'.")
                 return False        # other
@@ -250,7 +331,12 @@ class Histogram():
 
         return True
 
-    def user_DisplayParameter(self,variable):
+    def user_DisplayParameter(self,variable: str) -> None:
+        """Log the value of an option.
+
+        Args:
+            variable (``str``): name of the option.
+        """
         if variable=="nbins":
             logging.getLogger('MA5').info(" nbins = "+str(self.nbins))
         elif variable=="xmin":
@@ -296,12 +382,19 @@ class Histogram():
             logging.getLogger('MA5').error("no variable called '"+variable+"' is found")
 
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log the histogram definition, binning and options."""
         logging.getLogger('MA5').info(self.GetStringDisplay())
         logging.getLogger('MA5').info(self.GetStringDisplay2())
         self.GetStringDisplayMore()
 
-    def GetStringDisplay(self):
+    def GetStringDisplay(self) -> str:
+        """Get the user-level representation of the histogram.
+
+        Returns:
+            ``str``:
+            E.g. ``"  * Plot: PT ( j[1] ) "``.
+        """
         msg = "  * Plot: "+self.observable.name
         if len(self.arguments)!=0:
             msg += ' ( '
@@ -312,10 +405,27 @@ class Histogram():
             msg += ') '
         return msg 
 
-    def DoYouUseMultiparticle(self,name):
+    def DoYouUseMultiparticle(self,name: str) -> bool:
+        """Check whether a (multi)particle is used by the histogram.
+
+        Args:
+            name (``str``): label of the (multi)particle.
+
+        Returns:
+            ``bool``:
+            ``True`` if the (multi)particle is used.
+        """
+        # FIXME: 'self.combination' does not exist (AttributeError); the particles are in
+        # 'self.arguments'.
         return self.combination.DoYouUseMultiparticle(name)
 
-    def GetStringDisplay2(self):
+    def GetStringDisplay2(self) -> str:
+        """Get the binning and regions of the histogram.
+
+        Returns:
+            ``str``:
+            E.g. ``"  * Binning: nbins=20, xmin=0.0, xmax=100.0, regions=[...]"``.
+        """
         strng= "  * Binning: nbins="+str(self.nbins)+", xmin="+str(self.xmin)+ ", xmax="+str(self.xmax)
         if self.ymin!=[]:
           strng = strng+', ymin='+str(self.ymin)
@@ -324,7 +434,8 @@ class Histogram():
         strng = strng + ", regions="+str(self.regions)
         return strng
 
-    def GetStringDisplayMore(self):
+    def GetStringDisplayMore(self) -> None:
+        """Log the scales, stacking method, axis titles and particle options."""
         if self.logX or self.logY: 
             words = '  * Log scale: '
             if self.logX:
@@ -347,7 +458,13 @@ class Histogram():
         logging.getLogger('MA5').info('  * Particle ordering: ' +  self.rank)
         return 
 
-    def GetStringArguments(self):
+    def GetStringArguments(self) -> str:
+        """Get the arguments of the observable as a string.
+
+        Returns:
+            ``str``:
+            Comma-separated arguments.
+        """
         word=''
         for ind in range(len(self.arguments)):
             if self.observable.args[ind] in [ArgumentType.PARTICLE,\
@@ -361,17 +478,43 @@ class Histogram():
 
     dicoargs = { '[':'_{',']':'}' } 
 
-    def ReplaceAll(self,word,dico):
+    def ReplaceAll(self,word: str,dico: dict[str, str]) -> str:
+        """Apply several substring replacements.
+
+        Args:
+            word (``str``): input string.
+            dico (``dict[str, str]``): replacements ``{old: new}``.
+
+        Returns:
+            ``str``:
+            The modified string.
+        """
         for i,j in six.iteritems(dico):
             word = word.replace(i,j)
         return word    
 
-    def ReplaceAll_Matplotlib(self,word,dico):
+    def ReplaceAll_Matplotlib(self,word: str,dico: dict[str, str]) -> str:
+        """Apply several substring replacements (identical to :meth:`ReplaceAll`).
+
+        Args:
+            word (``str``): input string.
+            dico (``dict[str, str]``): replacements ``{old: new}``.
+
+        Returns:
+            ``str``:
+            The modified string.
+        """
         for i,j in six.iteritems(dico):
             word = word.replace(i,j)
         return word    
 
-    def GetXaxis_Root(self):
+    def GetXaxis_Root(self) -> str:
+        """Get the x-axis title in ROOT ``TLatex`` syntax.
+
+        Returns:
+            ``str``:
+            Observable, arguments and unit.
+        """
         word = self.observable.tlatex + " "
         if len(self.arguments)!=0:
             word += "[ " + self.ReplaceAll(self.GetStringArguments(),self.dicoargs)+ " ] "
@@ -379,7 +522,13 @@ class Histogram():
             word += "("+self.observable.plot_unitX_tlatex+") "
         return word    
 
-    def GetXaxis_Matplotlib(self):
+    def GetXaxis_Matplotlib(self) -> str:
+        """Get the x-axis title in Matplotlib (mathtext) syntax.
+
+        Returns:
+            ``str``:
+            Observable, arguments and unit, each between ``$`` signs.
+        """
         word = "$"+self.observable.tlatex + "$ "
         if len(self.arguments)!=0:
             word += "$[ " + self.ReplaceAll(self.GetStringArguments(),self.dicoargs)+ " ]$ "
@@ -387,7 +536,16 @@ class Histogram():
             word += "$("+self.observable.plot_unitX_tlatex+")$ "
         return word    
 
-    def GetYaxis(self):
+    def GetYaxis(self) -> str:
+        """Get the y-axis title (ROOT syntax).
+
+        Depending on the observable and on its arguments, the title is ``Events``,
+        ``N. of particles``, ``N. of <particles> pairs/combinations``, ...
+
+        Returns:
+            ``str``:
+            The y-axis title.
+        """
         word = "Events "
 
         part_string = self.ReplaceAll(self.GetStringArguments(),self.dicoargs)
@@ -396,6 +554,7 @@ class Histogram():
             word = 'N. of particles';
 
         elif self.observable.name in ['DELTAR', 'DPHI_0_PI', 'DPHI_0_2PI', 'RECOIL']:
+            # NOTE: '!=2 and !=2' may have been intended as 'or'.
             if self.GetStringArguments().count('[')!=2 and self.GetStringArguments().count(']')!=2:
                 word='N. of (' + part_string + ') pairs'; 
 
@@ -427,7 +586,16 @@ class Histogram():
         return word
     
 
-    def GetYaxis_Matplotlib(self):
+    def GetYaxis_Matplotlib(self) -> str:
+        """Get the y-axis title (Matplotlib syntax).
+
+        ``#`` is used as a placeholder for the LaTeX backslash; it is replaced later in
+        :mod:`madanalysis.layout.plotflow`.
+
+        Returns:
+            ``str``:
+            The y-axis title.
+        """
         word = "$#mathrm{Events}$"
 
         part_string = self.ReplaceAll_Matplotlib(self.GetStringArguments(),self.dicoargs)
@@ -435,6 +603,7 @@ class Histogram():
         if self.observable.name in ['NPID', 'NAPID']:
             word = '$#mathrm{N.}# #mathrm{of}# #mathrm{particles}$';
 
+        # NOTE: 'RECOIL' is handled in GetYaxis but not here.
         elif self.observable.name in ['DELTAR', 'DPHI_0_PI', 'DPHI_0_2PI']:
             if self.GetStringArguments().count('[')!=2 and self.GetStringArguments().count(']')!=2:
                 word='$#mathrm{N.}# #mathrm{of}# (' + part_string + ')# #mathrm{pairs}$'; 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file STDHEPreader.h
+ * @brief Reader of STDHEP (XDR binary) files.
+ */
+
 #ifndef STDHEP_READER_h
 #define STDHEP_READER_h
 
@@ -34,9 +39,12 @@
 namespace MA5
 {
 
+/** @brief Reader of STDHEP files (XDR-encoded HEPEVT records, versions 1 to 2.01). */
 class STDHEPreader : public ReaderTextBase
 {
+  /** @brief STDHEP versions. */
   enum STDHEPversion {UNKNOWN,V1,V2,V21};
+  /** @brief Identifiers of the STDHEP/MCFIO blocks. */
   enum STDHEPblock { GENERIC=0, 
                      FILEHEADER=1, 
                      EVENTTABLE=2, 
@@ -61,22 +69,25 @@ class STDHEPreader : public ReaderTextBase
   // -------------------------------------------------------------
  protected:
 
-  // temporary data format
+  /** @brief HEPEVT content of the current event: event number (current and previous), number of particles, first-event flag. */
   MAint32 nevhept_;
   MAint32 nevhept_before_;
   MAint32 nhept_;
   MAbool firstevent;
 
+  /** @brief HEPEVT arrays: status codes, PDG codes, mothers, daughters, momenta (5 per particle), vertices (4 per particle). */
   std::vector<MAint32>   isthept_;
   std::vector<MAint32>   idhept_;
   std::vector<MAint32>   jmohept_;
   std::vector<MAint32>   jdahept_;
   std::vector<MAfloat64> phept_;
   std::vector<MAfloat64> vhept_;
+  /** @brief Mother indices of the particles. */
   std::vector< std::pair<MAint32,MAint32> > mothers_;
 
-  // data related to the format
+  /** @brief Version of the file. */
   STDHEPversion version_;
+  /** @brief XDR decoder of the input stream. */
   xdr_istream * xdrinput_;
 
   // -------------------------------------------------------------
@@ -84,47 +95,130 @@ class STDHEPreader : public ReaderTextBase
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   STDHEPreader()
   {
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~STDHEPreader()
   {
   }
 
-  /// Reset
+  /** @brief Clear the HEPEVT arrays. */
   void Reset();
 
-  /// Initialize
+  /**
+   * @brief Open the file and create the XDR decoder.
+   *
+   * @param rawfilename file name.
+   * @param cfg run configuration.
+   * @return false if the file cannot be opened.
+   */
   virtual MAbool Initialize(const std::string& rawfilename,
                           const Configuration& cfg);
 
-  /// Read the sample (virtual pure)
+  /**
+   * @brief Read the file header.
+   *
+   * @param mySample sample.
+   * @return false if the header is invalid.
+   */
   virtual MAbool ReadHeader(SampleFormat& mySample);
 
-  /// Finalize the header (virtual pure)
+  /**
+   * @brief Finalise the header.
+   *
+   * @param mySample sample.
+   * @return true.
+   */
   virtual MAbool FinalizeHeader(SampleFormat& mySample);
 
-  /// Read the event (virtual pure)
+  /**
+   * @brief Read blocks until the next event.
+   *
+   * @param myEvent event to fill.
+   * @param mySample sample.
+   * @return KEEP, SKIP (invalid event or unknown block) or FAILURE at the end of the file.
+   */
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
 
+  /**
+   * @brief Decode the file header block.
+   *
+   * @param mySample sample.
+   * @return false if the header is invalid.
+   */
   MAbool DecodeFileHeader(SampleFormat& mySample);
+  /**
+   * @brief Decode an event header block.
+   *
+   * @param evt_version version of the block.
+   * @return false in case of error.
+   */
   MAbool DecodeEventHeader(const std::string& evt_version);
+  /**
+   * @brief Decode an event table block.
+   *
+   * @param evt_version version of the block.
+   * @return false in case of error.
+   */
   MAbool DecodeEventTable (const std::string& evt_version);
+  /**
+   * @brief Decode a STDCM1 block (beginning/end of run: cross section, ...).
+   *
+   * @param evt_version version of the block.
+   * @param mySample sample.
+   * @return false in case of error.
+   */
   MAbool DecodeSTDCM1     (const std::string& evt_version, SampleFormat& mySample);
+  /**
+   * @brief Decode a STDHEP event block.
+   *
+   * @param evt_version version of the block.
+   * @param myEvent event to fill.
+   * @return false for an inconsistent event.
+   */
   MAbool DecodeEventData  (const std::string& evt_version,EventFormat& myEvent);
+  /**
+   * @brief Decode a STDHEP4 event block (with weights).
+   *
+   * @param version version of the block.
+   * @param myEvent event to fill.
+   * @return false for an inconsistent event.
+   */
   MAbool DecodeSTDHEP4    (const std::string& version,EventFormat& myEvent);
 
-  /// Finalize the event (virtual pure)
+  /**
+   * @brief Build the mother-daughter links and compute MET, MHT, TET, THT and Meff.
+   *
+   * @param mySample sample.
+   * @param myEvent event.
+   * @return false if the event number is repeated (duplicated event).
+   */
   virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
-  /// Finalize
+  /**
+   * @brief Close the file.
+   *
+   * @return false in case of error.
+   */
   virtual MAbool Finalize();
 
  private :
+  /**
+   * @brief Decode the version string of the file.
+   *
+   * @param version version string.
+   */
   void SetVersion(const std::string& version);
+  /**
+   * @brief Check the consistency of the sizes of the HEPEVT arrays.
+   *
+   * @param myEvent event (unused).
+   * @param blk name of the block (for the messages).
+   * @return false if inconsistent.
+   */
   MAbool CheckEvent(const EventFormat&, const std::string&);
 
 };

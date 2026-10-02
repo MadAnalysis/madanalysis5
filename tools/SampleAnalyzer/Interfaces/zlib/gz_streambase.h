@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file gz_streambase.h
+ * @brief Stream buffer reading/writing gzip-compressed files (adapted from the gzstream library).
+ */
+
 #ifndef GZ_STREAM_BASE_H
 #define GZ_STREAM_BASE_H
 
@@ -37,12 +42,13 @@
 namespace MA5
 {
 
-// Implicit class
+/** @brief zlib file handle (defined in gz_file.h). */
 class gz_file;
 
 // -------------------------------------------------------------
 //                   CLASS GZ_STREAMBUF
 // -------------------------------------------------------------
+/** @brief Stream buffer reading or writing a gzip-compressed file through zlib. */
 class gz_streambuf : public std::streambuf
 {
 
@@ -51,9 +57,10 @@ class gz_streambuf : public std::streambuf
   // -------------------------------------------------------------
  private:
 
-  /// size of the data buffer
+  /** @brief Size of the data buffer (4 bytes are reserved for put-back). */
   static const MAint32 bufferSize = 47+256;    
 
+  /** @brief zlib file handle, data buffer, open/close state and I/O mode. */
   gz_file* file;               // file handle for compressed file
   MAchar   buffer[bufferSize]; // data buffer
   MAchar   opened;             // open/close state of stream
@@ -65,37 +72,72 @@ class gz_streambuf : public std::streambuf
   // -------------------------------------------------------------
  private :
 
-  /// Flush the buffer
+  /**
+   * @brief Write the content of the buffer to the file.
+   *
+   * @return the number of bytes written, or EOF in case of error.
+   */
   MAint32 flush_buffer();
 
  public:
 
-  /// Constructor withtout arguments
+  /** @brief Constructor. */
   gz_streambuf();
 
-  /// Destructor
+  /** @brief Destructor (closes the file). */
   ~gz_streambuf();
 
-  /// Is opened
+  /**
+   * @brief Is the file open?
+   *
+   * @return non-zero if open.
+   */
   MAint32 is_open() { return opened; }
 
-  /// Opening the gzip file
+  /**
+   * @brief Open a gzip file (read or write mode only).
+   *
+   * @param name file name.
+   * @param open_mode std::ios mode.
+   * @return this buffer, or 0 in case of error.
+   */
   gz_streambuf* open(const MAchar* name, MAint32 open_mode);
 
-  /// Closing the file
+  /**
+   * @brief Close the file.
+   *
+   * @return this buffer, or 0 in case of error.
+   */
   gz_streambuf* close();
 
     
-  /// Overflow
+  /**
+   * @brief Write a character and flush the buffer.
+   *
+   * @param c character.
+   * @return the character, or EOF in case of error.
+   */
   virtual MAint32 overflow(MAint32 c = EOF);
 
-  /// Underflow
+  /**
+   * @brief Refill the buffer from the file.
+   *
+   * @return the next character, or EOF.
+   */
   virtual MAint32 underflow();
 
-  /// Synchronize input buffer
+  /**
+   * @brief Flush the output buffer.
+   *
+   * @return 0, or -1 in case of error.
+   */
   virtual MAint32 sync();
 
-  /// get position of the cursor in the file
+  /**
+   * @brief Position in the compressed file.
+   *
+   * @return the number of compressed bytes read (approximation with zlib < 1.2.4).
+   */
   virtual MAint64 tellg();
 
 };
@@ -104,6 +146,7 @@ class gz_streambuf : public std::streambuf
 // -------------------------------------------------------------
 //                   CLASS GZ_STREAMBASE
 // -------------------------------------------------------------
+/** @brief Base of the gzip streams (owns the stream buffer). */
 class gz_streambase : virtual public std::ios
 {
 
@@ -111,6 +154,7 @@ class gz_streambase : virtual public std::ios
   //                        data members
   // -------------------------------------------------------------
  protected:
+  /** @brief Stream buffer. */
   gz_streambuf buf;
 
 
@@ -119,29 +163,39 @@ class gz_streambase : virtual public std::ios
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor. */
   gz_streambase() 
   { init(&buf); }
 
-  /// Constructor with arguments
+  /**
+   * @brief Constructor opening a file.
+   *
+   * @param name file name.
+   * @param open_mode std::ios mode.
+   */
   gz_streambase( const MAchar* name, MAint32 open_mode)
   {
     init( &buf);
     open( name, open_mode);
   }
 
-  /// Destructor
+  /** @brief Destructor (closes the file). */
   ~gz_streambase()
   { buf.close(); }
 
-  /// Open a gzip file
+  /**
+   * @brief Open a gzip file (the bad bit is set in case of error).
+   *
+   * @param name file name.
+   * @param open_mode std::ios mode.
+   */
   void open( const MAchar* name, MAint32 open_mode)
   {
     if (!buf.open( name, open_mode))
         clear( rdstate() | std::ios::badbit);
   }
 
-  /// Close a gzip file
+  /** @brief Close the file (the bad bit is set in case of error). */
   void close()
   {
     if (buf.is_open())
@@ -151,7 +205,11 @@ class gz_streambase : virtual public std::ios
     }
   }
 
-  /// Read the buffer
+  /**
+   * @brief Accessor to the stream buffer.
+   *
+   * @return the buffer.
+   */
   gz_streambuf* rdbuf()
   { return &buf; }
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ClusterAlgoPlugin.h
+ * @brief Base class of the clustering algorithms based on FastJet plugins.
+ */
+
 #ifndef JETCLUSTERINGPLUGIN_H
 #define JETCLUSTERINGPLUGIN_H
 
@@ -33,6 +38,7 @@
 namespace MA5
 {
 
+/** @brief Base class of the clustering algorithms based on FastJet plugins (SISCone, CDF, GridJet). */
 class ClusterAlgoPlugin: public ClusterAlgoFastJet
 {
 //---------------------------------------------------------------------------------
@@ -46,11 +52,11 @@ class ClusterAlgoPlugin: public ClusterAlgoFastJet
 //---------------------------------------------------------------------------------
   public :
 
-    /// Constructor without argument
+    /** @brief Constructor. */
     ClusterAlgoPlugin() : ClusterAlgoFastJet("fastjet_plugin")
     {}
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~ClusterAlgoPlugin()
     {}
 };

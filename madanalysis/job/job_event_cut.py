@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,22 @@
 ################################################################################
 
 
+"""Writer of the C++ code of the event cuts (``select``/``reject`` without candidate).
+
+Each condition of the cut is evaluated into ``filter[i]``; the logical expression
+of the cut is then built from these results and passed to
+``Manager()->ApplyCut``.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.multiparticle.particle_combination import ParticleCombination
+    from madanalysis.selection.condition_sequence import ConditionSequence
+    from madanalysis.selection.condition_type import ConditionType
 from madanalysis.selection.histogram          import Histogram
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.observable_type  import ObservableType
@@ -36,7 +51,13 @@ import logging
 from six.moves import range
 
 
-def GetConditions(current,table):
+def GetConditions(current: ConditionSequence,table: list[ConditionType]) -> None:
+    """Flatten (recursively) the conditions of a sequence.
+
+    Args:
+        current (``ConditionSequence``): sequence of conditions.
+        table (``list[ConditionType]``): list to extend (in place).
+    """
 
     i=0
     while i<len(current.sequence):
@@ -47,7 +68,20 @@ def GetConditions(current,table):
         i+=1
 
 
-def GetFinalCondition(current,index,tagName):
+def GetFinalCondition(current: ConditionSequence,index: int,tagName: str) -> tuple[str, int]:
+    """Build the C++ logical expression of a sequence of conditions.
+
+    Args:
+        current (``ConditionSequence``): sequence of conditions.
+        index (``int``): index of the first condition of the sequence in the flattened
+            list.
+        tagName (``str``): name of the C++ vector of condition results.
+
+    Returns:
+        ``tuple[str, int]``:
+        The expression (e.g. ``(filter[0] && (filter[1] || filter[2]))``) and the index
+        following the last condition.
+    """
     msg='('
     i=0
     while i<len(current.sequence):
@@ -63,7 +97,15 @@ def GetFinalCondition(current,index,tagName):
     msg+=')'
     return msg,index
 
-def WriteEventCut(file,main,iabs,icut):
+def WriteEventCut(file: TextIO,main: Main,iabs: int,icut: int) -> None:
+    """Write the code of an event cut.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+    """
 
     # Opening bracket for the current histo
     file.write('  {\n')
@@ -101,7 +143,18 @@ def WriteEventCut(file,main,iabs,icut):
     return
 
 
-def WriteConditions(file,main,iabs,icut,tagName,tagIndex,condition):
+def WriteConditions(file: TextIO,main: Main,iabs: int,icut: int,tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the evaluation of a condition according to the number of arguments of its observable.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
 
     if len(condition.parts)==0:
         WriteCutWith0Arg(file,main,iabs,icut,tagName,tagIndex,condition)
@@ -114,7 +167,18 @@ def WriteConditions(file,main,iabs,icut,tagName,tagIndex,condition):
                       "not managed by MadAnalysis 5")
 
 
-def WriteCutWith0Arg(file,main,iabs,icut,tagName,tagIndex,condition):
+def WriteCutWith0Arg(file: TextIO,main: Main,iabs: int,icut: int,tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the evaluation of a condition on an event-level observable.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
     file.write('      '+tagName+'['+str(tagIndex)+'] = (')
     file.write(condition.observable.code(main.mode)+' ')
     file.write(OperatorType.convert2cpp(condition.operator)+' ')
@@ -122,7 +186,18 @@ def WriteCutWith0Arg(file,main,iabs,icut,tagName,tagIndex,condition):
     file.write(' );\n')
 
 
-def WriteCutWith2Args(file,main,iabs,icut,tagName,tagIndex,condition):
+def WriteCutWith2Args(file: TextIO,main: Main,iabs: int,icut: int,tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the evaluation of a condition on a two-argument observable (e.g. ``DELTAR``).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
 
     # Loop over combination
     for combi1 in condition.parts[0]:
@@ -133,10 +208,22 @@ def WriteCutWith2Args(file,main,iabs,icut,tagName,tagIndex,condition):
             file.write('    }\n')
 
 
-def WriteCutWith1Arg(file,main,iabs,icut,tagName,tagIndex,condition):
+def WriteCutWith1Arg(file: TextIO,main: Main,iabs: int,icut: int,tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the evaluation of a condition on a one-argument observable (loop over the alternatives).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
 
     # Skip observable with INT of FLOAT argument
     # Temporary
+    # NOTE: parts[0] is a ParticleObject, never an ArgumentType value: this test is always False.
     if condition.parts[0] in [ArgumentType.FLOAT,\
                               ArgumentType.INTEGER]:
         return
@@ -148,7 +235,20 @@ def WriteCutWith1Arg(file,main,iabs,icut,tagName,tagIndex,condition):
         file.write('    }\n')
 
 
-def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,condition):
+def WriteJobExecute2Nbody(file: TextIO,iabs: int,icut: int,combi1: ParticleCombination,combi2: ParticleCombination,main: Main,tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the loops and the test of a two-argument observable.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        combi1 (``ParticleCombination``): combination of the first argument.
+        combi2 (``ParticleCombination``): combination of the second argument.
+        main (``Main``): session state.
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
 
     obs = condition.observable
 
@@ -176,6 +276,8 @@ def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,con
                 if i==j:
                     continue
                 if combi1[i].particle.IsThereCommonPart(combi1[j].particle):
+                    # FIXME: sets 'redundancies' instead of 'redundancies1': the redundancy treatment is never
+                    # activated for the first argument.
                     redundancies = True
 
     # FOR loop for first combi
@@ -192,6 +294,8 @@ def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,con
                 if i==j:
                     continue
                 if combi2[i].particle.IsThereCommonPart(combi2[j].particle):
+                    # FIXME: sets 'redundancies' instead of 'redundancies2': the redundancy treatment is never
+                    # activated for the second argument.
                     redundancies = True
 
     # FOR loop for second combi
@@ -205,6 +309,8 @@ def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,con
         pass
 
     # Getting number of combinations
+    # FIXME: dead code (obs is an ObservableBase, never ObservableType.N); it would fail anyway:
+    # 'combination' is undefined, open() is used instead of file.write and tagIndex is not a str.
     if obs is ObservableType.N:
         file.write('        Ncounter++;\n')
         for combi in range(len(combination)):
@@ -225,7 +331,22 @@ def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,con
             file.write('      }\n')
 
 
-def WriteJobSum2N(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,condition,iterator1,iterator2):
+def WriteJobSum2N(file: TextIO,iabs: int,icut: int,combi1: ParticleCombination,combi2: ParticleCombination,main: Main,tagName: str,tagIndex: int,condition: ConditionType,iterator1: str,iterator2: str) -> None:
+    """Write the test of a two-argument observable for the current combination.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        combi1 (``ParticleCombination``): combination of the first argument.
+        combi2 (``ParticleCombination``): combination of the second argument.
+        main (``Main``): session state.
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+        iterator1 (``str``): name of the C++ index array of the first combination.
+        iterator2 (``str``): name of the C++ index array of the second combination.
+    """
 
     cut = main.selection[iabs]
     obs = condition.observable
@@ -276,6 +397,7 @@ def WriteJobSum2N(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,condition,i
             TheOper='+'
             if ind!=0:
               TheOper=oper_string
+            # NOTE: '[+' generates a (harmless) unary plus in the C++ index.
             file.write('      q1'+TheOper+'='+\
                        containers1[ind]+'[+'+iterator1+'['+str(ind)+']]->'+\
                        'momentum();\n')
@@ -303,7 +425,22 @@ def WriteJobSum2N(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,condition,i
                    ') {'+tagName+'['+str(tagIndex)+']=true; break;}\n')
 
 
-def WriteJobExecuteNbody(file,iabs,icut,combination,main,tagName,tagIndex,condition):
+def WriteJobExecuteNbody(file: TextIO,iabs: int,icut: int,combination: ParticleCombination,main: Main,tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the loops and the test of a one-argument observable.
+
+    For the multiplicity observables (``N``, ``sN``, ...), the combinations are counted
+    and the count is compared to the threshold.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        combination (``ParticleCombination``): combination of particles.
+        main (``Main``): session state.
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
 
     obs = condition.observable
 
@@ -352,7 +489,21 @@ def WriteJobExecuteNbody(file,iabs,icut,combination,main,tagName,tagIndex,condit
             file.write('      }\n')
 
 
-def WriteJobLoop(file,iabs,icut,combination,redundancies,main,iterator='ind'):
+def WriteJobLoop(file: TextIO,iabs: int,icut: int,combination: ParticleCombination,redundancies: bool,main: Main,iterator: str = 'ind') -> None:
+    """Open the nested C++ loops over the containers of a combination.
+
+    With redundancies, identical particles in different containers are skipped and the
+    vector ``combis`` of already-used combinations is declared.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        combination (``ParticleCombination``): combination of particles.
+        redundancies (``bool``): some particles can appear in several containers.
+        main (``Main``): session state.
+        iterator (``str``, default ``'ind'``): name of the C++ index array.
+    """
 
     cut = main.selection[iabs]
 
@@ -391,7 +542,18 @@ def WriteJobLoop(file,iabs,icut,combination,redundancies,main,iterator='ind'):
 
 
 
-def WriteJobSameCombi(file,iabs,icut,combination,redundancies,main,iterator='ind'):
+def WriteJobSameCombi(file: TextIO,iabs: int,icut: int,combination: ParticleCombination,redundancies: bool,main: Main,iterator: str = 'ind') -> None:
+    """Write the skipping of combinations already considered (in another order).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        combination (``ParticleCombination``): combination of particles.
+        redundancies (``bool``): some particles can appear in several containers.
+        main (``Main``): session state.
+        iterator (``str``, default ``'ind'``): name of the C++ index array.
+    """
     if len(combination)==1 or not redundancies:
         return
 
@@ -411,6 +573,8 @@ def WriteJobSameCombi(file,iabs,icut,combination,redundancies,main,iterator='ind
     file.write('    for (MAuint32 i=0;i<'+str(len(combination))+';i++)\n')
     file.write('    {\n')
     for i in range(0,len(combination)):
+        # FIXME: the generated C++ loop inserts containers[k][iterator[i]] for every i and every k
+        # (the C++ index i is used for all containers): wrong combination set and possible out-of-range access.
         file.write('      mycombi.insert('+containers[i]+'['+iterator+'[i]]);\n')
     file.write('    }\n')
     file.write('    MAbool matched=false;\n')
@@ -420,7 +584,23 @@ def WriteJobSameCombi(file,iabs,icut,combination,redundancies,main,iterator='ind
     file.write('    else combis.push_back(mycombi);\n\n')
 
 
-def WriteJobSum(file,iabs,icut,combination,main,tagName,tagIndex,condition,iterator='ind'):
+def WriteJobSum(file: TextIO,iabs: int,icut: int,combination: ParticleCombination,main: Main,tagName: str,tagIndex: int,condition: ConditionType,iterator: str = 'ind') -> None:
+    """Write the test of a one-argument observable for the current combination.
+
+    The observable is computed on a single particle, on the scalar or vector
+    sum/difference of the particles, or as the ratio ``(a-b)/a``.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the cut in the selection.
+        icut (``int``): 1-based number of the event cut.
+        combination (``ParticleCombination``): combination of particles.
+        main (``Main``): session state.
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+        iterator (``str``, default ``'ind'``): name of the C++ index array.
+    """
 
     cut = main.selection[iabs]
     obs = condition.observable

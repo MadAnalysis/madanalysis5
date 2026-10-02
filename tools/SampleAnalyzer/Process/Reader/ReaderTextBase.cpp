@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file ReaderTextBase.cpp
+ * @brief Implementation of MA5::ReaderTextBase.
+ */
+
 #include <fstream>
 
 // Fifo headers
@@ -64,6 +69,7 @@ MAbool ReaderTextBase::Initialize(const std::string& rawfilename,
 
   // Cleaning the file (remove rfio or local location)
   filename_ = rawfilename;
+  // FIXME: the result of CleanFilename() is discarded: the rfio:/file: prefix is not removed.
   CleanFilename(filename_);
 
   // Is compressed file ?
@@ -73,6 +79,7 @@ MAbool ReaderTextBase::Initialize(const std::string& rawfilename,
   if (compress_)
   {
 #ifndef ZIP_USE
+    // NOTE: the message mentions RFIO_USE while zlib support (ZIP_USE) is missing.
     ERROR << "'zip file' is not allowed. Please set the RFIO_USE"
           << " variable in the Makefile to 1 and recompile the program if"
           << " you would like to use this option." << endmsg;
@@ -114,6 +121,7 @@ MAbool ReaderTextBase::Initialize(const std::string& rawfilename,
   // Input coming from FIFO
   else if (fifo_)
   {
+    // NOTE: this file descriptor is never used nor closed.
     MAint32 ififo = open(filename_.c_str(), O_RDONLY);
     if (ififo < 0) return false;
 

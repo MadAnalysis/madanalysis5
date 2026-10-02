@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file StatusCode.h
+ * @brief Status returned by the event readers.
+ */
+
 #ifndef StatusCode_h
 #define StatusCode_h
 
@@ -33,9 +38,11 @@
 namespace MA5
 {
 
+  /** @brief Status returned when reading an event. */
   class StatusCode
   {
   public:
+    /** @brief KEEP: event read; SKIP: event to be skipped; FAILURE: end of file or error. */
     enum Type {KEEP=0, SKIP=1, FAILURE=2};
   };
 

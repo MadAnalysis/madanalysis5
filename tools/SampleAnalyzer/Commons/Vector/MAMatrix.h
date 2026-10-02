@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file MAMatrix.h
+ * @brief Minimal dense matrix of doubles.
+ */
 
 #ifndef MAMatrix_h
 #define MAMatrix_h
@@ -43,6 +48,7 @@
 namespace MA5
 {
 
+/** @brief Minimal dense matrix of doubles (vector of rows). */
 class MAMatrix
 {
 
@@ -53,6 +59,7 @@ class MAMatrix
   // -------------------------------------------------------------
  protected:
   
+  /** @brief Rows of the matrix. */
   std::vector<std::vector<MAdouble64> > m_;
 
 
@@ -61,30 +68,57 @@ class MAMatrix
   // -------------------------------------------------------------
  public :
 
-  // Constructors
+  /** @brief Constructor (empty matrix). */
   MAMatrix()
   {}
 
+  /**
+   * @brief Constructor of an n x m null matrix.
+   *
+   * @param n number of rows.
+   * @param m number of columns.
+   */
   MAMatrix(MAuint16 n, MAuint16 m)
   {setDim(n,m);}
   
+  /**
+   * @brief Constructor of an n x n null matrix.
+   *
+   * @param n dimension.
+   */
   MAMatrix(MAuint16 n)
   {setDim(n,n);}
 
-  // Destructor
+  /** @brief Destructor. */
   ~MAMatrix()
   {}
 
-  // Setting the rotation angle
+  /**
+   * @brief Set the dimensions (new elements are null; existing rows keep their size).
+   *
+   * @param n number of rows.
+   * @param m number of columns.
+   */
   void setDim(MAuint16 n, MAuint16 m)
   {
     m_.resize(n,std::vector<MAdouble64>(m,0.));
   }
 
-  // Operator
+  /**
+   * @brief Access a row (read-only).
+   *
+   * @param i row index.
+   * @return the row.
+   */
   const std::vector<MAdouble64>& operator[] (MAuint16 i) const
   { return m_[i]; }
 
+  /**
+   * @brief Access a row.
+   *
+   * @param i row index.
+   * @return the row.
+   */
   std::vector<MAdouble64>& operator[] (MAuint16 i)
   { return m_[i]; }
 

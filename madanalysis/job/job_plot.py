@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,21 @@
 ################################################################################
 
 
+"""Writer of the C++ code filling the histograms of the selection.
+
+For each combination of the arguments of the observable, nested loops over the
+particle containers are written; combinations containing the same particle twice,
+or already considered in another order, are skipped. With the ``all`` keyword, the
+particles are summed before filling the histogram once per event.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.multiparticle.particle_combination import ParticleCombination
 from madanalysis.selection.histogram          import Histogram
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.observable_type  import ObservableType
@@ -34,7 +48,15 @@ import logging
 from six.moves import range
 
 
-def WritePlot(file,main,iabs,ihisto):
+def WritePlot(file: TextIO,main: Main,iabs: int,ihisto: int) -> None:
+    """Write the filling of a histogram according to the number of arguments of its observable.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+    """
 
     # Opening bracket for the current histo
     file.write('  {\n')
@@ -53,7 +75,15 @@ def WritePlot(file,main,iabs,ihisto):
     file.write('  }\n')
 
 
-def WritePlotWith0Arg(file,main,iabs,ihisto):
+def WritePlotWith0Arg(file: TextIO,main: Main,iabs: int,ihisto: int) -> None:
+    """Write the filling of a histogram of an event-level observable (or ``NPID``/``NAPID``).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+    """
     logging.getLogger('MA5').debug("  Writing histogram with 0 argument...")
 
     if main.selection[iabs].observable.name in ['NPID','NAPID']:
@@ -62,7 +92,20 @@ def WritePlotWith0Arg(file,main,iabs,ihisto):
         file.write('    Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
            main.selection[iabs].observable.code(main.mode)+');\n')
 
-def WriteJobNPID(file,main,iabs,ihisto):
+def WriteJobNPID(file: TextIO,main: Main,iabs: int,ihisto: int) -> None:
+    """Write the filling of a ``NPID``/``NAPID`` histogram.
+
+    At parton/hadron level the PDG codes of the Monte Carlo particles (with the
+    requested status) are used; at reco level, the codes associated with the
+    reconstructed objects (photons, leptons with charge, taus, jets and b/non-b jets).
+
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+    """
 
     # NPID or NAPID ?
     npid = ( main.selection[iabs].observable.name == 'NPID' )
@@ -140,13 +183,22 @@ def WriteJobNPID(file,main,iabs,ihisto):
                    '            Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", +1);\n')
         file.write('  }\n')
 
-def WritePlotWith1Arg(file,main,iabs,ihisto):
+def WritePlotWith1Arg(file: TextIO,main: Main,iabs: int,ihisto: int) -> None:
+    """Write the filling of a histogram of a one-argument observable (loop over the alternatives).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+    """
 
 
     logging.getLogger('MA5').debug("  Writing histogram with 1 argument...")
 
     # Skip observable with INT of FLOAT argument
     # Temporary
+    # NOTE: arguments[0] is a ParticleObject, never an ArgumentType value: always False.
     if main.selection[iabs].arguments[0] in [ArgumentType.FLOAT,\
                                              ArgumentType.INTEGER]:
         return
@@ -158,7 +210,15 @@ def WritePlotWith1Arg(file,main,iabs,ihisto):
         file.write('  }\n')
 
 
-def WritePlotWith2Args(file,main,iabs,ihisto):
+def WritePlotWith2Args(file: TextIO,main: Main,iabs: int,ihisto: int) -> None:
+    """Write the filling of a histogram of a two-argument observable (e.g. ``DELTAR``).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+    """
     
     logging.getLogger('MA5').debug("  Writing histogram with 2 arguments...")
 
@@ -170,7 +230,19 @@ def WritePlotWith2Args(file,main,iabs,ihisto):
             file.write('  }\n')
 
 
-def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
+def WriteJobExecute2Nbody(file: TextIO,iabs: int,ihisto: int,combi1: ParticleCombination,combi2: ParticleCombination,main: Main) -> None:
+    """Write the loops and the filling of a two-argument observable.
+
+    Four cases are handled depending on the ``all`` keyword in each argument.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combi1 (``ParticleCombination``): combination of the first argument.
+        combi2 (``ParticleCombination``): combination of the second argument.
+        main (``Main``): session state.
+    """
 
     obs      = main.selection[iabs].observable
     histo    = main.selection[iabs]
@@ -284,6 +356,7 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
                     TheOper='+'
                     if ind!=0:
                       TheOper=oper_string
+                    # FIXME: 'iterator2' is undefined (NameError); the iterator of the second combination is 'b'.
                     file.write('    q2'+TheOper+'='+\
                                containers2[ind]+'['+iterator2+'['+str(ind)+']]->'+\
                                'momentum();\n')
@@ -367,6 +440,7 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
                     TheOper='+'
                     if ind!=0:
                       TheOper=oper_string
+                    # FIXME: 'iterator1' is undefined (NameError); the iterator of the first combination is 'a'.
                     file.write('    q1'+TheOper+'='+\
                                containers1[ind]+'['+iterator1+'['+str(ind)+']]->'+\
                                'momentum();\n')
@@ -417,6 +491,7 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
         WriteBody(file,iabs,ihisto,combi2,main,iterator='b',value='value2',q='q2')
 
         # End Loop
+        # NOTE: iabs and ihisto are swapped (unused by WriteEndLoop).
         WriteEndLoop(file,ihisto,iabs,combi2,main)
 
         # After the two loops 
@@ -429,7 +504,18 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
         file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
             'q1.'+TheObs+'(q2));\n')
 
-def WriteBeforeLoop(file,iabs,ihisto,combination,main,value='value',q='q'):
+def WriteBeforeLoop(file: TextIO,iabs: int,ihisto: int,combination: ParticleCombination,main: Main,value: str = 'value',q: str = 'q') -> None:
+    """Declare the accumulators needed before the loops (counter or ``all`` sums).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combination (``ParticleCombination``): combination of particles.
+        main (``Main``): session state.
+        value (``str``, default ``'value'``): C++ name of the scalar accumulator.
+        q (``str``, default ``'q'``): C++ name of the four-vector accumulator.
+    """
 
     # shortcut
     obs = main.selection[iabs].observable
@@ -448,11 +534,29 @@ def WriteBeforeLoop(file,iabs,ihisto,combination,main,value='value',q='q'):
         else:
             file.write('    ParticleBaseFormat '+q+';\n')
 
-def WriteEndLoop(file,iabs,ihisto,combination,main):
+def WriteEndLoop(file: TextIO,iabs: int,ihisto: int,combination: ParticleCombination,main: Main) -> None:
+    """Close the loops opened by :func:`WriteJobLoop`.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combination (``ParticleCombination``): combination of particles.
+        main (``Main``): session state.
+    """
     for combi in range(len(combination)):
         file.write('    }\n')
 
-def WriteAfterLoop(file,iabs,ihisto,combination,main):
+def WriteAfterLoop(file: TextIO,iabs: int,ihisto: int,combination: ParticleCombination,main: Main) -> None:
+    """Write the filling done after the loops (``all`` keyword and multiplicity observables).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combination (``ParticleCombination``): combination of particles.
+        main (``Main``): session state.
+    """
 
     # shortcut
     obs     = main.selection[iabs].observable
@@ -479,7 +583,23 @@ def WriteAfterLoop(file,iabs,ihisto,combination,main):
     elif obs.name in ['N','vN','sN','sdN','dsN','dvN','vdN','dN','rN']:
         file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", Ncounter);\n')
 
-def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='q'):
+def WriteBody(file: TextIO,iabs: int,ihisto: int,combination: ParticleCombination,main: Main,iterator: str = 'ind',value: str = 'value',q: str = 'q') -> None:
+    """Write the body of the loops of a one-argument observable.
+
+    Depending on the observable, the counter is incremented, the observable of a single
+    particle is filled, or the scalar/vector sum (difference) or ratio of the particles
+    is computed (and filled unless the ``all`` keyword is used).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combination (``ParticleCombination``): combination of particles.
+        main (``Main``): session state.
+        iterator (``str``, default ``'ind'``): name of the C++ index array.
+        value (``str``, default ``'value'``): C++ name of the scalar accumulator.
+        q (``str``, default ``'q'``): C++ name of the four-vector accumulator.
+    """
 
     # Shortcut
     histo   = main.selection[iabs]
@@ -568,7 +688,19 @@ def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='
             containers[0]+'['+iterator+'[0]]->'+\
             obs.code(main.mode)+');\n')
 
-def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
+def WriteBody2(file: TextIO,iabs: int,ihisto: int,combi1: ParticleCombination,combi2: ParticleCombination,main: Main,iterator1: str,iterator2: str) -> None:
+    """Write the filling of a two-argument observable for the current combinations.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combi1 (``ParticleCombination``): combination of the first argument.
+        combi2 (``ParticleCombination``): combination of the second argument.
+        main (``Main``): session state.
+        iterator1 (``str``): C++ index array of the first combination.
+        iterator2 (``str``): C++ index array of the second combination.
+    """
 
     # Shortcut
     histo    = main.selection[iabs]
@@ -648,7 +780,17 @@ def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
         file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
                        'q1.'+TheObs+'(q2));\n')
 
-def HasDoubleCounting(combination):
+def HasDoubleCounting(combination: ParticleCombination | list[Any]) -> bool:
+    """Check whether two particles of a combination may share the same object.
+
+    Args:
+        combination (``ParticleCombination | list[Any]``): combination (or list of
+            particles).
+
+    Returns:
+        ``bool``:
+        ``True`` if two (multi)particles have a common PDG code.
+    """
     if len(combination)<=1:
         return False
 
@@ -662,7 +804,16 @@ def HasDoubleCounting(combination):
 
     return False
 
-def WriteJobExecuteNbody(file,iabs,ihisto,combination,main):
+def WriteJobExecuteNbody(file: TextIO,iabs: int,ihisto: int,combination: ParticleCombination,main: Main) -> None:
+    """Write the loops and the filling of a one-argument observable.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combination (``ParticleCombination``): combination of particles.
+        main (``Main``): session state.
+    """
 
     # shortcut
     obs = main.selection[iabs].observable
@@ -690,7 +841,19 @@ def WriteJobExecuteNbody(file,iabs,ihisto,combination,main):
     WriteAfterLoop(file,iabs,ihisto,combination,main)
 
 
-def WriteAvoidRedundancies(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
+def WriteAvoidRedundancies(file: TextIO,iabs: int,ihisto: int,combi1: ParticleCombination,combi2: ParticleCombination,main: Main,iterator1: str,iterator2: str) -> None:
+    """Skip the combinations where both arguments are the same object (single particles only).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combi1 (``ParticleCombination``): combination of the first argument.
+        combi2 (``ParticleCombination``): combination of the second argument.
+        main (``Main``): session state.
+        iterator1 (``str``): C++ index array of the first combination.
+        iterator2 (``str``): C++ index array of the second combination.
+    """
 
     # Shortcut
     histo    = main.selection[iabs]
@@ -720,7 +883,18 @@ def WriteAvoidRedundancies(file,iabs,ihisto,combi1,combi2,main,iterator1,iterato
                    containers2[0]+'['+iterator2+'[0]] ) continue;\n')
 
 
-def WriteJobLoop(file,iabs,ihisto,combination,redundancies,main,iterator='ind'):
+def WriteJobLoop(file: TextIO,iabs: int,ihisto: int,combination: ParticleCombination,redundancies: bool,main: Main,iterator: str = 'ind') -> None:
+    """Open the nested C++ loops over the containers of a combination.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combination (``ParticleCombination``): combination of particles.
+        redundancies (``bool``): some particles can appear in several containers.
+        main (``Main``): session state.
+        iterator (``str``, default ``'ind'``): name of the C++ index array.
+    """
 
     histo = main.selection[iabs]
 
@@ -758,7 +932,18 @@ def WriteJobLoop(file,iabs,ihisto,combination,redundancies,main,iterator='ind'):
             file.write(') continue;\n')     
 
 
-def WriteJobSameCombi(file,iabs,ihisto,combination,redundancies,main,iterator='ind'):
+def WriteJobSameCombi(file: TextIO,iabs: int,ihisto: int,combination: ParticleCombination,redundancies: bool,main: Main,iterator: str = 'ind') -> None:
+    """Write the skipping of combinations already considered (in another order).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the histogram in the selection.
+        ihisto (``int``): 1-based number of the histogram.
+        combination (``ParticleCombination``): combination of particles.
+        redundancies (``bool``): some particles can appear in several containers.
+        main (``Main``): session state.
+        iterator (``str``, default ``'ind'``): name of the C++ index array.
+    """
 
     if len(combination)==1 or not redundancies:
         return
@@ -779,6 +964,8 @@ def WriteJobSameCombi(file,iabs,ihisto,combination,redundancies,main,iterator='i
     file.write('    for (MAuint32 i=0;i<'+str(len(combination))+';i++)\n')
     file.write('    {\n')
     for i in range(len(combination)):
+        # FIXME: the generated C++ loop inserts containers[k][iterator[i]] for every i and every k
+        # (the C++ index i is used for all containers): wrong combination set and possible out-of-range access.
         file.write('      mycombi.insert('+containers[i]+'['+iterator+'[i]]);\n')
     file.write('    }\n')
     file.write('    MAbool matched=false;\n')

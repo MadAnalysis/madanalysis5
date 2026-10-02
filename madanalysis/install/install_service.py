@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -22,20 +22,37 @@
 ################################################################################
 
 
+"""Helpers shared by the installers: downloads, unpacking, folders and number of cores."""
+
 from __future__ import absolute_import
-from shell_command import ShellCommand
+from typing import Any
+
+import glob
 import logging
 import os
-import sys
 import shutil
-from six.moves import range
-from six.moves import input
+import sys
+
 import six
+from shell_command import ShellCommand
+from six.moves import input, range
+
+log = logging.getLogger("MA5")
 
 
 class InstallService:
+    """Static helpers used by the ``install`` command."""
     @staticmethod
-    def convert_bytes(bytes):
+    def convert_bytes(bytes: "float") -> "str":
+        """Format a size in bytes with a unit suffix.
+
+        Args:
+            bytes (``float``): size in bytes.
+
+        Returns:
+            ``str``:
+            E.g. ``"1.50M"``.
+        """
         bytes = float(bytes)
         if bytes >= 1099511627776:
             terabytes = bytes / 1099511627776
@@ -54,7 +71,15 @@ class InstallService:
         return size
 
     @staticmethod
-    def reporthook2(bytes_so_far, chunk_size, total_size):
+    def reporthook2(bytes_so_far: "int", chunk_size: "int", total_size: "int") -> "None":
+        """Print the download progress on the standard output (same line).
+
+        Args:
+            bytes_so_far (``int``): downloaded size.
+            chunk_size (``int``): size of a chunk (unused).
+            total_size (``int``): total size (``-1`` if unknown).
+        """
+        # FIXME: ZeroDivisionError if the size is 0; negative percentage if the size is unknown (-1).
         percent = float(bytes_so_far) / total_size
         percent = round(percent * 100, 2)
         sys.stdout.write(
@@ -66,7 +91,14 @@ class InstallService:
         )
 
     @staticmethod
-    def reporthook(numblocks, blocksize, filesize):
+    def reporthook(numblocks: "int", blocksize: "int", filesize: "int") -> "None":
+        """Legacy ``urlretrieve`` progress hook logging the download progress every 10%.
+
+        Args:
+            numblocks (``int``): number of downloaded blocks.
+            blocksize (``int``): size of a block.
+            filesize (``int``): total size.
+        """
         try:
             step = int(filesize / (blocksize * 10))
         except:
@@ -80,20 +112,26 @@ class InstallService:
             return
         try:
             percent = min(((numblocks + 1) * blocksize * 100) / filesize, 100)
-        except:
+        except Exception:
             percent = 100
         theString = "% 3.1f%%" % percent
-        logging.getLogger("MA5").info(
-            "      " + theString + " of " + InstallService.convert_bytes(filesize)
-        )
+        log.info("      " + theString + " of " + InstallService.convert_bytes(filesize))
 
     @staticmethod
-    def get_ncores(nmaxcores, forced):
-        logging.getLogger("MA5").info(
-            "   How many cores would you like "
-            + "to use for the compilation ? default = max = "
-            + str(nmaxcores)
-            + ""
+    def get_ncores(nmaxcores: "int", forced: "bool") -> "int":
+        """Ask the user for the number of cores used for a compilation.
+
+        Args:
+            nmaxcores (``int``): number of available cores (default answer).
+            forced (``bool``): do not ask, use all cores.
+
+        Returns:
+            ``int``:
+            Number of cores.
+        """
+        log.info(
+            "   How many cores would you like to use for the compilation ? default = max = %s",
+            nmaxcores,
         )
 
         if not forced:
@@ -106,7 +144,7 @@ class InstallService:
                     break
                 try:
                     ncores = int(answer)
-                except:
+                except Exception:
                     test = False
                     continue
                 if ncores <= nmaxcores and ncores > 0:
@@ -114,40 +152,38 @@ class InstallService:
 
         else:
             ncores = nmaxcores
-        logging.getLogger("MA5").info(
-            "   => Number of cores used for the compilation = " + str(ncores)
-        )
+        log.info("   => Number of cores used for the compilation = %s", str(ncores))
         return ncores
 
     @staticmethod
-    def untar(logname, downloaddir, installdir, tarball):
+    def untar(logname: "str", downloaddir: "str", installdir: "str", tarball: "str") -> "tuple[bool, str]":
+        """Unpack a ``.tar.gz`` archive.
+
+        Args:
+            logname (``str``): log file.
+            downloaddir (``str``): folder containing the archive.
+            installdir (``str``): destination folder.
+            tarball (``str``): name of the archive.
+
+        Returns:
+            ``tuple[bool, str]``:
+            Success flag and the unpacked folder (the single sub-folder if the archive
+            contains only one, ``installdir`` otherwise).
+        """
         # Unpacking the folder
         theCommands = ["tar", "xzf", tarball, "-C", installdir]
-        logging.getLogger("MA5").debug("shell command: " + " ".join(theCommands))
-        logging.getLogger("MA5").debug("exected dir: " + downloaddir)
+        log.debug("shell command: " + " ".join(theCommands))
+        log.debug("exected dir: %s", downloaddir)
         ok, out = ShellCommand.ExecuteWithLog(
             theCommands, logname, downloaddir, silent=False
         )
         if not ok:
             return False, ""
 
-        #        # Removing the tarball
-        #        toRemove=installdir+'/'+tarball
-        #        logging.getLogger('MA5').debug('removing the file: '+toRemove)
-        #        try:
-        #            os.remove(toRemove)
-        #        except:
-        #            logging.getLogger('MA5').debug('impossible to remove the tarball: '+tarball)
-
-        # Getting the good folder
-        import glob
-
         folder_content = glob.glob(installdir + "/*")
-        logging.getLogger("MA5").debug(
-            "content of " + installdir + ": " + str(folder_content)
-        )
+        log.debug("content of " + installdir + ": " + str(folder_content))
         if len(folder_content) == 0:
-            logging.getLogger("MA5").error("The content of the tarball is empty")
+            log.error("The content of the tarball is empty")
             return False, ""
         elif len(folder_content) == 1:
             return True, folder_content[0]
@@ -155,63 +191,71 @@ class InstallService:
             return True, installdir
 
     @staticmethod
-    def prepare_tmp(untardir, downloaddir):
+    def prepare_tmp(untardir: "str", downloaddir: "str") -> "bool":
+        """Create an empty temporary folder (removing a previous one) and the download folder.
+
+        Args:
+            untardir (``str``): temporary unpacking folder.
+            downloaddir (``str``): download folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Removing previous temporary folder path
         if os.path.isdir(untardir):
-            logging.getLogger("MA5").debug(
-                "This temporary folder '" + untardir + "' is found. Try to remove it ..."
+            log.debug(
+                "This temporary folder '%s' is found. Try to remove it ...", untardir
             )
             try:
                 shutil.rmtree(untardir)
-            except:
-                logging.getLogger("MA5").error(
-                    "impossible to remove the folder '" + untardir + "'"
-                )
+            except Exception:
+                log.error("impossible to remove the folder '%s'", untardir)
                 return False
 
         # Creating the temporary folder
-        logging.getLogger("MA5").debug(
-            "Creating a temporary folder '" + untardir + "' ..."
-        )
+        log.debug("Creating a temporary folder '%s' ...", untardir)
         try:
             os.mkdir(untardir)
-        except:
-            logging.getLogger("MA5").error(
-                "impossible to create the folder '" + untardir + "'"
-            )
+        except Exception:
+            log.error("impossible to create the folder '%s' ...", untardir)
             return False
 
         # Creating the downloaddir folder
-        logging.getLogger("MA5").debug(
-            "Creating a temporary download folder '" + downloaddir + "' ..."
-        )
+        log.debug("Creating a temporary download folder '%s' ...", downloaddir)
         if not os.path.isdir(downloaddir):
             try:
                 os.mkdir(downloaddir)
-            except:
-                logging.getLogger("MA5").error(
-                    "impossible to create the folder '" + downloaddir + "'"
-                )
+            except Exception:
+                log.error("impossible to create the folder '%s' ...", downloaddir)
                 return False
         else:
-            logging.getLogger("MA5").debug("folder '" + downloaddir + "'" + " exists.")
+            log.debug("folder '%s' exists.", downloaddir)
         # Ok
-        logging.getLogger("MA5").debug(
-            "Name of the temporary untar    folder: " + untardir
-        )
-        logging.getLogger("MA5").debug(
-            "Name of the temporary download folder: " + downloaddir
-        )
+        log.debug("Name of the temporary untar    folder: %s", untardir)
+        log.debug("Name of the temporary download folder: %s", downloaddir)
         return True
 
     @staticmethod
-    def wget(filesToDownload, logFileName, installdir, **kwargs):
+    def wget(filesToDownload: "dict[str, str]", logFileName: "str", installdir: "str", **kwargs) -> "bool":
+        """Download files (files with the expected size already present are not downloaded again).
+
+        Args:
+            filesToDownload (``dict[str, str]``): ``{local file name: URL}``.
+            logFileName (``str``): log file (one line per URL with ``OK``/``ERROR``).
+            installdir (``str``): destination folder.
+            **kwargs: ``headers`` (``dict[str, str]``), extra HTTP headers.
+
+        Returns:
+            ``bool``:
+            ``True`` if all files have been downloaded.
+        """
 
         # Opening log file
         try:
-            log = open(logFileName, "w")
-        except:
-            logging.getLogger("MA5").error("impossible to create the file " + logFileName)
+            logfile = open(logFileName, "w")
+        except Exception:
+            log.error("impossible to create the file %s", logFileName)
             return False
 
         # Parameters
@@ -222,65 +266,57 @@ class InstallService:
         for file, url in filesToDownload.items():
             ind += 1
             result = "OK"
-            logging.getLogger("MA5").info(
-                "    - "
-                + str(ind)
-                + "/"
-                + str(len(list(filesToDownload.keys())))
-                + " "
-                + url
-                + " ..."
-            )
+            log.info("    - %s/%s %s ...", ind, len(list(filesToDownload.keys())), url)
             output = installdir + "/" + file
 
             # Try to connect the file
             info = InstallService.UrlAccess(url, headers=kwargs.get("headers", None))
-            ok = info != None
+            ok = info is not None
 
             # Check if the connection is OK
             if not ok:
-                logging.getLogger("MA5").warning(
+                log.warning(
                     "Impossible to download the package from " + url + " to " + output
                 )
                 result = "ERROR"
                 error = True
 
                 # Write download status in the log file
-                log.write(url + " : " + result + "\n")
+                logfile.write(url + " : " + result + "\n")
 
                 # skip the file
                 continue
 
             # Decoding the size of the remote file
-            logging.getLogger("MA5").debug("Decoding the size of the remote file...")
-            sizeURLFile = 0
+            log.debug("Decoding the size of the remote file...")
+            sizeURLFile = -1
             try:
                 if six.PY2:
                     sizeURLFile = int(info.info().getheaders("Content-Length")[0])
                 else:
                     sizeURLFile = int(info.info().get("Content-Length"))
             except Exception as err:
-                print(err)
-                logging.getLogger("MA5").debug("-> Problem to decode it")
-                logging.getLogger("MA5").warning("Bad description for " + url)
-                result = "ERROR"
-                error = True
+                log.debug(err)
+                log.debug("-> Problem to decode it")
+                log.debug(
+                    "Bad description for %s, can not read the size of the file.", url
+                )
+                # result = "ERROR"
+                # error = True
 
                 # Write download status in the log file
-                log.write(url + " : " + result + "\n")
+                logfile.write(url + " : " + result + "\n")
 
                 # skip the file
-                continue
-            logging.getLogger("MA5").debug("-> size=" + str(sizeURLFile))
+                # pass
+            log.debug("-> size=%s", str(sizeURLFile))
 
             # Does the file exist locally?
             ok = False
             if not os.path.isfile(output):
-                logging.getLogger("MA5").debug(
-                    "No file with the name '" + output + "' exists locally."
-                )
+                log.debug("No file with the name '" + output + "' exists locally.")
             else:
-                logging.getLogger("MA5").debug(
+                log.debug(
                     "A file with the same name '"
                     + output
                     + "' has been found on the machine."
@@ -290,23 +326,21 @@ class InstallService:
 
                 # Decoding the size of the local file
                 if ok:
-                    logging.getLogger("MA5").debug(
-                        "Decoding the size of the local file..."
-                    )
+                    log.debug("Decoding the size of the local file...")
                     sizeSYSFile = 0
                     try:
                         sizeSYSFile = os.path.getsize(output)
                     except:
-                        logging.getLogger("MA5").debug("-> Problem to decode it")
+                        log.debug("-> Problem to decode it")
                         ok = False
 
                 # Comparing the sizes of two files
                 if ok:
-                    logging.getLogger("MA5").debug("-> size=" + str(sizeSYSFile))
-                    logging.getLogger("MA5").debug("Comparing the sizes of two files...")
+                    log.debug("-> size=" + str(sizeSYSFile))
+                    log.debug("Comparing the sizes of two files...")
                     if sizeURLFile != sizeSYSFile:
-                        logging.getLogger("MA5").debug("-> Difference detected!")
-                        logging.getLogger("MA5").info(
+                        log.debug("-> Difference detected!")
+                        log.info(
                             "   '"
                             + file
                             + "' is corrupted or is an old version."
@@ -317,8 +351,8 @@ class InstallService:
 
                 # Case where the two files are identifical -> do nothing
                 if ok:
-                    logging.getLogger("MA5").debug("-> NO difference detected!")
-                    logging.getLogger("MA5").info(
+                    log.debug("-> NO difference detected!")
+                    log.info(
                         "        --> '"
                         + file
                         + "' already exists. Package not downloaded."
@@ -326,23 +360,23 @@ class InstallService:
 
                 # Other cases: download is necessary
                 if not ok:
-                    logging.getLogger("MA5").debug(
+                    log.debug(
                         "Fail to get info about the local file. It will be overwritten."
                     )
 
             # Download of the package
             if not ok:
-                logging.getLogger("MA5").debug("Downloading the file ...")
+                log.debug("Downloading the file ...")
 
                 # Open the output file [write mode]
                 try:
                     outfile = open(output, "wb")
                 except:
                     info.close()
-                    logging.getLogger("MA5").warning(
-                        "Impossible to write the file " + output
-                    )
+                    log.warning("Impossible to write the file " + output)
                     result = "ERROR"
+                    # FIXME: 'error' is a global flag: after one failure, the next files are neither downloaded
+                    # nor closed ('if not error' blocks below).
                     error = True
 
                 # Copy the file
@@ -366,34 +400,50 @@ class InstallService:
                         outfile.close()
                         info.close()
                     except:
-                        logging.getLogger("MA5").warning(
-                            "Impossible to close the file " + output
-                        )
+                        log.warning("Impossible to close the file " + output)
                         result = "ERROR"
                         error = True
 
             # Write download status in the log file
-            log.write(url + " : " + result + "\n")
+            logfile.write(url + " : " + result + "\n")
 
         # Close the log file
         try:
-            log.close()
+            logfile.close()
         except:
-            logging.getLogger("MA5").error("impossible to close the file " + logFileName)
+            log.error("impossible to close the file " + logFileName)
 
         # Result
         if error:
-            logging.getLogger("MA5").warning("Error(s) occured during the installation.")
+            log.warning("Error(s) occured during the installation.")
             return False
         else:
             return True
 
     @staticmethod
-    def UrlAccess(url, headers: dict[str, str] = None):
+    # FIXME: 'dict[str, str]' is evaluated at definition time: the module cannot be imported
+    # with Python 3.8 (TypeError), although Python >= 3.8 is supported.
+    def UrlAccess(url: "str | urllib.request.Request", headers: dict[str, str] = None) -> "Any":
+        """Open a URL (three attempts, 3 s apart).
 
-        import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
+        .. warning::
+            The SSL certificates are not verified.
+
+        Args:
+            url (``str | urllib.request.Request``): URL or request.
+            headers (``dict[str, str]``, default ``None``): extra HTTP headers.
+
+        Returns:
+            ``Any``:
+            The response object, or ``None`` if the URL cannot be accessed.
+        """
+
         import ssl
         import time
+
+        import six.moves.urllib.error
+        import six.moves.urllib.parse
+        import six.moves.urllib.request
 
         # max of attempts when impossible to access a file
         nMaxAttempts = 3
@@ -409,46 +459,54 @@ class InstallService:
                 and sys.version_info[2] >= 9
             ) or (sys.version_info[0] == 3)
         except:
-            logging.getLogger("MA5").warning("Problem with Python version decoding!")
+            log.warning("Problem with Python version decoding!")
             modeSSL = False
 
-        # Try to access
-        ok = True
-        for nAttempt in range(0, nMaxAttempts):
-            if nAttempt > 0:
-                logging.getLogger("MA5").warning("New attempt to access the url: " + url)
-                logging.getLogger("MA5").debug(
-                    "Waiting " + str(nSeconds) + " seconds ..."
-                )
-                time.sleep(nSeconds)
-            logging.getLogger("MA5").debug(
-                "Attempt "
-                + str(nAttempt + 1)
-                + "/"
-                + str(nMaxAttempts)
-                + " to access the url"
+
+
+        # Keep the URL used in messages separate from the request object.
+        if isinstance(url, six.moves.urllib.request.Request):
+            display_url = url.get_full_url()
+            request = url
+            if headers is not None:
+                for name, value in headers.items():
+                    request.add_header(name, value)
+        else:
+            display_url = url
+            request = (
+                six.moves.urllib.request.Request(url, headers=headers)
+                if headers is not None
+                else url
             )
+
+        # Try to access.
+        ok = False
+        for nAttempt in range(nMaxAttempts):
+            if nAttempt > 0:
+                log.warning("New attempt to access the url: %s", display_url)
+                log.debug("Waiting %s seconds ...", nSeconds)
+                time.sleep(nSeconds)
+            log.debug("Attempt %s/%s to access the url", nAttempt + 1, nMaxAttempts)
+
             try:
-                if headers is not None:
-                    url = six.moves.urllib.request.Request(url, headers=headers)
                 if modeSSL:
-                    info = six.moves.urllib.request.urlopen(
-                        url, context=ssl._create_unverified_context()
-                    )
+                    info = six.moves.urllib.request.urlopen(request, context=ssl._create_unverified_context())
                 else:
-                    info = six.moves.urllib.request.urlopen(url)
+                    info = six.moves.urllib.request.urlopen(request)
             except Exception as err:
-                logging.getLogger("MA5").debug(err)
-                logging.getLogger("MA5").warning("Impossible to access the url: " + url)
-                ok = False
-            if ok:
-                break
+                log.debug(err)
+                log.warning("Impossible to access the url: %s", display_url)
+                continue
+
+            # A successful attempt ends the retry loop.
+            ok = True
+            break
 
         if not ok:
             return None
 
         # Display
-        logging.getLogger("MA5").debug(
+        log.debug(
             "Info about the url: --------------------------------------------------------"
         )
         words = str(info.info()).split("\n")
@@ -456,31 +514,40 @@ class InstallService:
             word = word.lstrip()
             word = word.rstrip()
             if word != "":
-                logging.getLogger("MA5").debug("Info about the url: " + word)
-        logging.getLogger("MA5").debug(
+                log.debug("Info about the url: " + word)
+        log.debug(
             "Info about the url: --------------------------------------------------------"
         )
 
         return info
 
     @staticmethod
-    def check_ma5site():
+    def check_ma5site() -> "bool":
+        """Try to access the MadAnalysis 5 website.
+
+        Returns:
+            ``bool``:
+            Always ``True`` (the result of the access is ignored).
+        """
         url = "http://madanalysis.irmp.ucl.ac.be"
-        logging.getLogger("MA5").debug(
-            "Testing the access to MadAnalysis 5 website: " + url + " ..."
-        )
+        log.debug("Testing the access to MadAnalysis 5 website: " + url + " ...")
         info = InstallService.UrlAccess(url)
         # Close the access
+        # NOTE: the function always returns True, even if the site is unreachable.
         if info != None:
             info.close()
         return True
 
     @staticmethod
-    def check_dataverse():
+    def check_dataverse() -> "bool":
+        """Try to access the UCLouvain Dataverse.
+
+        Returns:
+            ``bool``:
+            Always ``True`` (the result of the access is ignored).
+        """
         url = "http://dataverse.uclouvain.be"
-        logging.getLogger("MA5").debug(
-            "Testing access to the MadAnalysis5 dataverse: " + url + " ..."
-        )
+        log.debug("Testing access to the MadAnalysis5 dataverse: " + url + " ...")
         info = InstallService.UrlAccess(url)
         # Close the access
         if info != None:
@@ -488,39 +555,50 @@ class InstallService:
         return True
 
     @staticmethod
-    def create_tools_folder(path):
+    def create_tools_folder(path: "str") -> "bool":
+        """Create the ``tools`` folder if needed.
+
+        Args:
+            path (``str``): path of the folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if os.path.isdir(path):
-            logging.getLogger("MA5").debug(
-                "   The installation folder 'tools' is already created."
-            )
+            log.debug("   The installation folder 'tools' is already created.")
         else:
-            logging.getLogger("MA5").debug("   Creating the 'tools' folder ...")
+            log.debug("   Creating the 'tools' folder ...")
             try:
                 os.mkdir(path)
             except:
-                logging.getLogger("MA5").error("impossible to create the folder 'tools'.")
+                log.error("impossible to create the folder 'tools'.")
                 return False
         return True
 
     @staticmethod
-    def create_package_folder(toolsdir, package):
+    def create_package_folder(toolsdir: "str", package: "str") -> "bool":
+        """Create the installation folder of a package (it must not exist yet).
+
+        Args:
+            toolsdir (``str``): parent folder.
+            package (``str``): name of the package folder.
+
+        Returns:
+            ``bool``:
+            ``False`` if the folder already exists or cannot be created.
+        """
 
         # Removing the folder package
         if os.path.isdir(os.path.join(toolsdir, package)):
-            logging.getLogger("MA5").error(
-                "impossible to remove the folder 'tools/" + package + "'"
-            )
+            log.error("impossible to remove the folder 'tools/" + package + "'")
             return False
 
         # Creating the folder package
         try:
             os.mkdir(os.path.join(toolsdir, package))
         except:
-            logging.getLogger("MA5").error(
-                "impossible to create the folder 'tools/" + package + "'"
-            )
+            log.error("impossible to create the folder 'tools/" + package + "'")
             return False
-        logging.getLogger("MA5").debug(
-            "   Creation of the directory 'tools/" + package + "'"
-        )
+        log.debug("   Creation of the directory 'tools/" + package + "'")
         return True

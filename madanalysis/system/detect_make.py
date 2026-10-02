@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Detection of GNU Make (mandatory)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 import glob
 import os
@@ -34,8 +38,28 @@ from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectMake:
+    """Detector of GNU Make (mandatory).
 
-    def __init__(self, archi_info, user_info, session_info, debug):
+    The methods are called by
+    :meth:`madanalysis.system.detect_manager.DetectManager.Execute` in the following
+    order (only when defined): ``IsItVetoed``, ``AreDependenciesInstalled``,
+    ``ManualDetection``, ``ToolsDetection``, ``AutoDetection``, ``ExtractInfo`` and
+    ``SaveInfo``.
+
+    Attributes:
+        name (``str``): name displayed in the configuration check.
+        mandatory (``bool``): whether MadAnalysis 5 can run without the package.
+    """
+
+    def __init__(self, archi_info: Any, user_info: Any, session_info: Any, debug: bool) -> None:
+        """Create the detector of GNU Make (mandatory).
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration, filled by :meth:`SaveInfo`.
+            user_info (``UserInfo``): user options (vetoes, forced paths).
+            session_info (``SessionInfo``): session information, filled by :meth:`SaveInfo`.
+            debug (``bool``): print detailed information.
+        """
         # mandatory options
         self.archi_info   = archi_info
         self.user_info    = user_info
@@ -50,11 +74,19 @@ class DetectMake:
         self.version = ""
 
 
-    def PrintDisableMessage(self):
+    def PrintDisableMessage(self) -> None:
+        """Log the consequences of GNU Make (mandatory) being unavailable."""
         self.logger.warning("GNU Make not found. Please install it before using MadAnalysis 5")
         
 
-    def AutoDetection(self):
+    def AutoDetection(self) -> tuple[int, str]:
+        """Look for GNU Make (mandatory) on the system.
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         msg = ''
         
         # Which
@@ -69,7 +101,13 @@ class DetectMake:
         return DetectStatusType.FOUND, msg
 
 
-    def ExtractInfo(self):
+    def ExtractInfo(self) -> bool:
+        """Extract detailed information about the detected GNU Make (mandatory) (version, paths, ...).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Which all
         if self.debug:
             result = ShellCommand.Which('make',all=True,mute=True)
@@ -103,7 +141,13 @@ class DetectMake:
         return True
 
 
-    def SaveInfo(self):
+    def SaveInfo(self) -> bool:
+        """Store the information about GNU Make (mandatory) in the architecture/session information.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         self.archi_info.make_version = self.version
         return True
 

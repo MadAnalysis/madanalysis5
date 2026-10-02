@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,52 +22,112 @@
 ################################################################################
 
 
+"""Collection of the datasets defined in the session."""
+
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from madanalysis.dataset.dataset import Dataset as _Dataset
 import logging
 import madanalysis.dataset.dataset as Dataset
 import six
 
 class DatasetCollection:
+    """Ordered collection of :class:`~madanalysis.dataset.dataset.Dataset` objects.
 
-    def __init__(self):
+    Attributes:
+        table (``list[list]``): list of ``[name, Dataset]`` pairs, in definition order.
+    """
+
+    def __init__(self) -> None:
+        """Create an empty collection."""
         self.table = []
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Get the number of datasets.
+
+        Returns:
+            ``int``:
+            Number of datasets.
+        """
         return len(self.table)
 
-    def __getitem__(self,i):
+    def __getitem__(self,i: int) -> _Dataset:
+        """Get a dataset by position.
+
+        Args:
+            i (``int``): index of the dataset.
+
+        Returns:
+            ``Dataset``:
+            The ``i``-th dataset.
+        """
         return self.table[i][1]
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log the names and types of all datasets (``display_datasets``)."""
         logging.getLogger('MA5').info(" ********* List of defined datasets *********" )
         for value in self.table:
             logging.getLogger('MA5').info(" "+value[0]+" ("+value[1].GetStringTag()+")")
         logging.getLogger('MA5').info(" ********************************************" )
 
-    def Find(self,name):
+    def Find(self,name: str) -> bool:
+        """Check whether a dataset exists.
+
+        Args:
+            name (``str``): name of the dataset.
+
+        Returns:
+            ``bool``:
+            ``True`` if a dataset with this name exists.
+        """
+        # FIXME: str.lower() returns a new string; the result is discarded, so the lookup is
+        # case-sensitive although Dataset stores a lower-case name (same issue in Add/Get/Remove).
         name.lower()
         for item in self.table:
             if name == item[0]:
                 return True
         return False
 
-    def Reset(self):
+    def Reset(self) -> None:
+        """Remove all datasets."""
         self.table = []
     
-    def Add(self,name):
+    def Add(self,name: str) -> None:
+        """Create a new empty dataset (nothing is done if it already exists).
+
+        Args:
+            name (``str``): name of the dataset.
+        """
         name.lower()
         if not self.Find(name):
             self.table.append([name,Dataset.Dataset(name)])
 
-    def Get(self,name):
+    def Get(self,name: str) -> _Dataset | None:
+        """Get a dataset by name.
+
+        Args:
+            name (``str``): name of the dataset.
+
+        Returns:
+            ``Dataset | None``:
+            The dataset, or ``None`` if it does not exist.
+        """
         name.lower()
         for item in self.table:
             if name == item[0]:
                 return item[1]
         return None
 
-    def Remove(self,name):
+    def Remove(self,name: str) -> None:
+        """Remove a dataset.
+
+        Args:
+            name (``str``): name of the dataset.
+        """
         name.lower()
         if self.Find(name):
             newtable = []
@@ -76,17 +136,36 @@ class DatasetCollection:
                     newtable.append(item)
             self.table = newtable        
 
-    def Reset(self):
+    # NOTE: duplicate definition of Reset (identical to the one above).
+    def Reset(self) -> None:
+        """Remove all datasets (duplicate definition, overrides the first one)."""
         self.table = []
 
-    def GetNames(self):
+    def GetNames(self) -> list[str]:
+        """Get the names of all datasets.
+
+        Returns:
+            ``list[str]``:
+            Dataset names in definition order.
+        """
         names=[]
         for item in self.table:
             names.append(item[0])
         return names
 
 
-    def LoadWithSAF(self,ast):
+    # FIXME: dead code, see the warning in the docstring.
+    def LoadWithSAF(self,ast: Any) -> None:
+        """Rebuild the collection from a parsed SAF tree.
+
+        Args:
+            ast (``Any``): parsed SAF tree providing ``GetBranch``/``GetBranches`` and
+                typed parameter getters.
+
+        .. warning::
+            No class of the code base implements this tree interface: this method is
+            currently dead code.
+        """
         # Reseting the multiparticle collection
         self.Reset()
         
@@ -115,6 +194,7 @@ class DatasetCollection:
             # Getting physics parameters
             physics = value.GetBranch('physics',1)
             if physics==None:
+                # NOTE: print() used instead of the MA5 logger.
                 print("ERROR: no physics branch")
                 continue
             else:
@@ -142,6 +222,7 @@ class DatasetCollection:
                 linestyle = layout.GetParameterToUInt("linestyle")
                 dataset.linestyle = dataset.linestyle if linestyle==None else linestyle
 
+                # FIXME: shades can be negative but are read as unsigned integers.
                 lineshade = layout.GetParameterToUInt("lineshade")
                 dataset.lineshade = dataset.lineshade if lineshade==None else lineshade
 

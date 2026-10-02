@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,9 +22,22 @@
 ################################################################################
 
 
+"""Writer of the ``user::Finalize`` method of the generated analysis."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 import logging
-def WriteJobFinalize(file,main):
+def WriteJobFinalize(file: TextIO,main: Main) -> None:
+    """Write an empty ``user::Finalize`` method.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+    """
 
     # Function header
     file.write('void user::Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files)\n{\n')

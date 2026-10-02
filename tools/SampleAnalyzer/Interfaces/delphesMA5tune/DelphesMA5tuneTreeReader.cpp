@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file DelphesMA5tuneTreeReader.cpp
+ * @brief Implementation of MA5::DelphesMA5tuneTreeReader.
+ */
+
 #include <sstream>
 
 // SampleHeader headers
@@ -46,6 +51,7 @@ using namespace MA5;
 MAbool DelphesMA5tuneTreeReader::Initialize()
 {
   // Create object of class ExRootTreeReader
+  // NOTE: treeReader_ is never deleted.
   treeReader_    = new ExRootTreeReader(tree_);
   total_nevents_ = treeReader_->GetEntries();
   read_nevents_  = 0;
@@ -269,6 +275,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
   ElectronIndex_.clear();
 
   // Fill electrons
+  // NOTE: the results of the dynamic_casts are not checked in this function.
   if (branchElectron_!=0)
   for (MAuint32 i=0;i<static_cast<MAuint32>(branchElectron_->GetEntries());i++)
   {
@@ -403,14 +410,14 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
       if (header1!=0)
       {
         // Set event-weight
-        myEvent.mc()->setWeight(header1->Weight);
+        myEvent.mc()->setWeight(i, header1->Weight);
       }
       else
       {
         HepMCEvent* header2 = dynamic_cast<HepMCEvent*>(branchEvent_->At(i));
         if (header2==0) continue;
         // Set event-weight
-        myEvent.mc()->setWeight(header2->Weight);
+        myEvent.mc()->setWeight(i, header2->Weight);
       }
     }
   }
@@ -431,9 +438,10 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     else
     {
       RecJetFormat * jet = myEvent.rec()->GetNewJet();
+      // FIXME: the jet mass is discarded (DelphesTreeReader uses part->Mass).
       jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
-      jet->ntracks_  = 0; // To fix later
-      jet->btag_     = part->BTag;
+      jet->ntracks_ = 0; // To fix later
+      jet->loose_btag_ = part->BTag;
       jet->HEoverEE_ = part->EhadOverEem;
     }
   }
@@ -549,6 +557,8 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     RecTrackFormat * track = myEvent.rec()->GetNewTrack();
     track->pdgid_ = ref->PID;
     if (ref->Charge>0) track->charge_=true; else track->charge_=false;
+    // FIXME: the track energy is set to its pT (SetPtEtaPhiE(PT, Eta, Phi, PT)), which is only correct for
+    //   a massless particle at eta = 0.
     track->momentum_.SetPtEtaPhiE(ref->PT,ref->Eta,ref->Phi,ref->PT);
     track->etaOuter_ = ref->EtaOuter;
     track->phiOuter_ = ref->PhiOuter;

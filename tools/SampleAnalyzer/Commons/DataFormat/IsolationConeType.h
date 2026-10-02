@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file IsolationConeType.h
+ * @brief Isolation variables computed in a cone around an object.
+ */
 
 #ifndef IsolationConeType_h
 #define IsolationConeType_h
@@ -47,6 +52,12 @@ class DetectorDelphes;
 class DetectorDelphesMA5tune;
 class ClusterAlgoBase;
 
+/**
+ * @brief Isolation variables in a cone of given radius around an object.
+ *
+ * The contribution of the object itself (selfPT_, selfET_) is subtracted by the
+ * accessors sumPT() and sumET().
+ */
 class IsolationConeType
 {
 
@@ -67,11 +78,17 @@ class IsolationConeType
   // -------------------------------------------------------------
  private:
 
+  /** @brief Number of tracks in the cone. */
   MAuint16 ntracks_;    /// number of tracks
+  /** @brief Scalar sum of the transverse momenta of the tracks. */
   MAfloat32 sumPT_;       /// sum PT
+  /** @brief Scalar sum of the transverse momenta of the energy-flow objects. */
   MAfloat32 eflow_sumPT_; /// sum PT eflow
+  /** @brief Scalar sum of the transverse energies of the calorimeter deposits. */
   MAfloat32 sumET_;       /// sum ET
+  /** @brief Radius of the cone. */
   MAfloat32 deltaR_;      /// deltaR of the cone
+  /** @brief Transverse energy and momentum of the object itself. */
   MAfloat32 selfET_;
   MAfloat32 selfPT_;
 
@@ -80,20 +97,20 @@ class IsolationConeType
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor (members reset). */
   IsolationConeType()
   { Reset(); }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~IsolationConeType()
   {}
 
-  /// Dump information
+  /** @brief Print (nothing is printed). */
   virtual void Print() const
   {
   }
 
-  /// Clear all information
+  /** @brief Reset all the members. */
   virtual void Reset()
   {
     ntracks_     = 0; 
@@ -105,61 +122,123 @@ class IsolationConeType
     selfPT_      = 0.;
   }
 
-  /// Accessor to the number of tracks
+  /**
+   * @brief Accessor to the number of tracks.
+   *
+   * @return the number of tracks.
+   */
   const MAuint16 ntracks() const
   {return ntracks_;}
 
-  /// Accessor to sumPT
+  /**
+   * @brief Accessor to the sum of the track transverse momenta, without the object itself.
+   *
+   * @return the sum.
+   */
   const MAfloat32 sumPT() const
   { return sumPT_ - selfPT_; }
 
-  /// Accessor to sumET
+  /**
+   * @brief Accessor to the sum of the transverse energies, without the object itself.
+   *
+   * @return the sum.
+   */
   const MAfloat32 sumET() const
   { return sumET_ - selfET_; }
 
-  /// Accessor to deltaR
+  /**
+   * @brief Accessor to the radius of the cone.
+   *
+   * @return the radius.
+   */
   const MAfloat32& deltaR() const
   {return deltaR_;}
 
-  /// Accessor to sumPTeflow
+  /**
+   * @brief Accessor to the sum of the energy-flow transverse momenta.
+   *
+   * @return the sum.
+   */
   const MAfloat32& sumPTeflow() const
   {return eflow_sumPT_;}
 
-  /// Mutator to the number of tracks
+  /**
+   * @brief Set the number of tracks.
+   *
+   * @param tracks number of tracks.
+   */
   void setNtracks(MAuint16 tracks)
   {ntracks_=tracks;}
 
-  /// add to the number of tracks
+  /**
+   * @brief Add tracks.
+   *
+   * @param tracks number of tracks to add.
+   */
   void addNtracks(MAuint16 tracks)
   {ntracks_+=tracks;}
 
-  /// Mutator to sumPT
+  /**
+   * @brief Set the sum of the track transverse momenta.
+   *
+   * @param sumPT sum.
+   */
   void setsumPT(MAfloat32 sumPT)
   {sumPT_=sumPT;}
 
+  /**
+   * @brief Add to the sum of the track transverse momenta.
+   *
+   * @param sumPT value to add.
+   */
   void addsumPT(MAfloat32 sumPT)
   {sumPT_+=sumPT;}
 
-  /// Mutator to sumET
+  /**
+   * @brief Set the sum of the transverse energies.
+   *
+   * @param sumET sum.
+   */
   void setSumET(MAfloat32 sumET)
   {sumET_=sumET;}
 
+  /**
+   * @brief Add to the sum of the transverse energies.
+   *
+   * @param sumET value to add.
+   */
   void addSumET(MAfloat32 sumET)
   {sumET_+=sumET;}
 
-  /// Mutator to deltaR
+  /**
+   * @brief Set the radius of the cone.
+   *
+   * @param deltaR radius.
+   */
   void setDeltaR(MAfloat32 deltaR)
   {deltaR_=deltaR;}
 
-  /// Mutator to sumPT
+  /**
+   * @brief Set the transverse momentum of the object itself.
+   *
+   * @param PT transverse momentum.
+   */
   void setSelfPT(MAfloat32 PT)
   {selfPT_=PT;}
 
-  /// Mutator to sumET
+  /**
+   * @brief Set the transverse energy of the object itself.
+   *
+   * @param ET transverse energy.
+   */
   void setSelfET(MAfloat32 ET)
   {selfET_=ET;}
 
-  /// Mutator to sumPTeflow
+  /**
+   * @brief Set the sum of the energy-flow transverse momenta.
+   *
+   * @param eflow_sumPT sum.
+   */
   void setSumPTeflow(MAfloat32 eflow_sumPT)
   {eflow_sumPT_=eflow_sumPT;}
 

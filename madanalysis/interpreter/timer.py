@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,26 +22,45 @@
 ################################################################################
 
 
+"""Periodic timer calling a function at regular intervals in a background thread."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any, Callable
 import threading
 import time
 
 class Timer:
-    def __init__(self,tempo,target,args=[],kwargs={}):
+    """Repeating timer based on :class:`threading.Timer`.
+
+    The target is called every ``tempo`` seconds from :meth:`start` until :meth:`stop`.
+    """
+    def __init__(self,tempo: float,target: Callable[..., Any],args: list[Any] = [],kwargs: dict[str, Any] = {}) -> None:
+        """Initialise the timer (not started).
+
+        Args:
+            tempo (``float``): period in seconds.
+            target (``Callable[..., Any]``): function to call periodically.
+            args (``list[Any]``, default ``[]``): positional arguments of ``target``.
+            kwargs (``dict[str, Any]``, default ``{}``): keyword arguments of ``target``.
+        """
         self.target = target
         self.args = args
         self.kwargs = kwargs
         self.tempo = tempo
 
-    def run(self):
+    def run(self) -> None:
+        """Re-arm the timer and call the target (executed at each period)."""
         self.timer = threading.Timer(self.tempo,self.run)
         self.timer.start()
         self.target(*self.args,**self.kwargs)
 
-    def start(self):
+    def start(self) -> None:
+        """Start the timer (the first call happens after one period)."""
         self.timer = threading.Timer(self.tempo,self.run)
         self.timer.start()
 
-    def stop(self):
+    def stop(self) -> None:
+        """Cancel the pending call."""
         self.timer.cancel()
         

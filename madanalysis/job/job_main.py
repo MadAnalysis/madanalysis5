@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,21 @@
 ################################################################################
 
 
+"""Generation of the C++ analysis (``user.h``/``user.cpp``) corresponding to the selection.
+
+The analysis inherits from ``MA5::AnalyzerBase``. The header declares the particle
+containers and the particle-identification functions (:mod:`~madanalysis.job.job_header`);
+the source file defines ``Initialize`` (:mod:`~madanalysis.job.job_initialize`),
+``Execute`` (:mod:`~madanalysis.job.job_execute`) and ``Finalize``
+(:mod:`~madanalysis.job.job_finalize`).
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.selection.histogram          import Histogram
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.observable_type  import ObservableType
@@ -31,21 +45,37 @@ from madanalysis.interpreter.cmd_cut          import CmdCut
 import logging
 
 class JobMain:
+    """Writer of the ``user`` analysis class.
 
-    def __init__(self,file,main):
+    Attributes:
+        file (``TextIO``): output file.
+        main (``Main``): session state.
+        parts (``list[list[Any]]``): particle containers used by the selection (see
+            :func:`~madanalysis.job.job_particle.GetParticles`).
+    """
+
+    def __init__(self,file: TextIO,main: Main) -> None:
+        """Collect the particle containers used by the selection.
+
+        Args:
+            file (``TextIO``): output file (header or source).
+            main (``Main``): session state.
+        """
         self.file = file
         self.main = main
         import madanalysis.job.job_particle as JobParticle
         self.parts=JobParticle.GetParticles(self.main)
 
 
-    def WriteHeader(self):
+    def WriteHeader(self) -> None:
+        """Write the header ``user.h``."""
         import madanalysis.job.job_header as JobHeader
         JobHeader.WriteHeader(self.file,self.main)
         JobHeader.WriteCore(self.file,self.main,self.parts)
         JobHeader.WriteFoot(self.file,self.main)
 
-    def WriteSource(self):
+    def WriteSource(self) -> None:
+        """Write the source file ``user.cpp``."""
         self.file.write('#include "SampleAnalyzer/User/Analyzer/user.h"\n')
         self.file.write('using namespace MA5;\n')
         self.file.write('\n')

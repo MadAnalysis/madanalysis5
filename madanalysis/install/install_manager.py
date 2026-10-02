@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,20 +22,52 @@
 ################################################################################
 
 
+"""Dispatcher of the ``install`` command."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 import logging
 
 from string_tools import StringTools
 from chronometer  import Chronometer
 
 class InstallManager():
+    """Select the installer of a package and run the installation steps."""
 
-    def __init__(self,main):
+    def __init__(self,main: Main) -> None:
+        """Create the manager.
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main   = main
         self.logger = logging.getLogger('MA5')
         self.chrono = Chronometer()
 
-    def Execute(self, rawpackage):
+    def Execute(self, rawpackage: str) -> bool | str:
+        """Install a package.
+
+        The installer class of the package is selected and its methods are called (when
+        defined) in the following order: ``Detect`` (and ``Remove`` of a previous
+        installation), ``GetNcores``, ``CreatePackageFolder``, ``CreateTmpFolder``,
+        ``Download`` (only with web access), ``Unpack``, ``Configure``, ``Build``,
+        ``PreCheck``, ``Clean``, ``Install`` and ``Check``.
+
+        Args:
+            rawpackage (``str``): name of the package (case-insensitive): ``zlib``,
+                ``fastjet``, ``fastjet-contrib``, ``heptoptagger``, ``delphes``,
+                ``delphesma5tune``, ``samples``, ``gnuplot``, ``matplotlib``, ``root``,
+                ``numpy``, ``pad``, ``padforma5tune``, ``padforsfs`` or ``simplify``.
+
+        Returns:
+            ``bool | str``:
+            ``'restart'`` if MadAnalysis 5 must be restarted, ``True`` on success (or when the
+            installation is skipped), ``False`` on failure.
+        """
 
         # Selection of the package
         package=rawpackage.lower()
@@ -143,6 +175,7 @@ class InstallManager():
                 if not installer.Download():
                     self.PrintBad()
                     return False
+            # NOTE: without web access the installation continues and usually fails at the Unpack step.
             else:
                 self.logger.warning("   Download is not allowed because the internet access is disabled.")
 
@@ -203,7 +236,8 @@ class InstallManager():
         else:
             return True
 
-    def PrintGood(self):
+    def PrintGood(self) -> None:
+        """Log the successful end of an installation and its duration."""
         self.logger.info("   Installation complete.")
 
         # Chrono end
@@ -214,7 +248,8 @@ class InstallManager():
         self.logger.info("   **********************************************************")
         self.logger.info("")
 
-    def PrintSkip(self):
+    def PrintSkip(self) -> None:
+        """Log that the installation has been skipped."""
         self.logger.info("   Installation skipped.")
 
         # Chrono end
@@ -225,7 +260,8 @@ class InstallManager():
         self.logger.info("   **********************************************************")
         self.logger.info("")
 
-    def PrintBad(self):
+    def PrintBad(self) -> None:
+        """Log the failure of an installation."""
         self.logger.info("   Installation NOT complete.")
 
         # Chrono end
@@ -236,7 +272,16 @@ class InstallManager():
         self.logger.info("   **********************************************************")
         self.logger.info("")
 
-    def Deactivate(self, rawpackage):
+    def Deactivate(self, rawpackage: str) -> bool:
+        """Deactivate Delphes or Delphes-MA5tune.
+
+        Args:
+            rawpackage (``str``): ``delphes`` or ``delphesma5tune``.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         package=rawpackage.lower()
         if package in ['delphes', 'delphesma5tune']:
             from madanalysis.install.install_delphes import InstallDelphes
@@ -250,7 +295,17 @@ class InstallManager():
         return True
 
 
-    def Activate(self, rawpackage):
+    def Activate(self, rawpackage: str) -> int:
+        """Reactivate Delphes or Delphes-MA5tune.
+
+        Args:
+            rawpackage (``str``): ``delphes`` or ``delphesma5tune``.
+
+        Returns:
+            ``int``:
+            Result of :meth:`~madanalysis.install.install_delphes.InstallDelphes.Activate`
+            (``-1`` on error or for an unknown package).
+        """
         package=rawpackage.lower()
         if package in ['delphes', 'delphesma5tune']:
             from madanalysis.install.install_delphes import InstallDelphes
@@ -258,5 +313,6 @@ class InstallManager():
             return installer.Activate()
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
+            # NOTE: an int is returned here whereas Deactivate returns a bool.
             return -1
 

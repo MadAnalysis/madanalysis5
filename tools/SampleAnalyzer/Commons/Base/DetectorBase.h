@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file DetectorBase.h
+ * @brief Interface of the detector simulations (Delphes, Delphes-MA5tune).
+ */
+
 #ifndef DETECTOR_BASE_H
 #define DETECTOR_BASE_H
 
@@ -41,6 +46,7 @@
 namespace MA5
 {
 
+  /** @brief Abstract base class of the detector simulations. */
   class DetectorBase
   {
     //--------------------------------------------------------------------------
@@ -48,6 +54,7 @@ namespace MA5
     //--------------------------------------------------------------------------
   protected :
 
+    /** @brief Path of the detector configuration card. */
     std::string configFile_;
 
     //--------------------------------------------------------------------------
@@ -55,41 +62,74 @@ namespace MA5
     //--------------------------------------------------------------------------
   public :
 
-    /// Constructor without argument
+    /** @brief Constructor. */
     DetectorBase () 
     { }
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~DetectorBase()
     { }
 
-    /// Jet clustering
+    /**
+     * @brief Simulate the detector response for an event.
+     *
+     * @param mySample current sample.
+     * @param myEvent event (the reconstructed objects are filled).
+     * @return false in case of error.
+     */
     virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent)=0;
 
-    /// Initialization
+    /**
+     * @brief Initialise the detector simulation.
+     *
+     * @param configFile path of the detector card.
+     * @param options additional options.
+     * @return false in case of error.
+     */
     virtual MAbool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)=0;
 
-    /// Finalization
+    /** @brief Finalise the detector simulation. */
     virtual void Finalize()=0;
 
-    /// Print parameters
+    /** @brief Print the parameters of the detector simulation. */
     virtual void PrintParam()=0;
 
-    /// Accessor to the detector name
+    /**
+     * @brief Accessor to the name of the detector simulation.
+     *
+     * @return the name.
+     */
     virtual std::string GetName()=0;
 
-    /// Accessor to the detector parameters
+    /**
+     * @brief Accessor to the parameters of the detector simulation.
+     *
+     * @return a printable summary of the parameters.
+     */
     virtual std::string GetParameters()=0;
 
-    /// Config File
+    /**
+     * @brief Accessor to the path of the detector card.
+     *
+     * @return the path.
+     */
     const std::string& GetConfigFile() const
     { return configFile_; }
 
-    /// Config File
+    /**
+     * @brief Get a printable description of the detector card.
+     *
+     * @return the description.
+     */
     virtual const std::string PrintConfigFile() const
     { return "        with config card: "+GetConfigFile(); }
 
-    /// Putting the string in lower case
+    /**
+     * @brief Convert a string to lower case.
+     *
+     * @param word string.
+     * @return the lower-case string.
+     */
     static std::string Lower(const std::string& word)
     {
       std::string result;

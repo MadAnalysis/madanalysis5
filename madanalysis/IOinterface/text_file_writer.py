@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,15 +22,37 @@
 ################################################################################
 
 
+"""Base class for text files opened in writing mode."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import IO
 import logging
 class TextFileWriter():
+    """Text file opened in writing mode.
 
-    def __init__(self,filename):
+    Attributes:
+        filename (``str``): path of the file.
+        isopen (``bool``): whether the file is open.
+        file (``IO[str]``): file object (defined once opened).
+    """
+
+    def __init__(self,filename: str) -> None:
+        """Store the file name (the file is not opened).
+
+        Args:
+            filename (``str``): path of the file.
+        """
         self.filename = filename
         self.isopen = False
 
-    def Open(self):
+    def Open(self) -> bool:
+        """Open the file.
+
+        Returns:
+            ``bool``:
+            ``False`` if the file is already open or cannot be opened.
+        """
         if self.isopen:
             logging.getLogger('MA5').error("the file called '"+self.filename+"' cannot be opened. It is already opened")
             return False
@@ -42,7 +64,8 @@ class TextFileWriter():
             logging.getLogger('MA5').error("Impossible to create the file called '" + self.filename + "'")
             return False
 
-    def Close(self):
+    def Close(self) -> None:
+        """Close the file if it is open."""
         if self.isopen:
             self.file.close()
             self.isopen = False

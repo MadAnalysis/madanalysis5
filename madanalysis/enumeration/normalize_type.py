@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,14 +22,38 @@
 ################################################################################
 
 
+"""Histogram normalisation modes (``set main.normalize``)."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
-        def __getattr__(self, name):
+        """Metaclass turning the class attribute access ``NormalizeType.NAME`` into an integer code.
+
+        Accessing ``NormalizeType.NAME`` returns the index of ``NAME`` in ``NormalizeType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
+        def __getattr__(self, name: str) -> int:
+                """Get the integer code of an enumeration entry.
+
+                Args:
+                    name (``str``): name of the entry (e.g. ``NormalizeType.LUMI``).
+
+                Raises:
+                    ``ValueError``: if ``name`` is not a key of ``values``.
+
+                Returns:
+                    ``int``:
+                    Index of the entry in ``values``.
+                """
                 return self.values.index(name)
 
 @six.add_metaclass(metaclass)
 class NormalizeType(object):
+        """Normalisation modes: ``NONE`` (raw event counts), ``LUMI`` (normalised to the
+        integrated luminosity) and ``LUMI_WEIGHT`` (luminosity and dataset weight).
+        """
         values = ['NONE','LUMI','LUMI_WEIGHT']
 
 

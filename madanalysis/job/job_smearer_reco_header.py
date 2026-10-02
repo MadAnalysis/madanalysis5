@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,9 +22,38 @@
 ################################################################################
 
 
+"""Writer of the SFS smearer header (``new_smearer_reco.h``) and of the SFS functions."""
+
+from __future__ import annotations
+from typing import TYPE_CHECKING, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.fastsim.fastsim import SuperFastSim
+
 class JobSmearerRecoHeader:
+    """Writer of the ``NewSmearer`` class declaration (derived from ``SmearerBase``).
+
+    The ``*_smearing`` flags record which object types are affected by a smearer, a
+    reconstruction efficiency or a scaling rule.
+
+    Attributes:
+        fastsim (``SuperFastSim``): SFS configuration.
+        electron_smearing (``bool``): electrons are modified.
+        muon_smearing (``bool``): muons are modified.
+        photon_smearing (``bool``): photons are modified.
+        tau_smearing (``bool``): hadronic taus are modified.
+        jet_smearing (``bool``): jets are modified (jet-based smearing or JES).
+        constituent_smearing (``bool``): jet constituents are smeared.
+        track_smearing (``bool``): tracks are modified.
+        propagator (``bool``): the particle propagator is switched on.
+    """
     ## Initialization
-    def __init__(self, fastsim):
+    def __init__(self, fastsim: SuperFastSim) -> None:
+        """Determine which object types must be modified.
+
+        Args:
+            fastsim (``SuperFastSim``): SFS configuration (``main.superfastsim``).
+        """
         self.fastsim = fastsim
         self.electron_smearing    = False
         self.muon_smearing        = False
@@ -82,7 +111,12 @@ class JobSmearerRecoHeader:
 
 
     ## Writing NewSmearer.h
-    def WriteNewSmearerRecoHeader(self, file):
+    def WriteNewSmearerRecoHeader(self, file: TextIO) -> None:
+        """Write ``new_smearer_reco.h``.
+
+        Args:
+            file (``TextIO``): output C++ file.
+        """
         file.write('#ifndef NEW_SMEARER_H\n')
         file.write('#define NEW_SMEARER_H\n')
         file.write('// SampleAnalyzer headers\n')
@@ -146,7 +180,12 @@ class JobSmearerRecoHeader:
         file.write('#endif')
 
     ## efficiencies and bounds
-    def WriteNewSmearerEfficiencies(self,file):
+    def WriteNewSmearerEfficiencies(self,file: TextIO) -> None:
+        """Write ``sigmas.h``: the resolution and bound functions of the smearing rules.
+
+        Args:
+            file (``TextIO``): output C++ file.
+        """
         file.write('#ifndef SIG_H_INCLUDED\n')
         file.write('#define SIG_H_INCLUDED\n')
         file.write('#include <cmath>\n')
@@ -165,7 +204,13 @@ class JobSmearerRecoHeader:
         file.write('#endif')
 
     ## Reconstruction efficiencies and bounds
-    def WriteNewRecoEfficiencies(self,file, constituents=False):
+    def WriteNewRecoEfficiencies(self,file: TextIO, constituents: bool = False) -> None:
+        """Write ``reco.h``: the reconstruction efficiency and bound functions.
+
+        Args:
+            file (``TextIO``): output C++ file.
+            constituents (``bool``, default ``False``): unused.
+        """
         file.write('#ifndef RECO_H_INCLUDED\n')
         file.write('#define RECO_H_INCLUDED\n')
         file.write('#include <cmath>\n')
@@ -183,7 +228,12 @@ class JobSmearerRecoHeader:
 
 
     ## scales and bounds
-    def WriteNewScales(self,file):
+    def WriteNewScales(self,file: TextIO) -> None:
+        """Write ``scaling.h``: the scaling and bound functions.
+
+        Args:
+            file (``TextIO``): output C++ file.
+        """
         file.write('#ifndef SC_H_INCLUDED\n')
         file.write('#define SC_H_INCLUDED\n')
         file.write('#include <cmath>\n')

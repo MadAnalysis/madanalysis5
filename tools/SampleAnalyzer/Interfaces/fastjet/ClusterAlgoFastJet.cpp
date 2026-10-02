@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // SampleAnalyser headers
+/**
+ * @file ClusterAlgoFastJet.cpp
+ * @brief Implementation of MA5::ClusterAlgoFastJet.
+ */
+
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoFastJet.h"
 
 using namespace MA5;
@@ -146,6 +151,7 @@ MAbool ClusterAlgoFastJet::Cluster(EventFormat& myEvent, std::string JetID)
     }
 
     // Filling the dataformat with jets
+    // NOTE: insert() does nothing if a collection with the same identifier already exists.
     myEvent.rec()->jetcollection_.insert(std::make_pair(JetID, output_jets));
 
     return true;

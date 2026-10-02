@@ -1,0 +1,33 @@
+#TITLE Event-level cutflows with multiple event weights
+#MODE PARTON
+
+import samples/lljj.lhe.gz as testset
+set testset.weighted_events = true
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu-
+
+# No explicit regions: exercise the default region independently of region tests.
+plot N(lep) 6 0 6
+
+# These cuts preserve the initial event count, including events without e/mu.
+select N(lep) >= 0
+reject N(lep) < 0
+
+# Require the objects before using their ordered momenta.
+select N(lep) >= 2
+select N(j) >= 2
+plot M(lep[1] lep[2]) 40 0 200
+select PT(lep[1]) > 25
+select M(lep[1] lep[2]) > 50 and (PT(j[1]) > 50 or PT(lep[1]) > 60)
+reject M(lep[1] lep[2]) > 95 and PT(lep[1]) < 70
+plot M(lep[1] lep[2]) 40 0 200
+plot PT(lep[1]) 40 0 200
+
+# Reject all remaining events. Later counters and histograms must stay empty
+# for the nominal weight and every stored variation.
+select PT(lep[1]) < 0
+select N(lep) >= 0
+plot M(lep[1] lep[2]) 40 0 200
+
+submit

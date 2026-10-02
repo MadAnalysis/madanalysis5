@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyser headers
+/**
+ * @file SFSTaggerBase.cpp
+ * @brief Implementation of MA5::SFSTaggerBase (truth-level matching and detector-level (mis)tagging).
+ */
+
 #include "SampleAnalyzer/Commons/Base/SFSTaggerBase.h"
 #include "SampleAnalyzer/Commons/Service/RandomService.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
@@ -48,6 +53,7 @@ namespace MA5 {
 
         /// Print Tau-tagging options
         if (_options.tautag_jetbased) {
+            // FIXME: uses ctag_exclusive instead of tautag_exclusive for the tau printout.
             excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
             INFO << "        with tau : matching ΔR = "
                  << _options.tautag_matching_deltaR
@@ -95,6 +101,7 @@ namespace MA5 {
             for (auto &jet: myEvent.rec()->jets())
             {
                 ijet++;
+                // NOTE: one random number per jet is shared by all the (mis)tagging tests below.
                 MAfloat64 flat = RANDOM->flat();
                 /// We have a true b-jet: is it b-tagged?
                 if (jet.true_btag())
@@ -177,6 +184,8 @@ namespace MA5 {
                     /// Scope for light jet mistagging for electron
                     {
                         /// if not, is it Electron-tagged?
+                        // FIXME: no 'continue' after the electron mistag: the same jet can also be mistagged as a photon and
+                        // its index is then pushed twice into toRemove (a wrong jet is erased).
                         if (flat < lightjet_mistag_electron(jet))
                         {
                             RecLeptonFormat* NewParticle = myEvent.rec()->GetNewElectron();
@@ -243,6 +252,7 @@ namespace MA5 {
         /// Muon mistagging
         if (_isMuonTaggingOn)
         {
+            // NOTE: unsigned counter starting at -1: relies on the wrap-around of the first increment.
             MAuint32 imu = -1;
             for (auto &muon: myEvent.rec()->muons())
             {
@@ -475,6 +485,7 @@ namespace MA5 {
                     {
                         DeltaRmax = dR; current_jet = ijet;
                     }
+                    // FIXME: current_jet is -1 here (non-exclusive mode): out-of-bounds access; ijet was meant.
                     else myEvent.rec()->jets()[current_jet].setAllTautags(true);
                 }
             }

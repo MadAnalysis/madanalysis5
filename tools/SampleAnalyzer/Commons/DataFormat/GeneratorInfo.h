@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file GeneratorInfo.h
+ * @brief Identifiers of the event generators and of the sample formats.
+ */
+
 #ifndef GENERATOR_INFO_H
 #define GENERATOR_INFO_H
 
@@ -35,6 +40,7 @@ namespace MA5
 
 namespace MA5GEN
 {
+  /** @brief Program that produced the sample. */
   enum GeneratorType { UNKNOWN=0,
                        MG5=1, MA5=2,
                        PYTHIA6=3, PYTHIA8=4, 
@@ -45,6 +51,7 @@ namespace MA5GEN
 
 namespace MA5FORMAT
 {
+  /** @brief Format of the sample file. */
   enum SampleFormatType { UNKNOWN=0, 
                           LHE=1, SIMPLIFIED_LHE=2, 
                           STDHEP=3, HEPMC=4, LHCO=5,

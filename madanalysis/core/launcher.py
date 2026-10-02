@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -23,8 +23,26 @@
 
 
 # Setting global variables of MadAnalysis main
+"""Command-line launcher of MadAnalysis 5.
+
+This module is imported by ``bin/ma5``. It decodes the command-line options
+(:func:`DecodeArguments`), configures the logger and the ``readline`` tab completion,
+and runs one or several MadAnalysis 5 sessions (:func:`MainSession`). A new session
+is started each time the user issues the ``restart`` command (or after the
+installation of a package requiring a restart).
+
+A session consists of:
+
+1. the creation of the global :class:`~madanalysis.core.main.Main` object;
+2. the detection of the system configuration and of the optional dependencies;
+3. the (re)compilation of the SampleAnalyzer C++ kernel if needed;
+4. either the creation of an expert-mode working directory, or the execution of
+   the interactive command-line interpreter (possibly fed by scripts).
+"""
+
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import annotations
 from madanalysis.core.script_stack import ScriptStack
 from madanalysis.core.main         import Main
 from string_tools                  import StringTools
@@ -36,8 +54,22 @@ import logging
 
 
 class MA5mode():
+   """Container for the running options decoded from the command line.
+
+   All attributes are booleans set by :func:`DecodeArguments`:
+
+   * ``partonlevel`` / ``hadronlevel`` / ``recolevel``: running mode (``-P``, ``-H``,
+     ``-R``); at most one of them can be ``True``;
+   * ``expertmode``: expert mode (``-e``/``-E``);
+   * ``forcedmode``: no confirmation questions (``-f``, implied by ``-s``);
+   * ``scriptmode``: quit after the execution of the scripts (``-s``);
+   * ``debug``: debug logging (``-d``);
+   * ``build``: force the rebuild of SampleAnalyzer (``-b``);
+   * ``developer_mode``: developer mode (``-q``).
+   """
     
-   def __init__(self):
+   def __init__(self) -> None:
+      """Initialise all running options to ``False``."""
       self.partonlevel    = False
       self.hadronlevel    = False
       self.recolevel      = False
@@ -53,7 +85,14 @@ class MA5mode():
 ################################################################################
 # Function DefaultInstallCard
 ################################################################################
-def DefaultInstallCard():
+def DefaultInstallCard() -> None:
+    """Write a commented template of the installation card.
+
+    The file ``installation_options.dat`` is created in the **current working
+    directory**. Every option is commented out; it can be edited and copied to
+    ``madanalysis/input/installation_options.dat`` to force vetoes or paths of the
+    optional dependencies (ROOT, Delphes, FastJet, zlib, PADs, LaTeX, ...).
+    """
     logging.getLogger('MA5').info("Generate a default installation_options.dat file...")
     output = open('installation_options.dat','w')
     output.write('# WARNING! MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION\n')
@@ -115,13 +154,35 @@ def DefaultInstallCard():
 ################################################################################
 # Function DecodeArguments
 ################################################################################
-def DecodeArguments(version, date):
+def DecodeArguments(version: str, date: str) -> tuple[MA5mode, list[str]]:
+    """Decode the command-line arguments given to ``bin/ma5``.
+
+    Informative options (``-v``, ``-h``, ``-i``) are executed immediately and
+    terminate the program. Incompatible running modes (e.g. ``-P`` together with
+    ``-R``) terminate the program with an error message.
+
+    Args:
+        version (``str``): MadAnalysis 5 release number (displayed with ``-v``).
+        date (``str``): release date (displayed with ``-v``).
+
+    Raises:
+        ``SystemExit``: for informative options, unknown options or inconsistent
+        running modes.
+
+    Returns:
+        ``tuple[MA5mode, list[str]]``:
+        The decoded running options and the list of positional arguments (script
+        file names in normal mode; directory name, analysis name and optional SFS
+        card in expert mode).
+    """
     
     import sys
     
     # Checking arguments
     import getopt
     try:
+        # NOTE: '-m' is accepted by getopt but has no handler below: it ends in the
+        # 'Argument not found' branch.
         optlist, arglist = getopt.getopt(sys.argv[1:], \
                                      "PHReEvhfmsbdqi", \
                                      ["partonlevel","hadronlevel","recolevel",\
@@ -167,6 +228,7 @@ def DecodeArguments(version, date):
         elif o in ["-i","--installcard"]:
             DefaultInstallCard()
             sys.exit()
+        # FIXME: short option '-m' (declared in the getopt string) reaches this branch and exits.
         else:
             logging.getLogger('MA5').error("Argument '"+o+"' is not found.")
             Usage()
@@ -197,7 +259,34 @@ def DecodeArguments(version, date):
 ################################################################################
 # Function MainSession
 ################################################################################
-def MainSession(mode,arglist,ma5dir,version,date):
+def MainSession(mode: MA5mode,arglist: list[str],ma5dir: str,version: str,date: str) -> bool:
+    """Run a single MadAnalysis 5 session.
+
+    The global :class:`~madanalysis.core.main.Main` object is created and configured
+    with the running mode, the system configuration is checked, the SampleAnalyzer
+    library is built if necessary and then either the expert mode is executed or
+    the interpreter is started. Scripts previously stored in
+    :class:`~madanalysis.core.script_stack.ScriptStack` are executed before the
+    interactive loop.
+
+    Args:
+        mode (``MA5mode``): running options decoded from the command line.
+        arglist (``list[str]``): positional command-line arguments. In expert mode,
+            an existing file among them is interpreted as an SFS configuration card
+            and removed from the list (the list is modified in place).
+        ma5dir (``str``): path to the MadAnalysis 5 installation.
+        version (``str``): MadAnalysis 5 release number.
+        date (``str``): release date.
+
+    Raises:
+        ``SystemExit``: if the configuration check, the library building or the
+        expert-mode directory creation fails.
+
+    Returns:
+        ``bool``:
+        ``True`` if a new session must be started (``restart`` requested),
+        ``False`` otherwise.
+    """
 
     # Instantiating  MadAnalysis main class
     main = Main()
@@ -281,11 +370,15 @@ def MainSession(mode,arglist,ma5dir,version,date):
         expert = ExpertMode(main)
         dirname=""
         config_file = ''
+        # NOTE: rest_arglist is an alias of arglist (not a copy): arglist is modified below.
         rest_arglist = arglist
 
         # Scan the arglist to find the configuration file, if it exists 
         # separate it from the arglist
         conf_tmp = [x for x in arglist if os.path.isfile(x)]
+        # FIXME: the comment below says the *last* appearance is used, but conf_tmp[0] is the
+        # *first* existing file of the list; the directory/analysis name may be mistaken for
+        # the card if a file with that name exists in the current directory.
         if len(conf_tmp)>=1:
             # the config file name might be the same with analysis name so just
             # take the last appearence of the name.
@@ -340,7 +433,8 @@ def MainSession(mode,arglist,ma5dir,version,date):
 ################################################################################
 # Function usage
 ################################################################################
-def Usage():
+def Usage() -> None:
+    """Print the command-line help of ``bin/ma5`` through the ``MA5`` logger."""
     logging.getLogger('MA5').info("\nUsage of MadAnalysis 5")
     logging.getLogger('MA5').info("------------------------")
     logging.getLogger('MA5').info("Syntax : ./bin/ma5 [options] [scripts]\n")
@@ -363,6 +457,7 @@ def Usage():
                                   "a directory or overwrites an object") 
     logging.getLogger('MA5').info(" -s or --script      : quit automatically MA5 when the script is loaded")
     logging.getLogger('MA5').info(" -h or --help        : dump this help")
+    # FIXME: the card is written to 'installation_options.dat', not 'installation_card.dat'.
     logging.getLogger('MA5').info(" -i or --installcard : produce the default installation card in installation_card.dat")
     logging.getLogger('MA5').info(" -d or --debug       : debug mode")
     logging.getLogger('MA5').info(" -q or --qmode       : developper mode only for MA5 developpers\n")
@@ -378,7 +473,18 @@ def Usage():
 # Function PrimarySession
 ################################################################################
 
-def LaunchMA5(version, date, ma5dir):
+def LaunchMA5(version: str, date: str, ma5dir: str) -> None:
+    """Entry point of MadAnalysis 5, called by ``bin/ma5``.
+
+    Initialises the coloured logger and ``readline`` (tab completion), decodes the
+    command-line arguments, stores the scripts to execute (normal mode only) and
+    loops over :func:`MainSession` as long as a restart is requested.
+
+    Args:
+        version (``str``): MadAnalysis 5 release number.
+        date (``str``): release date.
+        ma5dir (``str``): path to the MadAnalysis 5 installation.
+    """
     
     # Configuring the logger
     import colored_log
@@ -423,6 +529,8 @@ def LaunchMA5(version, date, ma5dir):
 
     # Loop over MA5 sessions
     # Goal: allowing to restart
+    # NOTE: ScriptStack is not reset between sessions: after a 'restart' the remaining
+    # commands of the scripts are executed in the new session.
     while True:
 
         # Launch the interpreter

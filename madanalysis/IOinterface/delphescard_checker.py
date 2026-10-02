@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,14 +22,28 @@
 ################################################################################
 
 
+"""Consistency checks of the Delphes card used by a job."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 import logging
 import os
 from six.moves import input
 
 class DelphesModule():
+    """Module declared in a Delphes card.
+
+    Attributes:
+        name / type (``str``): name and class of the module.
+        inputs / outputs (``list[str]``): input (``Module/Collection``) and output collections.
+    """
     
-    def __init__(self):
+    def __init__(self) -> None:
+        """Create an empty module description."""
         self.name=''
         self.type=''
         self.inputs=[]
@@ -40,21 +54,49 @@ class DelphesModule():
 
 
 class DelphesCardChecker():
+    """Checker of the Delphes card copied in the ``Input`` folder of a job.
 
-    def __init__(self,dirname,main):
+    Attributes:
+        dirname (``str``): job directory.
+        main (``Main``): session state.
+        ModuleExecutionPaths (``list[str]``): modules of the ``ExecutionPath``.
+        Modules (``list[DelphesModule]``): declared modules.
+        PileUps (``list[str]``): pile-up files.
+    """
+
+    def __init__(self,dirname: str,main: Main) -> None:
+        """Create the checker.
+
+        Args:
+            dirname (``str``): job directory.
+            main (``Main``): session state.
+        """
         self.dirname = dirname
         self.main    = main
 
 
-    def getNameCard(self):
+    def getNameCard(self) -> str:
+        """Get the path of the Delphes card of the job.
+
+        Returns:
+            ``str``:
+            ``<dirname>/Input/<card>``.
+        """
         if self.main.fastsim.package=="delphes":
             cardname = self.main.fastsim.delphes.card
         elif self.main.fastsim.package=="delphesMA5tune":
             cardname = self.main.fastsim.delphesMA5tune.card
+        # NOTE: UnboundLocalError if the package is neither delphes nor delphesMA5tune.
         return self.dirname+"/Input/"+cardname        
         
 
-    def checkPresenceCard(self):
+    def checkPresenceCard(self) -> bool:
+        """Check that the Delphes card exists.
+
+        Returns:
+            ``bool``:
+            ``True`` if the card exists.
+        """
         logging.getLogger('MA5').debug("Check the presence of the Delphes card: "+self.getNameCard()+' ...')
         if not os.path.isfile(self.getNameCard()):
             logging.getLogger('MA5').error('DelphesCard is not found: '+self.getNameCard())
@@ -62,7 +104,13 @@ class DelphesCardChecker():
         return True
                           
 
-    def editCard(self):
+    def editCard(self) -> bool:
+        """Propose to edit the card with the user's editor (not in forced/script mode).
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         logging.getLogger('MA5').debug("Invite the user to edit the Delphes card: "+self.getNameCard()+' ...')
         if self.main.forced or self.main.script:
             return True
@@ -81,7 +129,13 @@ class DelphesCardChecker():
             return True
 
 
-    def checkContentCard(self):
+    def checkContentCard(self) -> bool:
+        """Parse and check the card; in interactive mode, the user can go on despite problems.
+
+        Returns:
+            ``bool``:
+            ``True`` if the card is valid or the user wants to go on.
+        """
         logging.getLogger('MA5').debug("Check the content of the Delphes card: "+self.getNameCard()+' ...')
 
         self.extractContentCard()
@@ -101,7 +155,8 @@ class DelphesCardChecker():
                 return True # go on       
     
 
-    def extractContentCard(self):
+    def extractContentCard(self) -> None:
+        """Parse the card (modules, inputs/outputs, execution path, pile-up files)."""
         ExecutionMode=False
         self.ModuleExecutionPaths=[]
         self.Modules=[]
@@ -169,7 +224,17 @@ class DelphesCardChecker():
             
         input.close()
  
-    def decodeContentCard(self):
+    def decodeContentCard(self) -> bool:
+        """Check the parsed card.
+
+        Every module of the execution path must be declared, every pile-up file must exist,
+        and every input collection must be produced by a declared module (or be a ``Delphes``
+        collection).
+
+        Returns:
+            ``bool``:
+            ``True`` if no problem is found.
+        """
         # check that modules are declared
         logging.getLogger("MA5").debug("- Check that the modules to execute are declared (#modules="+\
                                        str(len(self.ModuleExecutionPaths))+")...")

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,10 @@
 ################################################################################
 
 
+"""Execution of the Matplotlib scripts producing the histograms of the reports."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 from string_tools                             import StringTools
 from shell_command                            import ShellCommand
 import logging
@@ -31,15 +34,33 @@ import os
 import sys
 
 class HistoMatplotlibProducer():
+    """Run the Matplotlib scripts written by the layout (one Python module per histogram).
 
-    def __init__(self,histo_path,filenames):
+    Attributes:
+        filenames (``list[str]``): Python scripts (``<name>.py``).
+        histo_path (``str``): folder of the scripts.
+    """
+
+    def __init__(self,histo_path: str,filenames: list[str]) -> None:
+        """Create the producer.
+
+        Args:
+            histo_path (``str``): folder of the scripts.
+            filenames (``list[str]``): script names without the ``.py`` extension.
+        """
         self.filenames  = []
         for filename in filenames:
             self.filenames.append(filename+'.py')
         self.histo_path = histo_path
 
 
-    def Execute(self):
+    def Execute(self) -> bool:
+        """Write and run the main script.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if not self.WriteMainFile():
             return False
         if not self.LaunchInteractiveMatplotlib():
@@ -47,7 +68,13 @@ class HistoMatplotlibProducer():
         return True
         
 
-    def WriteMainFile(self):
+    def WriteMainFile(self) -> bool:
+        """Write ``all.py`` importing and calling every histogram function.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         output = open(self.histo_path+'/all.py','w')
         output.write('# Import all histograms\n')
         for item in self.filenames:
@@ -64,7 +91,13 @@ class HistoMatplotlibProducer():
         return True
 
 
-    def LaunchInteractiveMatplotlib(self):
+    def LaunchInteractiveMatplotlib(self) -> bool:
+        """Run ``all.py`` with the current Python interpreter (log in ``matplotlib.log``).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Commands
         theCommands=[sys.executable,'all.py']
 

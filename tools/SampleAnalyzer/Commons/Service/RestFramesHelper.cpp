@@ -24,4 +24,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyzer headers
+/**
+ * @file RestFramesHelper.cpp
+ * @brief Compilation unit of MA5::RestFramesHelper.
+ */
+
 #include "SampleAnalyzer/Commons/Service/RestFramesHelper.h"

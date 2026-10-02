@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LogStream.h
+ * @brief Logger stream with colour, prompt and mute support.
+ */
+
 #ifndef LOG_STREAM_H
 #define LOG_STREAM_H
 
@@ -41,14 +46,18 @@
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class LogStream is a logger which extends the class std::ostream
-/// such as std::cout.
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Logger behaving like a std::ostream.
+ *
+ * The text is accumulated in a buffer and written to the output stream (std::cout by
+ * default), with the prompt and the ANSI colour codes, when the manipulator endmsg
+ * is streamed. A muted logger ignores everything.
+ */
 class LogStream
 {
  public:
 
+  /** @brief ANSI colour codes. */
   enum ColorType {NONE=0, BLACK=30, BLUE=34, GREEN=32, CYAN=36, 
                   RED=31, PURPLE=35, YELLOW=33, WHITE=37};
 
@@ -57,34 +66,34 @@ class LogStream
   // -------------------------------------------------------------
  private:
 
-  /// Special manipulator which replaces std::endl for logger of LogStream type
+  /** @brief Manipulator flushing the buffer (replaces std::endl). */
   friend LogStream& endmsg(LogStream& os);
 
-  /// Pointer to the output stream used 
+  /** @brief Output stream. */
   mutable std::ostream* Stream_; 
 
-  /// Stream used as bugger 
+  /** @brief Buffer of the current line. */
   mutable std::stringstream Buffer_;
 
-  /// Using color ?
+  /** @brief Are the colours enabled? */
   MAbool ColorMode_;
 
-  /// Color type
+  /** @brief Colour of the logger. */
   ColorType Color_;
 
-  /// Mute or UnMute ?
+  /** @brief Is the logger muted? */
   MAbool Mute_;
 
-  /// Tag specifying if a new line is begun
+  /** @brief Is a new line being started? */
   MAbool NewLine_;
 
-  /// String displayed at the beginning of a new line 
+  /** @brief String written at the beginning of each line (colour code and prompt). */
   std::string BeginLine_;
 
-  /// String displayed at the end of a new line
+  /** @brief String written at the end of each line (colour reset). */
   std::string EndLine_;
 
-  /// Word used as prompt
+  /** @brief Prompt. */
   std::string Prompt_;
 
   // -------------------------------------------------------------
@@ -93,13 +102,17 @@ class LogStream
 
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor (output to std::cout, no colour, unmuted). */
   LogStream() : Stream_(&std::cout), ColorMode_(true), 
                 Color_(NONE), Mute_(false),
                 NewLine_(true)
   {}
   
-  /// Copy constructor
+  /**
+   * @brief Copy constructor (the buffer is not copied).
+   *
+   * @param ref logger to copy.
+   */
   LogStream(const LogStream& ref)
   {
     Stream_    = ref.Stream_; 
@@ -112,7 +125,7 @@ class LogStream
     Prompt_    = ref.Prompt_;
   }
 
-  /// Clearing the content
+  /** @brief Reset the settings (the begin-of-line string is not updated). */
   void Reset()
   {
     ColorMode_    = true;
@@ -123,169 +136,292 @@ class LogStream
     Prompt_       = "";
   }
 
-  /// Mutator related to the output stream
+  /**
+   * @brief Set the output stream.
+   *
+   * @param stream output stream.
+   */
   void SetStream(std::ostream* stream)
   { Stream_=stream; }
 
-  /// Accessor to the output stream
+  /**
+   * @brief Accessor to the output stream.
+   *
+   * @return the stream.
+   */
   std::ostream* GetStream() const
   { return Stream_; }
 
-  /// Overloading operator << for bool value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (bool val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for short value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (short val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for ushort value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (unsigned short val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for char value
+  /**
+   * @brief Append a character, printed as its integer code (ignored if muted).
+   *
+   * @param val character.
+   * @return this logger.
+   */
   LogStream& operator<< (char val)
   { 
     if (NewEntry()) Buffer_ << static_cast<signed int>(val);
     return *this;
   }
 
-  /// Overloading operator << for uchar value
+  /**
+   * @brief Append an unsigned character, printed as its integer code (ignored if muted).
+   *
+   * @param val character.
+   * @return this logger.
+   */
   LogStream& operator<< (unsigned char val)
   { 
     if (NewEntry()) Buffer_ << static_cast<unsigned int>(val);
     return *this;
   }
 
-  /// Overloading operator << for int value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (int val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for uint value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (unsigned int val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for long value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (long val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for long value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (long long val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for ulong value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (unsigned long val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for ulong value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (unsigned long long val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for float value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (float val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for double value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (double val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for long double value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (long double val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for const char* value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (const char * val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for const signed char* value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (const signed char * val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for const unsigned char* value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (const unsigned char * val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for string value
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (std::string val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for any function
+  /**
+   * @brief Append a value to the current line (ignored if muted).
+   *
+   * @param val value.
+   * @return this logger.
+   */
   LogStream& operator<< (const void* val)
   { 
     if (NewEntry()) Buffer_ << val;
     return *this;
   }
 
-  /// Overloading operator << for other stream 
+  /**
+   * @brief Apply a std::ostream manipulator (e.g. std::setw) to the buffer.
+   *
+   * @param pf manipulator.
+   * @return this logger.
+   */
   LogStream& operator<< (std::ostream& ( *pf )(std::ostream&))
   {
     if (NewEntry()) pf(Buffer_);
     return *this;
   }
 
-  /// Overloading operator << for LogStream stream 
+  /**
+   * @brief Apply a LogStream manipulator (e.g. endmsg).
+   *
+   * @param pf manipulator.
+   * @return this logger.
+   */
   LogStream& operator<< (LogStream& ( *pf )(LogStream&))
   {
     if (NewEntry()) pf(*this);
     return *this;
   }
 
-  /// Overloading operator << for manipulator
+  /**
+   * @brief Apply a std::ios manipulator to the buffer.
+   *
+   * @param pf manipulator.
+   * @return this logger.
+   */
   LogStream& operator<< (std::ios& ( *pf )(std::ios&))
   {
     if (NewEntry()) pf(Buffer_);
     return *this;
   }
 
-  /// Overloading operator << for manipulator
+  /**
+   * @brief Apply a std::ios_base manipulator (e.g. std::fixed) to the buffer.
+   *
+   * @param pf manipulator.
+   * @return this logger.
+   */
   LogStream& operator<< (std::ios_base& ( *pf )(std::ios_base&))
   {
     if (NewEntry()) pf(Buffer_);
@@ -334,84 +470,155 @@ class LogStream
 //    return *this;
 //  }
 
-  /// Enabling the color mode
+  /** @brief Enable the colours. */
   void EnableColor()
   { ColorMode_=true; Update(); }
 
-  /// Disabling the color mode
+  /** @brief Disable the colours. */
   void DisableColor()
   { ColorMode_=false; Update(); }
 
-  /// Is the stream mute ?
+  /**
+   * @brief Is the logger muted?
+   *
+   * @return true if muted.
+   */
   MAbool IsMute()
   { return Mute_;}
 
-  /// Is the stream unmute ?
+  /**
+   * @brief Is the logger active?
+   *
+   * @return true if not muted.
+   */
   MAbool IsUnMute()
   { return !Mute_;}
 
-  /// Mute the stream
+  /** @brief Mute the logger. */
   void SetMute()
   { Mute_=true; }
 
-  /// UnMute the stream
+  /** @brief Unmute the logger. */
   void SetUnMute()
   { Mute_=false; }
 
-  /// Mutator relative to the prompt
+  /**
+   * @brief Set the prompt.
+   *
+   * @param prompt prompt.
+   */
   void SetPrompt(const std::string& prompt)
   { Prompt_=prompt; Update(); }
 
-  /// Accessor to the prompt
+  /**
+   * @brief Accessor to the prompt.
+   *
+   * @return the prompt.
+   */
   const std::string& GetPrompt() const
   { return Prompt_; }
 
-  /// Mutator relative to the prompt
+  /**
+   * @brief Set the colour.
+   *
+   * @param color colour.
+   */
   void SetColor(ColorType color)
   { Color_=color; Update(); }
 
-  /// Accessor to the color
+  /**
+   * @brief Accessor to the colour.
+   *
+   * @return the colour.
+   */
   ColorType GetColor() const
   { return Color_; }
 
-  /// Getting the character used for filling
+  /**
+   * @brief Accessor to the fill character.
+   *
+   * @return the character.
+   */
   char fill() const
   { return Buffer_.fill(); }
 
-  /// Setting the character used for filling
+  /**
+   * @brief Set the fill character.
+   *
+   * @param fillch character.
+   * @return the previous character.
+   */
   char fill(char fillch) 
   { return Buffer_.fill(fillch); }
 
-  /// Setting specific format flags
+  /**
+   * @brief Set format flags.
+   *
+   * @param fmtfl flags.
+   * @return the previous flags.
+   */
   std::ios_base::fmtflags setf(std::ios_base::fmtflags fmtfl)
   { return Buffer_.setf(fmtfl); }
 
-  /// Setting specific format flags and mask
+  /**
+   * @brief Set format flags under a mask.
+   *
+   * @param fmtfl flags.
+   * @param mask mask.
+   * @return the previous flags.
+   */
   std::ios_base::fmtflags setf(std::ios_base::fmtflags fmtfl,
                                std::ios_base::fmtflags mask)
   { return Buffer_.setf(fmtfl, mask); }
 
-  /// Clearing specific format flags
+  /**
+   * @brief Clear format flags.
+   *
+   * @param mask flags to clear.
+   */
   void unsetf(std::ios_base::fmtflags mask)
   { Buffer_.unsetf(mask); }
 
-  /// Getting the digit precision
+  /**
+   * @brief Accessor to the precision.
+   *
+   * @return the precision.
+   */
   std::streamsize precision() const
   { return Buffer_.precision(); }
 
-  /// Setting the digit precision
+  /**
+   * @brief Set the precision.
+   *
+   * @param prec precision.
+   * @return the previous precision.
+   */
   std::streamsize precision(std::streamsize prec)
   { return Buffer_.precision(prec); }
 
-  /// Getting the width
+  /**
+   * @brief Accessor to the field width.
+   *
+   * @return the width.
+   */
   std::streamsize width() const
   { return Buffer_.width(); }
 
-  /// Setting the width
+  /**
+   * @brief Set the field width.
+   *
+   * @param wide width.
+   * @return the previous width.
+   */
   std::streamsize width(std::streamsize wide)
   { return Buffer_.width(wide); }
 
-  /// Displaying n times a character c 
+  /**
+   * @brief Write a character several times.
+   *
+   * @param c character.
+   * @param n number of repetitions.
+   */
   void repeat(char c, MAuint32 n)
   {
     if (NewEntry())
@@ -427,7 +634,11 @@ class LogStream
  
  private:
 
-  /// Global veto applied on the stream
+  /**
+   * @brief Start a new entry: write the begin-of-line string if needed.
+   *
+   * @return false if the logger is muted.
+   */
   MAbool NewEntry()
   {
     if (Mute_) return false;
@@ -435,7 +646,7 @@ class LogStream
     return true;
   }
 
-  /// Updating header and foot string
+  /** @brief Recompute the begin/end-of-line strings from the colour and the prompt. */
   void Update()
   {
     if (!ColorMode_  || Color_==NONE)
@@ -456,7 +667,12 @@ class LogStream
 };
 
 
-/// Special manipulator which replaces std::endl for logger of LogStream type
+/**
+ * @brief Flush the current line of a logger (replaces std::endl).
+ *
+ * @param os logger.
+ * @return the logger.
+ */
 LogStream& endmsg(LogStream& os);
 
 

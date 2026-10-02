@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -21,6 +21,13 @@
 #  
 ################################################################################
 
+
+"""Mapping between ROOT colour indices and hexadecimal RGB codes.
+
+:data:`color_hex` is used to translate the ROOT colour codes of
+:class:`~madanalysis.enumeration.color_type.ColorType` into colours understood by
+Matplotlib when the figures are produced with Matplotlib.
+"""
 
 color_hex = {0:'#ffffff',\
 1:'#000000',\

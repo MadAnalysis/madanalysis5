@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file ReaderBase.h
+ * @brief Interface of the event-file readers (LHE, LHCO, HepMC, STDHEP, ROOT).
+ */
 
 #ifndef READER_BASE_h
 #define READER_BASE_h
@@ -44,6 +49,12 @@
 namespace MA5
 {
 
+/**
+ * @brief Abstract base class of the event-file readers.
+ *
+ * A reader is used as follows: Initialize(), ReadHeader(), FinalizeHeader(), then
+ * ReadEvent()/FinalizeEvent() for each event, and Finalize().
+ */
 class ReaderBase
 {
   // -------------------------------------------------------------
@@ -51,16 +62,16 @@ class ReaderBase
   // -------------------------------------------------------------
  protected:
 
-  /// Allowing to read data from RFIO
+  /** @brief Is the file read through RFIO? */
   MAbool rfio_;
 
-  /// Allowing to read compressed file
+  /** @brief Is the file gzip-compressed? */
   MAbool compress_;
 
-  /// Allowing to read fifo file
+  /** @brief Is the file a named pipe (FIFO)? */
   MAbool fifo_;
 
-  /// User configuration
+  /** @brief User configuration of the run. */
   Configuration cfg_;
 
 
@@ -69,18 +80,24 @@ class ReaderBase
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   ReaderBase()
   {
+    // FIXME: fifo_ is not initialised.
     rfio_=false;  compress_=false; 
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~ReaderBase()
   {
   }
 
-  /// Is FIFO file?
+  /**
+   * @brief Is the file a named pipe (name ending with `.fifo`)?
+   *
+   * @param name file name.
+   * @return true for a FIFO.
+   */
   static MAbool IsFIFOMode(const std::string& name)
   {
     if (name.size()<6) return false;
@@ -88,33 +105,75 @@ class ReaderBase
     return false;
   }
 
-  /// Initialize (virtual pure)
+  /**
+   * @brief Open the file.
+   *
+   * @param rawfilename file name (possibly prefixed by `rfio:` or `file:`).
+   * @param cfg user configuration.
+   * @return false in case of error.
+   */
   virtual MAbool Initialize(const std::string& rawfilename,
                           const Configuration& cfg) = 0;
 
-  /// Read the sample (virtual pure)
+  /**
+   * @brief Read the header of the file.
+   *
+   * @param mySample sample to fill.
+   * @return false in case of error.
+   */
   virtual MAbool ReadHeader(SampleFormat& mySample) = 0;
 
-  /// Finalize the header (virtual pure)
+  /**
+   * @brief Finalise the reading of the header.
+   *
+   * @param mySample sample to finalise.
+   * @return false in case of error.
+   */
   virtual MAbool FinalizeHeader(SampleFormat& mySample) = 0;
 
-  /// Read the event (virtual pure)
+  /**
+   * @brief Read the next event.
+   *
+   * @param myEvent event to fill.
+   * @param mySample current sample.
+   * @return the status of the reading (FAILURE at the end of the file).
+   */
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample) = 0;
 
-  /// Finalize the event (virtual pure)
+  /**
+   * @brief Finalise the reading of an event (computation of derived quantities).
+   *
+   * @param mySample current sample.
+   * @param myEvent event to finalise.
+   * @return false in case of error.
+   */
   virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent) = 0;
 
-  /// Finalize
+  /**
+   * @brief Close the file.
+   *
+   * @return false in case of error.
+   */
   virtual MAbool Finalize()=0;
 
-  /// Is the file stored in Rfio ?
+  /**
+   * @brief Is the file stored on RFIO (name starting with `rfio:`)?
+   *
+   * @param name file name.
+   * @return true for an RFIO file.
+   */
   static MAbool IsRfioMode(const std::string& name)
   {  
     if (name.find("rfio:")==0) return true;
     return false;
   }
 
-  /// Is compressed file ?
+  /**
+   * @brief Is the file gzip-compressed (name ending with `.gz`)?
+   *
+   * @param name file name.
+   * @return true for a compressed file.
+   */
   static MAbool IsCompressedMode(const std::string& name)
   {
     if (name.size()<4) return false;
@@ -122,7 +181,12 @@ class ReaderBase
     return false;
   }
 
-  /// Is the file stored in Rfio
+  /**
+   * @brief Remove the `rfio:` or `file:` prefix of a file name.
+   *
+   * @param name file name.
+   * @return the cleaned name.
+   */
   static std::string CleanFilename(const std::string& name)
   {
     if (name.find("rfio:")==0) return name.substr(5);
@@ -130,13 +194,25 @@ class ReaderBase
     return name;
   }
 
-  /// Get the file size
+  /**
+   * @brief Get the size of the file.
+   *
+   * @return the size in bytes.
+   */
   virtual MAint64 GetFileSize()=0;
 
-  /// Get the position in file
+  /**
+   * @brief Get the current position in the file.
+   *
+   * @return the position in bytes.
+   */
   virtual MAint64 GetPosition()=0;
 
-  /// Get the final position in file
+  /**
+   * @brief Get the final position in the file.
+   *
+   * @return the position in bytes.
+   */
   virtual MAint64 GetFinalPosition()=0;
 
 

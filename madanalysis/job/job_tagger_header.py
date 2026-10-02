@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -21,9 +21,28 @@
 #
 ################################################################################
 
+"""Writer of the SFS tagger header (``new_tagger.h``) and of the tagging efficiency functions.
+"""
+
+from __future__ import annotations
+from typing import TYPE_CHECKING, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.fastsim.fastsim import SuperFastSim
+
 from madanalysis.fastsim.tagger import TaggerStatus
 
 class JobTaggerHeader:
+    """Writer of the ``NewTagger`` class declaration (derived from ``SFSTaggerBase``).
+
+    Attributes:
+        base (``dict[tuple[int, int], Callable[[str], str]]``): C++ signature (with a
+            Doxygen comment line) of the efficiency method for each ``(true_id, reco_id)``
+            pair, as a function of the tagging status.
+        fastsim (``SuperFastSim``): SFS configuration.
+        unique_rules (``list[tuple[int, int, str]]``): distinct ``(true_id, reco_id,
+            status)`` combinations of the tagging rules.
+    """
 
     # structure: (true_id, reco_id) : "..."
     base = {
@@ -37,6 +56,7 @@ class JobTaggerHeader:
         (21, 11): lambda tag: f"/// Light-Jet mistagging rate as an electron (j as e)\nMAfloat32 NewTagger::lightjet_mistag_electron(const RecJetFormat &object) const",
         (21, 22): lambda tag: f"/// Light-Jet mistagging rate as a photon (j as photon)\nMAfloat32 NewTagger::lightjet_mistag_photon(const RecJetFormat &object) const",
         (15, 15): lambda tag: f"/// Tau tagging efficiency (ta as ta)\nMAfloat32 NewTagger::{tag}_tau_tagging_eff(const RecTauFormat &object) const",
+        # NOTE: several Doxygen lines below mention 'Electron' for muon/photon rules.
         (11, 13): lambda tag: f"/// Electron mistagging rate as a muon (e as mu)\nMAfloat32 NewTagger::electron_mistag_muon(const RecLeptonFormat &object) const",
         (11, 22): lambda tag: f"/// Electron mistagging rate as a photon (e as a)\nMAfloat32 NewTagger::electron_mistag_photon(const RecLeptonFormat &object) const",
         (11, 21): lambda tag: f"/// Electron mistagging rate as a light jet (e as j)\nMAfloat32 NewTagger::electron_mistag_lightjet(const RecLeptonFormat &object) const",
@@ -50,7 +70,12 @@ class JobTaggerHeader:
 
 
     ## Initialization
-    def __init__(self, fastsim):
+    def __init__(self, fastsim: SuperFastSim) -> None:
+        """Collect the distinct tagging rules.
+
+        Args:
+            fastsim (``SuperFastSim``): SFS configuration (``main.superfastsim``).
+        """
         self.fastsim = fastsim
 
         self.unique_rules = []
@@ -60,7 +85,15 @@ class JobTaggerHeader:
 
 
     ## Writing NewTagger.h
-    def WriteNewTaggerHeader(self, file):
+    def WriteNewTaggerHeader(self, file: TextIO) -> None:
+        """Write ``new_tagger.h``.
+
+        The ``Initialize`` method switches on the tagging of the object types having
+        rules; one efficiency method is declared per distinct rule.
+
+        Args:
+            file (``TextIO``): output C++ file.
+        """
         file.write('#ifndef MADANALYSIS5_NEW_TAGGER_H\n')
         file.write('#define MADANALYSIS5_NEW_TAGGER_H\n')
         file.write('// SampleAnalyzer headers\n')
@@ -98,7 +131,12 @@ class JobTaggerHeader:
 
 
     ## efficiencies and bounds
-    def WriteNewTaggerEfficiencies(self,file):
+    def WriteNewTaggerEfficiencies(self,file: TextIO) -> None:
+        """Write ``efficiencies.h``: the efficiency and bound functions of every rule.
+
+        Args:
+            file (``TextIO``): output C++ file.
+        """
         file.write('#ifndef EFF_H_INCLUDED\n')
         file.write('#define EFF_H_INCLUDED\n')
         file.write('#include <cmath>\n')

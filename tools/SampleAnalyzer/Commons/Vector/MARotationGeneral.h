@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MARotationGeneral.h
+ * @brief Rotation around an arbitrary axis.
+ */
+
 #ifndef MARotationGeneral_h
 #define MARotationGeneral_h
 
@@ -42,6 +47,7 @@
 namespace MA5
 {
 
+/** @brief Rotation by an angle around an arbitrary axis (Rodrigues formula). */
 class MARotationGeneral
 {
 
@@ -51,6 +57,7 @@ class MARotationGeneral
   //                        data members
   // -------------------------------------------------------------
  protected:
+  /** @brief Cosine and sine of the angle, unit vector of the axis, temporary vector. */
   MAdouble64 c_; // cos(angle)
   MAdouble64 s_; // sin(angle)
   MAVector3 axis_; // axis unit vector
@@ -60,18 +67,29 @@ class MARotationGeneral
   //                      method members
   // -------------------------------------------------------------
  public :
-  // Constructors
+  /** @brief Constructor (null rotation matrix, not the identity). */
   MARotationGeneral()
   {c_=0.; s_=0.; axis_=MAVector3(0.0,0.0,0.0);}
 
+  /**
+   * @brief Constructor.
+   *
+   * @param angle rotation angle.
+   * @param axis rotation axis (normalised internally).
+   */
   MARotationGeneral(MAdouble64 angle, MAVector3 axis)
   {setAngleAxis(angle,axis);}
 
-  // Destructor
+  /** @brief Destructor. */
   ~MARotationGeneral()
   {}
 
-  // Setting the rotation angle
+  /**
+   * @brief Set the angle and the axis.
+   *
+   * @param angle rotation angle.
+   * @param axis rotation axis (normalised internally).
+   */
   void setAngleAxis(MAdouble64 angle, MAVector3 axis)
   {
     s_ = std::sin(angle);
@@ -79,12 +97,19 @@ class MARotationGeneral
     axis_ = axis.Unit();
   }
 
-  // Rotate a MALorentzVector
+  /**
+   * @brief Rotate the spatial part of a four-vector in place.
+   *
+   * @param q four-vector.
+   */
   void rotate(MALorentzVector& q) const
   { rotate(q.Vect()); }
 
-  // Rotate a MAVector3
-  // p * costheta + (p x axis) sintheta + p (p.axis) (1-costheta)
+  /**
+   * @brief Rotate a three-vector in place: p cos + (axis x p) sin + axis (p.axis)(1-cos).
+   *
+   * @param p three-vector.
+   */
   void rotate(MAVector3& p) const
   {
      tmp_ = p;

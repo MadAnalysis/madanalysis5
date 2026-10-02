@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,18 +22,52 @@
 ################################################################################
 
 
+"""Figure of merit (signal over background significance) and its uncertainty."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.layout.measure               import Measure
 from math import sqrt
 from math import log
 
 class FomCalculation:
+    """Evaluator of the figure of merit selected with ``set main.fom.formula``.
 
-    def __init__(self,main):
+    Formulas: 1 ``S/B``, 2 ``S/sqrt(B)``, 3 ``S/(S+B)``, 4 ``S/sqrt(S+B)``,
+    5 ``S/sqrt(S+B+(xB)**2)``, 6 ``sqrt(2((S+B)ln(1+S/B)-S))``.
+
+    Attributes:
+        formula (``int``): formula number (1-6).
+        x (``float``): relative background uncertainty (formula 5).
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Read the selected formula.
+
+        Args:
+            main (``Main``): session state.
+        """
         self.formula = main.fom.formula
         self.x       = main.fom.x
 
-    def Compute(self,s,es,b,eb):
+    def Compute(self,s: float,es: float,b: float,eb: float) -> Measure:
+        """Compute the figure of merit and its propagated uncertainty.
+
+        Args:
+            s (``float``): number of signal events.
+            es (``float``): uncertainty on ``s``.
+            b (``float``): number of background events.
+            eb (``float``): uncertainty on ``b``.
+
+        Returns:
+            ``Measure``:
+            The value (``-1`` for a division by zero or an invalid sqrt/log) and its
+            uncertainty.
+        """
 
         # Initialization
         value = Measure()
@@ -68,23 +102,28 @@ class FomCalculation:
             if self.formula==1:
                 value.error = 1./(B**2)*\
                               sqrt(B**2*ES**2+S**2*EB**2)
+            # FIXME: the error formulas of cases 2 and 3 are swapped (this one is the error of S/(S+B)).
             elif self.formula==2:
                 value.error = 1./(S+B)**2*\
                               sqrt(B**2*ES**2+S**2*EB**2)
+            # FIXME: this is the error of S/sqrt(B) (see above).
             elif self.formula==3:
                 value.error = 1./(2*pow(B,3./2.))*\
                               sqrt((2*B)**2*ES**2+S**2*EB**2)
             elif self.formula==4:
                 value.error = 1./(2*pow(S+B,3./2.))*\
                               sqrt((S+2*B)**2*ES**2+S**2*EB**2)
+            # FIXME: the error assumes S/sqrt(S+B+x*B**2) while the mean uses (x*B)**2.
             elif self.formula==5:
                 value.error = 1./(2*pow(S+B+self.x*B**2,3./2.))*\
                              sqrt((S+2*B+2*self.x*B**2)**2*ES**2+S**2*(2*self.x*B+1)**2*EB**2)
+            # FIXME: the prefactor should be 1/Z, not 1/(sqrt(2) Z): the error is underestimated by sqrt(2).
             elif self.formula==6:
                 value.error = sqrt(2)/(2.*value.mean)*\
                               sqrt( ES**2 * (log(1+S/B))**2 +\
                                     EB**2 * (log(1+S/B)-S/B)**2 )
 
+        # FIXME: the exceptions below reset value.mean instead of value.error.
         except ZeroDivisionError: # division by 0
             value.mean=-1
         except ValueError: # negative sqrt or log

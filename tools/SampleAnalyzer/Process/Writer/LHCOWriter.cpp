@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file LHCOWriter.cpp
+ * @brief Implementation of MA5::LHCOWriter.
+ */
+
 #include <sstream>
 #include <iomanip>
 
@@ -128,6 +133,8 @@ MAbool LHCOWriter::WriteEvent(const EventFormat& myEvent,
                            const SampleFormat& mySample)
 {
   // FirstEvent
+  // NOTE: counter_ only increases for events with reconstructed objects: the header is written again
+  // if the first events have none.
   if (counter_==0)
   {
     WriteHeader(mySample);

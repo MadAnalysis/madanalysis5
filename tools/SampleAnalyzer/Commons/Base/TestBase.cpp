@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file TestBase.cpp
+ * @brief Compilation test of the base-class headers.
+ */
+
 #include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 #include "SampleAnalyzer/Commons/Base/ReaderBase.h"

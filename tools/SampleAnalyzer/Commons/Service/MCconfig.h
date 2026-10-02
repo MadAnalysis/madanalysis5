@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MCconfig.h
+ * @brief Monte Carlo configuration: PDG codes of the hadronic and invisible particles.
+ */
+
 #ifndef MCTOOLCONFIG_h
 #define MCTOOLCONFIG_h
 
@@ -40,6 +45,7 @@ namespace MA5
 
 class Tools;
 
+/** @brief PDG codes defining the `hadronic` and `invisible` multiparticles (set by the generated analysis). */
 struct MCconfig
 {
   friend class PhysicsService;
@@ -50,10 +56,10 @@ struct MCconfig
   // -------------------------------------------------------------
   protected:
 
-  /// list of PDG ids related to invisible particles
+  /** @brief PDG codes of the invisible particles. */
   std::set<MAint32> invisible_ids_;
 
-  /// list of PDG ids related to partons
+  /** @brief PDG codes of the hadronic particles. */
   std::set<MAint32> hadronic_ids_;
 
   // -------------------------------------------------------------
@@ -61,45 +67,62 @@ struct MCconfig
   // -------------------------------------------------------------
   public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   MCconfig()
   { }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~MCconfig()
   { }
 
-  /// Reset
+  /** @brief Remove all the PDG codes. */
   void Reset()
   {
     invisible_ids_.clear();
     hadronic_ids_.clear();
   } 
 
-  /// Add hadronic id
+  /**
+   * @brief Add a hadronic PDG code.
+   *
+   * @param id PDG code.
+   */
   void AddHadronicId(MAint32 id)
   {
     hadronic_ids_.insert(id);
   } 
 
-  /// Remove hadronic id
+  /**
+   * @brief Remove a hadronic PDG code.
+   *
+   * @param id PDG code.
+   */
   void RemoveHadronicId(MAint32 id)
   {
     hadronic_ids_.erase(id);
   }
 
-  /// Add invisible id
+  /**
+   * @brief Add an invisible PDG code.
+   *
+   * @param id PDG code.
+   */
   void AddInvisibleId(MAint32 id)
   {
     invisible_ids_.insert(id);
   } 
 
-  /// Remove invisible id
+  /**
+   * @brief Remove an invisible PDG code.
+   *
+   * @param id PDG code.
+   */
   void RemoveInvisibleId(MAint32 id)
   {
     invisible_ids_.erase(id);
   }
 
+  /** @brief Print the PDG codes. */
   void Print()
   {
     INFO << "Hadronic IDs " ;

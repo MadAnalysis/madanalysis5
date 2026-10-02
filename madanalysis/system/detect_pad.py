@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Detection of a Public Analysis Database (PAD, PADForMA5tune or PADForSFS)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from shell_command import ShellCommand
 from madanalysis.enumeration.detect_status_type import DetectStatusType
 from madanalysis.system.config_checker import ConfigChecker
@@ -30,7 +34,29 @@ import logging, os
 
 
 class DetectPAD:
-    def __init__(self, archi_info, user_info, session_info, debug, padtype=""):
+    """Detector of a Public Analysis Database (PAD, PADForMA5tune or PADForSFS).
+
+    The methods are called by
+    :meth:`madanalysis.system.detect_manager.DetectManager.Execute` in the following
+    order (only when defined): ``IsItVetoed``, ``AreDependenciesInstalled``,
+    ``ManualDetection``, ``ToolsDetection``, ``AutoDetection``, ``ExtractInfo`` and
+    ``SaveInfo``.
+
+    Attributes:
+        name (``str``): name displayed in the configuration check.
+        mandatory (``bool``): whether MadAnalysis 5 can run without the package.
+    """
+    def __init__(self, archi_info: Any, user_info: Any, session_info: Any, debug: bool, padtype: str = "") -> None:
+        """Create the detector of a PAD.
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration.
+            user_info (``UserInfo``): user options.
+            session_info (``SessionInfo``): session information, filled by :meth:`SaveInfo`.
+            debug (``bool``): print detailed information.
+            padtype (``str``, default ``""``): ``""`` (PAD), ``"ma5"`` (PADForMA5tune) or
+                ``"sfs"`` (PADForSFS).
+        """
         self.archi_info = archi_info
         self.user_info = user_info
         self.session_info = session_info
@@ -50,7 +76,13 @@ class DetectPAD:
         self.version = ""
         self.logger = logging.getLogger("MA5")
 
-    def IsItVetoed(self):
+    def IsItVetoed(self) -> bool:
+        """Check whether a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) has been vetoed by the user (``installation_options.dat``).
+
+        Returns:
+            ``bool``:
+            ``True`` if vetoed.
+        """
         if self.ma5tune:
             if self.user_info.padma5_veto:
                 self.logger.debug("user setting: veto on PADForMA5Tune")
@@ -73,7 +105,13 @@ class DetectPAD:
                 self.logger.debug("no user veto")
                 return False
 
-    def AreDependenciesInstalled(self):
+    def AreDependenciesInstalled(self) -> bool:
+        """Check whether the dependencies of a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) are available.
+
+        Returns:
+            ``bool``:
+            ``True`` if all dependencies are available.
+        """
         checker = ConfigChecker(
             self.archi_info, self.user_info, self.session_info, False, False
         )
@@ -87,7 +125,14 @@ class DetectPAD:
                 return False
         return True
 
-    def ManualDetection(self):
+    def ManualDetection(self) -> tuple[int, str]:
+        """Look for a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) in the location given by the user (``installation_options.dat``).
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         msg = ""
 
         if self.ma5tune:
@@ -100,6 +145,8 @@ class DetectPAD:
             # Folder name
             folder = os.path.normpath(self.user_info.padma5_build_path)
 
+        # FIXME: 'if' instead of 'elif': for the PADForMA5tune, the else-branch below is also
+        # executed and the PAD build path overrides the PADForMA5tune one.
         if self.sfs:
             # User setting
             if (
@@ -143,9 +190,16 @@ class DetectPAD:
         # Ok
         return DetectStatusType.FOUND, msg
 
-    def ToolsDetection(self):
+    def ToolsDetection(self) -> tuple[int, str]:
+        """Look for a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) in the ``tools`` folder of MadAnalysis 5 (local installation).
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         msg = ""
-        if not self.archi_info.has_spey:
+        if not self.session_info.has_spey:
             msg = (
                 "Spey is not installed. Please install it before using " + self.name + "."
             )
@@ -184,7 +238,13 @@ class DetectPAD:
 
         return DetectStatusType.FOUND, msg
 
-    def ExtractInfo(self):
+    def ExtractInfo(self) -> bool:
+        """Extract detailed information about the detected a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) (version, paths, ...).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if self.sfs:
             return True
         theCommands = [self.build_file, "--info"]
@@ -214,7 +274,13 @@ class DetectPAD:
         # Ok
         return ok
 
-    def SaveInfo(self):
+    def SaveInfo(self) -> bool:
+        """Store the information about a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) in the architecture/session information.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # archi_info
         if self.ma5tune:
             self.session_info.has_padma5 = True
