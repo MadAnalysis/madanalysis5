@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file Pruner.h
+ * @brief Jet pruning (FastJet Pruner).
+ */
+
 #ifndef MADANALYSIS5_PRUNER_H
 #define MADANALYSIS5_PRUNER_H
 
@@ -33,13 +38,14 @@ namespace fastjet {
 
 namespace MA5 {
     namespace Substructure {
+        /** @brief Jet pruning (Ellis, Vermilion and Walsh, arXiv:0903.5081) through the FastJet Pruner. */
         class Pruner {
             //---------------------------------------------------------------------------------
             //                                 data members
             //---------------------------------------------------------------------------------
             protected:
 
-                /// Jet definition
+                /** @brief Jet definition used for the pruning (owned). */
                 fastjet::JetDefinition *JetDefinition_;
 
                 MAfloat32 zcut_; // pt-fraction cut in the pruning
@@ -47,10 +53,12 @@ namespace MA5 {
 
             public:
 
-                /// Constructor without argument
+                /** @brief Constructor without argument (call Initialize() before use). */
+                // FIXME: the default constructor leaves the pointer(s) uninitialised, but the destructor deletes them
+                //   (undefined behaviour if Initialize() is never called).
                 Pruner() {}
 
-                /// Destructor
+                /** @brief Destructor (deletes the jet definition). */
                 ~Pruner();
 
                 //============================//
@@ -60,18 +68,45 @@ namespace MA5 {
                 // Hence it would be optimum execution to initialize the algorithm during the initialisation
                 // of the analysis
 
-                // Constructor with arguments
+                /**
+                 * @brief Constructor with arguments (calls Initialize()).
+                 *
+                 * @param algorithm reclustering algorithm.
+                 * @param R jet radius (the maximum allowed radius if R <= 0).
+                 * @param zcut pT-fraction cut.
+                 * @param Rcut_factor the angular cut is Rcut_factor * 2m/pT.
+                 */
                 Pruner(Substructure::Algorithm algorithm, MAfloat32 R, MAfloat32 zcut, MAfloat32 Rcut_factor)
                 { Initialize(algorithm, R, zcut, Rcut_factor); }
 
-                // Constructor with arguments
+                /**
+                 * @brief Constructor with arguments, using the maximum allowed radius.
+                 *
+                 * @param algorithm reclustering algorithm.
+                 * @param zcut pT-fraction cut.
+                 * @param Rcut_factor the angular cut is Rcut_factor * 2m/pT.
+                 */
                 Pruner(Substructure::Algorithm algorithm, MAfloat32 zcut, MAfloat32 Rcut_factor)
                 { Initialize(algorithm, -1., zcut, Rcut_factor); }
 
+                /**
+                 * @brief Initialise with the maximum allowed radius.
+                 *
+                 * @param algorithm reclustering algorithm.
+                 * @param zcut pT-fraction cut.
+                 * @param Rcut_factor the angular cut is Rcut_factor * 2m/pT.
+                 */
                 void Initialize(Substructure::Algorithm algorithm, MAfloat32 zcut, MAfloat32 Rcut_factor)
                 { Initialize(algorithm, -1., zcut, Rcut_factor); }
 
-                // Initialize with all the arguments. Note that if R <= 0 max allowable radius will be used
+                /**
+                 * @brief Create the jet definition and store the pruning parameters.
+                 *
+                 * @param algorithm reclustering algorithm.
+                 * @param R jet radius (the maximum allowed radius if R <= 0).
+                 * @param zcut pT-fraction cut.
+                 * @param Rcut_factor the angular cut is Rcut_factor * 2m/pT.
+                 */
                 void Initialize(
                     Substructure::Algorithm algorithm, MAfloat32 R, MAfloat32 zcut, MAfloat32 Rcut_factor
                 );
@@ -80,14 +115,35 @@ namespace MA5 {
                 //        Execution      //
                 //=======================//
 
-                // Method to prune a given jet with respect to initialization parameters
+                /**
+                 * @brief Prune a jet.
+                 *
+                 * The returned jets are allocated on the heap and are owned by the caller.
+                 *
+                 * @param jet jet to process (its constituents are used).
+                 * @return the pruned jet.
+                 */
                 const RecJetFormat * Execute(const RecJetFormat *jet) const;
 
-                // Method to prune each given jet individually with respect to initialization parameters
+                /**
+                 * @brief Prune each jet of a collection.
+                 *
+                 * The returned jets are allocated on the heap and are owned by the caller.
+                 * The output is not re-ordered.
+                 *
+                 * @param jets jets to process.
+                 * @return the pruned jets.
+                 */
                 std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets) const;
 
             private:
 
+                /**
+                 * @brief Prune a PseudoJet.
+                 *
+                 * @param jet FastJet jet.
+                 * @return the pruned jet.
+                 */
                 fastjet::PseudoJet __prune(fastjet::PseudoJet jet) const;
 
         };

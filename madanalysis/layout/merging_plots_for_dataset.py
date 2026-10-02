@@ -22,7 +22,15 @@
 ################################################################################
 
 
+"""Collection of the DJR merging-check histograms of one dataset."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.dataset.dataset import Dataset
 from madanalysis.enumeration.uncertainty_type     import UncertaintyType
 from madanalysis.enumeration.normalize_type       import NormalizeType
 from madanalysis.enumeration.report_format_type   import ReportFormatType
@@ -35,29 +43,59 @@ from math import sqrt
 
 
 class MergingPlotsForDataset:
+    """Merging-check histograms of one dataset.
 
-    def __init__(self,main,dataset):
+    Attributes:
+        dataset (``Dataset``): dataset.
+        main (``Main``): session state.
+        histos (``list[Any]``): histograms.
+    """
+
+    def __init__(self,main: Main,dataset: Dataset) -> None:
+        """Initialise an empty collection.
+
+        Args:
+            main (``Main``): session state.
+            dataset (``Dataset``): dataset.
+        """
         self.dataset = dataset
         self.main    = main
         self.histos  = []
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Get the number of histograms.
+
+        Returns:
+            ``int``:
+            Number of histograms.
+        """
         return len(self.histos)
 
 
-    def __getitem__(self,i):
+    def __getitem__(self,i: int) -> Any:
+        """Get a histogram.
+
+        Args:
+            i (``int``): index.
+
+        Returns:
+            ``Any``:
+            The histogram.
+        """
         return self.histos[i]
 
 
     # Computing integral
-    def FinalizeReading(self):
+    def FinalizeReading(self) -> None:
+        """Finalise the reading (normalisation) of all histograms."""
 
         for histo in self.histos:
             histo.FinalizeReading(self.main,self.dataset)
 
             
     # Computing integral
-    def CreateHistogram(self):
+    def CreateHistogram(self) -> None:
+        """Build the summed histograms of all histograms."""
 
         for histo in self.histos:
             histo.CreateHistogram()

@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file ReaderManager.cpp
+ * @brief Implementation of MA5::ReaderManager.
+ */
+
 #include "SampleAnalyzer/Process/Reader/ReaderManager.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Process/Reader/LHEReader.h"

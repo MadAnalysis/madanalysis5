@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file RecTowerFormat.h
+ * @brief Calorimeter tower.
+ */
+
 #ifndef RecTowerFormat_h
 #define RecTowerFormat_h
 
@@ -50,6 +55,7 @@ class DetectorDelphesMA5tune;
 class RecLeptonFormat;
 class DelphesMemoryInterface;
 
+/** @brief Calorimeter tower (only the four-momentum is used). */
 class RecTowerFormat : public RecParticleFormat
 {
   friend class LHEReader;
@@ -72,21 +78,21 @@ class RecTowerFormat : public RecParticleFormat
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor (momentum reset). */
   RecTowerFormat()
   { Reset(); }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~RecTowerFormat()
   {}
 
-  /// Clear all information
+  /** @brief Reset the four-momentum. */
   virtual void Reset()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
   }
 
-  /// Print particle informations
+  /** @brief Print (nothing is printed). */
   virtual void Print() const
   {
   }

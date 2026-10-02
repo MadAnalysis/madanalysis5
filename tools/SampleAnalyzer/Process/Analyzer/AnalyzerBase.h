@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file AnalyzerBase.h
+ * @brief Base class of all analyses (normal mode, expert mode and PAD).
+ */
+
 #ifndef ANALYSISBASE_h
 #define ANALYSISBASE_h
 
@@ -62,10 +67,14 @@
 #include <vector>
 #include <map>
 
-// initializing MACRO 
+/**
+ * @brief Declare the constructor and the destructor of an analysis class and set its name.
+ *
+ * To be placed at the beginning of the class declaration: `INIT_ANALYSIS(MyAna, "MyAna")`.
+ */
 #define INIT_ANALYSIS(CLASS,NAME) public: CLASS() {setName(NAME);} virtual ~CLASS() {} private:
 
-// Introduce shorthand for widely used reconstructed objects
+/** @brief Shorthands for pointers to reconstructed objects and their collections. */
 #define RecJet MA5::RecJetFormat *
 typedef std::vector<const RecJet> RecJets;
 #define RecTau MA5::RecTauFormat *
@@ -79,6 +88,13 @@ typedef std::vector<const RecTrack> RecTracks;
 
 
 namespace MA5 {
+    /**
+     * @brief Base class of the analyses.
+     *
+     * An analysis implements Initialize() (declaration of regions, cuts and histograms
+     * through Manager()), Execute() (called for each event) and Finalize(). Options given
+     * on the command line (`--name=value`) are available through getOption().
+     */
     class AnalyzerBase
     {
 
@@ -87,23 +103,24 @@ namespace MA5 {
         // -------------------------------------------------------------
     public :
 
-        /// name of the analysis
+        /** @brief Name of the analysis. */
         std::string name_;
 
-        /// Weighted events mode
+        /** @brief Use the event weights? */
         MAbool weighted_events_;
 
-        /// A RS manager is associated with each analysis
+        /** @brief Manager of the signal regions, cuts and histograms of the analysis. */
         RegionSelectionManager manager_;
+        /** @brief Output directory of the analysis. */
         std::string outputdir_;
 
-        /// Writer SAF
+        /** @brief Writer of the SAF output file. */
         SAFWriter out_;
 
-        // options
+        /** @brief Command-line options. */
         std::map<std::string, std::string> options_;
 
-        // parameters
+        /** @brief Parameters given in main.cpp. */
         std::map<std::string, std::string> parameters_;
 
         // -------------------------------------------------------------
@@ -111,15 +128,21 @@ namespace MA5 {
         // -------------------------------------------------------------
     public :
 
-        /// Constructor without argument
+        /** @brief Constructor. */
         AnalyzerBase()
         { name_="unknown"; outputdir_=""; }
 
-        /// Destructor
+        /** @brief Destructor. */
         virtual ~AnalyzerBase()
         { }
 
-        /// Initialize (common part to all analyses)
+        /**
+         * @brief Initialisation common to all analyses (weights mode, SAF writer, options).
+         *
+         * @param outputName name of the SAF output file.
+         * @param cfg run configuration.
+         * @return true.
+         */
         MAbool PreInitialize(const std::string& outputName,
                              const Configuration* cfg)
         {
@@ -129,16 +152,33 @@ namespace MA5 {
             return true;
         }
 
-        /// Initialize (specific to the analysis)
+        /**
+         * @brief Initialise the analysis (to be implemented by the user).
+         *
+         * @param cfg run configuration.
+         * @param parameters parameters given in main.cpp.
+         * @return false to stop the job.
+         */
         virtual MAbool Initialize(const Configuration& cfg,
                                   const std::map<std::string,std::string>& parameters)=0;
 
+        /**
+         * @brief Initialise the analysis with the stored parameters.
+         *
+         * @param cfg run configuration.
+         * @return the result of the user Initialize().
+         */
         MAbool Initialize(const Configuration& cfg)
         {
             return Initialize(cfg, parameters_);
         }
 
-        /// PreFinalize
+        /**
+         * @brief Write the header and the list of files in the SAF output file.
+         *
+         * @param summary summary of the samples.
+         * @param samples samples.
+         */
         void PreFinalize(const SampleFormat& summary,
                          const std::vector<SampleFormat>& samples)
         {
@@ -146,11 +186,21 @@ namespace MA5 {
             out_.WriteFiles(samples);
         }
 
-        /// Finalize
+        /**
+         * @brief Finalise the analysis (to be implemented by the user).
+         *
+         * @param summary summary of the samples.
+         * @param samples samples.
+         */
         virtual void Finalize(const SampleFormat& summary,
                               const std::vector<SampleFormat>& samples)=0;
 
-        /// PostFinalize
+        /**
+         * @brief Write the footer of the SAF output file and close it.
+         *
+         * @param summary summary of the samples.
+         * @param samples samples (unused).
+         */
         void PostFinalize(const SampleFormat& summary,
                           const std::vector<SampleFormat>& samples)
         {
@@ -159,7 +209,13 @@ namespace MA5 {
             out_.Finalize();
         }
 
-        /// Execute
+        /**
+         * @brief Common part of the event processing: set the initial/final-state status codes from the event.
+         *
+         * @param mySample current sample.
+         * @param myEvent current event.
+         * @return true.
+         */
         MAbool PreExecute(const SampleFormat& mySample,
                           const EventFormat& myEvent)
         {
@@ -168,38 +224,87 @@ namespace MA5 {
             return true;
         }
 
+        /**
+         * @brief Process an event (to be implemented by the user).
+         *
+         * @param mySample current sample.
+         * @param myEvent current event.
+         * @return the status of the event (the return value is not used by the generated main program).
+         */
         virtual MAbool Execute(SampleFormat& mySample,
                                const EventFormat& myEvent)=0;
 
-        /// Accessor to analysis name
+        /**
+         * @brief Accessor to the name of the analysis.
+         *
+         * @return the name.
+         */
         const std::string name() const {return name_;}
 
-        /// Accessor to the manager
+        /**
+         * @brief Accessor to the region-selection manager.
+         *
+         * @return a pointer to the manager.
+         */
         RegionSelectionManager *Manager() { return &manager_; }
 
-        /// Mutator to analysis name
+        /**
+         * @brief Set the name of the analysis.
+         *
+         * @param Name name.
+         */
         void setName(const std::string& Name) {name_=Name;}
 
-        /// Accessor to the output directory name
+        /**
+         * @brief Accessor to the output directory.
+         *
+         * @return the directory.
+         */
         const std::string Output() const {return outputdir_;}
 
-        /// Mutator to the output directory name
+        /**
+         * @brief Set the output directory.
+         *
+         * @param name directory.
+         */
         void SetOutputDir(const std::string &name) {outputdir_=name;}
 
 
+        /**
+         * @brief Accessor to the SAF writer.
+         *
+         * @return the writer.
+         */
         SAFWriter& out()
         { return out_; }
 
-        // Set command line options
+        /**
+         * @brief Set the command-line options.
+         *
+         * @param options options.
+         */
         void SetOptions(std::map<std::string, std::string> options) {options_=options;}
 
-        // Set parameters, initialized in main.cpp
+        /**
+         * @brief Set the parameters (from main.cpp).
+         *
+         * @param params parameters.
+         */
         void SetParameters(std::map<std::string, std::string> params) {parameters_=params;}
 
-        // Accessor to parameters
+        /**
+         * @brief Accessor to the parameters.
+         *
+         * @return a copy of the parameters.
+         */
         const std::map<std::string, std::string> GetParameters() {return parameters_;}
 
-        /// Get an option for this analysis instance as a string.
+        /**
+         * @brief Get a command-line option as a string.
+         *
+         * @param optname name of the option.
+         * @return the value (empty if not given).
+         */
         std::string getOption(std::string optname) const
         {
             if ( options_.find(optname) != options_.end() )
@@ -207,28 +312,40 @@ namespace MA5 {
             return "";
         }
 
-        /// Get an option for this analysis instance converted to a specific type
-        /// The return type is given by the specified @a def value, or by an explicit template
-        /// type-argument, e.g. getOption<double>("FOO", 3).
+        /**
+         * @brief Get a command-line option converted to the type of the default value.
+         *
+         * Example: `getOption<double>("FOO", 3.)`.
+         *
+         * @tparam T type of the value.
+         * @param optname name of the option.
+         * @param def default value.
+         * @return the converted value, or def if the option is not given.
+         */
         template<typename T>
         T getOption(std::string optname, T def) const {
             if (options_.find(optname) == options_.end()) return def;
             std::stringstream ss;
             ss << options_.find(optname)->second;
+            // NOTE: ret is left uninitialised if the conversion fails.
             T ret;
             ss >> ret;
             return ret;
         }
 
-        /// overload for literal character strings (which don't play well with stringstream)
-        /// Note this isn't a template specialisation, because we can't return a non-static
-        /// char*, and T-as-return-type is built into the template function definition.
+        /**
+         * @brief Get a command-line option as a string (overload for string literals).
+         *
+         * @param optname name of the option.
+         * @param def default value.
+         * @return the value, or def.
+         */
         std::string getOption(std::string optname, const char* def) {
             return getOption<std::string>(optname, def);
         }
 
 
-        // backwards compatibility
+        /** @brief Deprecated (prints a warning). */
         void AddDefaultHadronic()
         {
             try {
@@ -238,6 +355,7 @@ namespace MA5 {
             }
         }
 
+        /** @brief Deprecated (prints a warning). */
         void AddDefaultInvisible()
         {
             try {

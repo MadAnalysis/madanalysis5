@@ -22,26 +22,66 @@
 ################################################################################
 
 
+"""Comparison operators of the cuts."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
+        """Metaclass turning the class attribute access ``OperatorType.NAME`` into an integer code.
+
+        Accessing ``OperatorType.NAME`` returns the index of ``NAME`` in ``OperatorType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
     
-        def __getattr__(self, name):
+        def __getattr__(self, name: str) -> int:
+            """Get the integer code of an enumeration entry.
+
+            Unknown names are mapped to the index of ``UNKNOWN`` instead of raising.
+
+            Args:
+                name (``str``): name of the entry (e.g. ``OperatorType.GREATER``).
+
+            Returns:
+                ``int``:
+                Index of the entry in ``values``.
+            """
             if name in list(self.values.keys()):
                 return list(self.values.keys()).index(name)
             else:
                 return list(self.values.keys()).index('UNKNOWN')
 
-        def convert2string(self,op):
+        def convert2string(self,op: int) -> str:
+            """Get the user symbol of an operator.
+
+            Args:
+                op (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                Symbol such as ``'>='`` (``'='`` for ``EQUAL``).
+            """
             name = list(self.values.keys())[op]
             return self.values[name][0]
 
-        def convert2cpp(self,op):
+        def convert2cpp(self,op: int) -> str:
+            """Get the C++ operator.
+
+            Args:
+                op (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                C++ operator (``'=='`` for ``EQUAL``).
+            """
             name = list(self.values.keys())[op]
             return self.values[name][1]
 
 @six.add_metaclass(metaclass)
 class OperatorType(object):
+    """Comparison operators. Each entry of ``values`` is ``[user_symbol, cpp_operator]``.
+    """
     values = { 'GREATER'       : [">",">"],\
                'GREATER_EQUAL' : [">=",">="],\
                'LESS'          : ["<","<"],\

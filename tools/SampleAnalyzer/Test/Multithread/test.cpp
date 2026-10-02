@@ -23,16 +23,27 @@
 
 
 // STL library
+/**
+ * @file test.cpp
+ * @brief Test of the C++11 thread support of the compiler (not built by the Python front-end).
+ */
+
 #include <iostream>
 #include <thread>
 
 //This function will be called from a thread
 
+/** @brief Print the marker MA5_C+11_MULTITHREAD (run in a thread). */
 void call_from_thread()
 {
   std::cout << "MA5_C+11_MULTITHREAD" << std::endl;
 }
 
+/**
+ * @brief Launch a thread and join it.
+ *
+ * @return 0.
+ */
 int main()
 {
   //Launch a thread

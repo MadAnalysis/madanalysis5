@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MCParticleFormat.h
+ * @brief Monte Carlo (generator-level) particle.
+ */
+
 #ifndef MCParticleFormat_h
 #define MCParticleFormat_h
 
@@ -54,6 +59,13 @@ namespace MA5
     class DelphesMA5tuneTreeReader;
     class SmearerBase;
 
+    /**
+     * @brief Particle of the Monte Carlo event record.
+     *
+     * In addition to the kinematics, it stores the PDG code, the status code, the spin,
+     * the mother/daughter links (pointers into MCEventFormat::particles()) and the
+     * decay vertex used by the SFS particle propagator.
+     */
     class MCParticleFormat : public ParticleBaseFormat
     {
         friend class LHEReader;
@@ -72,31 +84,28 @@ namespace MA5
         // -------------------------------------------------------------
     private:
 
-        /// PDG numbering of the particle
+        /** @brief PDG code of the particle. */
         MAint32 pdgid_;
 
-        /// Status code of the particle
-        /// For LHE: -1 for initial state, 2 intermediate state, 1 final state
-        /// For PYTHIA: more sophisticated
+        /** @brief Status code (LHE: -1 initial state, 2 intermediate state, 1 final state; generator-specific otherwise). */
         MAint16 statuscode_;
 
-        /// Cosine of the angle btwn the spin vector and its 3-momentum, in the lab frame
+        /** @brief Cosine of the angle between the spin and the three-momentum, in the laboratory frame. */
         MAfloat32 spin_;
 
-        /// Is a PileUp particle or not?
+        /** @brief Is the particle coming from pile-up? */
         MAbool isPU_;
 
-        /// List of daughter particles
+        /** @brief Daughter particles. */
         std::vector<MCParticleFormat*> daughters_;
 
-        /// List of mother particles
+        /** @brief Mother particles. */
         std::vector<MCParticleFormat*> mothers_;
 
-        /// Decay position in time & space (in s & mm)
+        /** @brief Decay vertex (x, y, z [mm] and c*tau [mm] stored as the time component). */
         MALorentzVector decay_vertex_;
 
-        /// Angle defining the rotation the momentum is subjected to during its
-        /// propagation in the magnetic field
+        /** @brief Rotation angle of the momentum due to the propagation in the magnetic field. */
         MAdouble64 momentum_rotation_;
 
 
@@ -105,19 +114,26 @@ namespace MA5
         // -------------------------------------------------------------
     public :
 
-        /// Constructor without arguments
+        /** @brief Constructor (all members reset). */
         MCParticleFormat()
         { Reset(); }
 
-        /// Destructor
+        /** @brief Destructor. */
         virtual ~MCParticleFormat()
         {}
 
-        /// Constructor with arguments
+        /**
+         * @brief Constructor from the momentum components.
+         *
+         * @param px x component.
+         * @param py y component.
+         * @param pz z component.
+         * @param e energy.
+         */
         MCParticleFormat(MAfloat64 px, MAfloat64 py, MAfloat64 pz, MAfloat64 e)
         { Reset(); momentum_.SetPxPyPzE(px,py,pz,e); }
 
-        /// Clear all information
+        /** @brief Reset all members. */
         virtual void Reset()
         {
             momentum_.SetPxPyPzE(0.,0.,0.,0.);
@@ -128,13 +144,14 @@ namespace MA5
             daughters_.clear();
             mothers_.clear();
             decay_vertex_.clear();
+            // NOTE: d0_approx_ and dz_approx_ are not reset.
             closest_approach_.clear();
             d0_         = 0.;
             dz_         = 0.;
             momentum_rotation_ = 0.;
         }
 
-        /// Print particle informations
+        /** @brief Print the particle properties. */
         virtual void Print() const
         {
             INFO << "momentum=(" << /*set::setw(8)*/"" << std::left << momentum_.Px()
@@ -152,47 +169,139 @@ namespace MA5
                  << "Number of daughters=" << daughters_.size() << endmsg;
         }
 
+        /**
+         * @brief Is the particle coming from pile-up?
+         *
+         * @return true for a pile-up particle.
+         */
         const MAbool& isPU()  const {return isPU_;}
+        /**
+         * @brief Accessor to the proper decay length (time component of the decay vertex).
+         *
+         * @return c*tau [mm].
+         */
         const MAfloat64& ctau() const {return decay_vertex_.T();}
+        /**
+         * @brief Accessor to the spin (cosine of the angle with the momentum).
+         *
+         * @return the spin.
+         */
         const MAfloat32& spin() const {return spin_;}
+        /**
+         * @brief Accessor to the PDG code.
+         *
+         * @return the PDG code.
+         */
         const MAint32& pdgid()  const {return pdgid_;}
+        /**
+         * @brief Accessor to the status code.
+         *
+         * @return the status code.
+         */
         const MAint16& statuscode() const {return statuscode_;}
 
-        /// Accessor to the daughters (read-only)
+        /**
+         * @brief Accessor to the daughters (read-only).
+         *
+         * @return the daughters.
+         */
         const std::vector<MCParticleFormat*>& daughters() const {return daughters_;}
 
-        /// Accessor to the daughters
+        /**
+         * @brief Accessor to the daughters.
+         *
+         * @return the daughters.
+         */
         std::vector<MCParticleFormat*>& daughters() {return daughters_;}
 
-        /// Accessor to the mothers (read-only)
+        /**
+         * @brief Accessor to the mothers (read-only).
+         *
+         * @return the mothers.
+         */
         const std::vector<MCParticleFormat*>& mothers() const {return mothers_;}
 
-        /// Accessor to the mothers
+        /**
+         * @brief Accessor to the mothers.
+         *
+         * @return the mothers.
+         */
         std::vector<MCParticleFormat*>& mothers() {return mothers_;}
 
-        /// Accessor to the decay vertex (read-only)
+        /**
+         * @brief Accessor to the decay vertex.
+         *
+         * @return the decay vertex (x, y, z, c*tau) [mm].
+         */
         const MALorentzVector& decay_vertex() const {return decay_vertex_;}
 
-        /// Accessor to the rotation angle of the momentum (read-only)
+        /**
+         * @brief Accessor to the rotation angle of the momentum.
+         *
+         * @return the angle [rad].
+         */
         const MAdouble64& momentum_rotation() const {return momentum_rotation_;}
 
 
-        /// Mutators
+        /**
+         * @brief Set the decay vertex.
+         *
+         * @param v decay vertex (x, y, z, c*tau) [mm].
+         */
         void setDecayVertex(const MALorentzVector& v) {decay_vertex_=v;}
+        /**
+         * @brief Set the pile-up flag.
+         *
+         * @param v flag.
+         */
         void setIsPU(MAbool v)   {isPU_=v;}
+        /**
+         * @brief Set the spin.
+         *
+         * @param v cosine of the angle between the spin and the momentum.
+         */
         void setSpin(MAfloat32 v)  {spin_=v;}
+        /**
+         * @brief Set the PDG code.
+         *
+         * @param v PDG code.
+         */
         void setPdgid(MAint32 v)   {pdgid_=v;}
+        /**
+         * @brief Set the status code.
+         *
+         * @param v status code.
+         */
         void setStatuscode(MAint16 v)  {statuscode_=v;}
+        /**
+         * @brief Set the four-momentum.
+         *
+         * @param v four-momentum.
+         */
         void setMomentum(const MALorentzVector& v)  {momentum_=v;}
+        /**
+         * @brief Set the rotation angle of the momentum.
+         *
+         * @param v angle [rad].
+         */
         void setMomentumRotation(MAdouble64 v) {momentum_rotation_=v;}
 
-        /// Boosting the four momentum to the restframe of another particle
+        /**
+         * @brief Boost the four-momentum to the rest frame of another particle.
+         *
+         * @param boost reference particle (nothing is done if null).
+         */
         void ToRestFrame(const MCParticleFormat* boost)
         {
             if (boost==0) return;
             ToRestFrame(*boost);
         }
 
+        /**
+         * @brief Boost the four-momentum to the rest frame of another particle.
+         *
+         * @param boost reference particle.
+         */
         void ToRestFrame(const MCParticleFormat& boost)
         {
             MALorentzVector momentum = boost.momentum();

@@ -22,17 +22,49 @@
 ################################################################################
 
 
+"""Installation of a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) (``install PAD|PADForMA5tune|PADForSFS``).
+"""
+
 from __future__                          import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.install.install_service import InstallService
 from shell_command                       import ShellCommand
 import glob, os, logging, shutil
 
 
 class InstallPad:
+    """Installer of a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) (``install PAD|PADForMA5tune|PADForSFS``).
 
-    def __init__(self,main, padname):
+    The methods are called by
+    :meth:`madanalysis.install.install_manager.InstallManager.Execute` in the following
+    order (only when defined): ``Detect``/``Remove``, ``GetNcores``,
+    ``CreatePackageFolder``, ``CreateTmpFolder``, ``Download``, ``Unpack``, ``Configure``,
+    ``Build``, ``PreCheck``, ``Clean``, ``Install``, ``Check`` and ``NeedToRestart``.
+
+    The PAD folder is created as an expert-mode working directory, the list of analyses is
+    downloaded from the MadAnalysis 5 website/Dataverse, and the analysis codes, info files,
+    detector (Delphes/SFS) cards, pile-up files, likelihood JSON files and CSV files are
+    downloaded and installed. ``Input/recast_config.dat`` (card -> analyses) and
+    ``Input/analysis_description.dat`` are written. The PAD and PADForMA5tune are compiled;
+    the PADForSFS analyses are compiled on demand during recasting.
+    """
+
+    def __init__(self,main: Main, padname: str) -> None:
+        """Prepare the installation of a PAD.
+
+        Args:
+            main (``Main``): session state.
+            padname (``str``): ``PAD``, ``PADForMA5tune`` or ``PADForSFS``.
+        """
         self.main        = main
+        # FIXME: the case-sensitive replacements only work for the capitalised names: e.g.
+        # 'padforsfs' gives 'PADforsfs', which does not match the 'PADForSFS' tests below.
         self.padname     = padname.replace('pad','PAD').replace('ma5','MA5');
+        # NOTE: the raw name (not self.padname) is used for the installation folder.
         self.installdir  = os.path.join(self.main.archi_info.ma5dir,'tools', padname)
         self.tmpdir      = self.main.session_info.tmpdir
         self.downloaddir = self.main.session_info.downloaddir
@@ -66,14 +98,30 @@ class InstallPad:
         self.csv_cards      = []
 
 
-    def Detect(self):
+    def Detect(self) -> bool:
+        """Check whether a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) is already installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the installation folder exists.
+        """
         if not os.path.isdir(self.installdir):
             logging.getLogger('MA5').debug("The folder "+self.installdir+"' is not found")
             return False
         return True
 
 
-    def Remove(self,question=True):
+    def Remove(self,question: bool = True) -> tuple[bool, bool]:
+        """Back up (``tools/<PAD>-v<date>.tgz``) and remove the previous installation.
+
+        Args:
+            question (``bool``, default ``True``): ask the user for confirmation.
+
+        Returns:
+            ``tuple[bool, bool]``:
+            See :meth:`~madanalysis.IOinterface.folder_writer.FolderWriter.RemoveDirectory`
+            (``(False, False)`` if the backup fails).
+        """
         import time
         bkpname = self.padname + "-v" + time.strftime("%Y%m%d-%Hh%M") + ".tgz"
         logging.getLogger('MA5').info("     => Backuping the previous installation: " + bkpname)
@@ -88,7 +136,8 @@ class InstallPad:
         return FolderWriter.RemoveDirectory(self.installdir,question)
 
 
-    def GetNcores(self):
+    def GetNcores(self) -> None:
+        """Ask the number of cores used for the compilation (all cores in forced mode)."""
         if self.padname != 'PADForSFS':
             self.ncores = InstallService.get_ncores(self.main.archi_info.ncores,\
                                                     self.main.forced)
@@ -96,7 +145,13 @@ class InstallPad:
             self.ncores = 1
 
 
-    def CreatePackageFolder(self):
+    def CreatePackageFolder(self) -> bool:
+        """Create the installation folder of a Public Analysis Database (PAD, PADForMA5tune or PADForSFS).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/'+self.padname+'-workingdir.log')
 
         # Initialize the expert mode
@@ -115,6 +170,7 @@ class InstallPad:
         if not expert.CreateDirectory(dirname):
             return False
         if not expert.Copy(filename):
+            # NOTE: self.main.expertmode is not restored when Copy() fails above.
             return False
         self.main.expertmode=backup
         logging.getLogger('MA5').debug('END ExpertMode')
@@ -148,7 +204,13 @@ class InstallPad:
         # EXIT
         return True
 
-    def Download(self):
+    def Download(self) -> bool:
+        """Download the source files of a Public Analysis Database (PAD, PADForMA5tune or PADForSFS).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Checking connection with InSpire and the ma5 website
         if not InstallService.check_ma5site():
             return False
@@ -360,7 +422,13 @@ class InstallPad:
         # Ok
         return True
 
-    def Unpack(self):
+    def Unpack(self) -> bool:
+        """Unpack the downloaded files of a Public Analysis Database (PAD, PADForMA5tune or PADForSFS).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Copying the analysis files
         for analysis in self.analyses:
             for extension in ['h','cpp', 'info']:
@@ -386,7 +454,13 @@ class InstallPad:
 
         return True
 
-    def Configure(self):
+    def Configure(self) -> bool:
+        """Configure a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) before compilation.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ## not needed for the SFS
         if self.padname == 'PADForSFS':
             return True
@@ -433,7 +507,13 @@ class InstallPad:
             return False
         return ok
 
-    def Build(self):
+    def Build(self) -> bool:
+        """Compile a Public Analysis Database (PAD, PADForMA5tune or PADForSFS).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ## not needed for the SFS
         if self.padname == 'PADForSFS':
             return True
@@ -449,7 +529,13 @@ class InstallPad:
             logging.getLogger('MA5').error(logname)
         return ok
 
-    def Check(self):
+    def Check(self) -> bool:
+        """Check that a Public Analysis Database (PAD, PADForMA5tune or PADForSFS) has been properly installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the expected files are present.
+        """
         for path in glob.glob(self.installdir+"/*.log"):
             shutil.move(path, self.installdir+'/Logs')
         setattr(self.main.session_info,
@@ -457,7 +543,13 @@ class InstallPad:
                 True)
         return True
 
-    def NeedToRestart(self):
+    def NeedToRestart(self) -> bool:
+        """Tell whether MadAnalysis 5 must be restarted after the installation.
+
+        Returns:
+            ``bool``:
+            ``True`` if a restart (new configuration check and library build) is needed.
+        """
         return False
 
 

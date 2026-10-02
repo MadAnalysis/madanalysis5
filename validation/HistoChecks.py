@@ -27,11 +27,11 @@
 
 This script supports two workflows.
 
-1. Direct comparison mode
+1. Direct comparison of existing files without running MA5:
    Compare a reference ``histos.saf`` file against a produced histogram file.
 
    Usage:
-       python HistoChecks.py compare <reference.saf> <produced.saf>
+       python3 HistoChecks.py compare <reference.saf> <produced.saf>
 
 2. Run-and-compare mode
    Given a validation name ``NAME``
@@ -42,7 +42,7 @@ This script supports two workflows.
    - if the output file is not available, it is downloaded from github
 
    Usage:
-       python HistoChecks.py run <name>
+       python HistoChecks.py run <NAME>
 
 The comparison is based on the *bin content* only. For each line of a SAF
 <Data> block, the bin content is defined as the sum of the first two columns,
@@ -85,15 +85,16 @@ RESET = "\033[0m"
 # ---------------------------------------------------------------------------
 #  Ensure the reference output SAF filesexists locally
 # ---------------------------------------------------------------------------
-def ensure_reference_file(name: str, ma5dir: Path) -> Path:
+def ensure_reference_file(name: str, ma5dir: Path, output_dir: Path | None = None) -> Path:
     """Ensure validation/outputs/<name>.saf exists locally.
 
     If missing, download <name>.saf.gz from the validation_data GitHub repo
-    and decompress it locally.
+    and decompress it locally. An optional output directory allows other
+    validation drivers to use an explicitly supplied reference location.
     """
 
     # Init and safety
-    local_dir = ma5dir / "validation" / "outputs"
+    local_dir = output_dir if output_dir is not None else ma5dir / "validation" / "outputs"
     local_dir.mkdir(parents=True, exist_ok=True)
     local_saf = local_dir / f"{name}.saf"
     if local_saf.exists(): return local_saf
@@ -363,7 +364,7 @@ def main() -> int:
             reference = args.reference.resolve()
             produced = args.produced.resolve()
         elif args.mode == "run":
-            ma5dir = Path.cwd().parent.resolve()
+            ma5dir = Path(__file__).resolve().parent.parent
             reference, produced = run_ma5_script(args.name, ma5dir)
             print(f"{BOLD}Reference:{RESET} {reference}")
             print(f"{BOLD}Produced :{RESET} {produced}")

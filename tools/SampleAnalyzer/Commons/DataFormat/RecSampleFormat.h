@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file RecSampleFormat.h
+ * @brief Reconstruction-level information of a sample (currently empty).
+ */
+
 #ifndef RECSAMPLE_DATAFORMAT_H
 #define RECSAMPLE_DATAFORMAT_H
 
@@ -42,6 +47,7 @@ class LHEReader;
 class LHCOReader;
 class SampleAnalyzer;
 
+/** @brief Reconstruction-level information of a sample (placeholder without data member). */
 class RecSampleFormat
 {
   friend class LHEReader;
@@ -58,20 +64,20 @@ class RecSampleFormat
   // -------------------------------------------------------------
  public :
 
-  /// Constructor withtout arguments
+  /** @brief Constructor. */
   RecSampleFormat()
   { Reset(); }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~RecSampleFormat()
   { }
 
-  /// Clear all the content
+  /** @brief Reset (nothing to do). */
   void Reset()
   {
   }
 
-  /// Displaying subtitle for file
+  /** @brief Print a placeholder message. */
   void printSubtitle() const
   {
     INFO << "Printing Subtitles ... " << endmsg;

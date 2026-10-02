@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Installation of gnuplot 4.6.5 (legacy) (``install gnuplot``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.install.install_service import InstallService
 from shell_command import ShellCommand
 import os
@@ -30,19 +37,39 @@ import sys
 import logging
 
 class InstallGnuplot:
+    """Installer of gnuplot 4.6.5 (legacy) (``install gnuplot``).
 
-    def __init__(self,main):
+    The methods are called by
+    :meth:`madanalysis.install.install_manager.InstallManager.Execute` in the following
+    order (only when defined): ``Detect``/``Remove``, ``GetNcores``,
+    ``CreatePackageFolder``, ``CreateTmpFolder``, ``Download``, ``Unpack``, ``Configure``,
+    ``Build``, ``PreCheck``, ``Clean``, ``Install``, ``Check`` and ``NeedToRestart``.
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Prepare the installation of gnuplot 4.6.5 (legacy) (folders, download URLs).
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main       = main
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/gnuplot/')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir     = self.main.session_info.tmpdir
+        # NOTE: the session download folder is not used here.
         self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_gnuplot/')
         self.ncores     = 1
         self.files = {"gnuplot.tar.gz" : "http://sourceforge.net/projects/gnuplot/files/gnuplot/4.6.5/gnuplot-4.6.5.tar.gz"}
 
 
-    def Detect(self):
+    def Detect(self) -> bool:
+        """Check whether gnuplot 4.6.5 (legacy) is already installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the installation folder exists.
+        """
         if not os.path.isdir(self.toolsdir):
             logging.getLogger('MA5').debug("The folder '"+self.toolsdir+"' is not found")
             return False
@@ -52,15 +79,33 @@ class InstallGnuplot:
         return True
 
 
-    def Remove(self,question=True):
+    def Remove(self,question: bool = True) -> tuple[bool, bool]:
+        """Remove the previous installation of gnuplot 4.6.5 (legacy).
+
+        Args:
+            question (``bool``, default ``True``): ask the user for confirmation.
+
+        Returns:
+            ``tuple[bool, bool]``:
+            Result of :meth:`~madanalysis.IOinterface.folder_writer.FolderWriter.RemoveDirectory`:
+            whether the operation succeeded and whether the folder was removed/kept on the
+            user's request.
+        """
         from madanalysis.IOinterface.folder_writer import FolderWriter
         return FolderWriter.RemoveDirectory(self.installdir,question)
 
-    def GetNcores(self):
+    def GetNcores(self) -> None:
+        """Ask the number of cores used for the compilation (all cores in forced mode)."""
         self.ncores = InstallService.get_ncores(self.main.archi_info.ncores,\
                                                 self.main.forced)
 
-    def CreatePackageFolder(self):
+    def CreatePackageFolder(self) -> bool:
+        """Create the installation folder of gnuplot 4.6.5 (legacy).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if not InstallService.create_tools_folder(self.toolsdir):
             return False
         if not InstallService.create_package_folder(self.toolsdir,'gnuplot'):
@@ -68,13 +113,25 @@ class InstallGnuplot:
         return True
 
 
-    def CreateTmpFolder(self):
+    def CreateTmpFolder(self) -> bool:
+        """Create (clean) the temporary unpacking folder and the download folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ok = InstallService.prepare_tmp(self.untardir, self.downloaddir)
         if ok:
             self.tmpdir=self.untardir
         return ok
 
-    def Download(self):
+    def Download(self) -> bool:
+        """Download the source files of gnuplot 4.6.5 (legacy).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
             return False
@@ -86,7 +143,13 @@ class InstallGnuplot:
         return True
 
 
-    def Unpack(self):
+    def Unpack(self) -> bool:
+        """Unpack the downloaded files of gnuplot 4.6.5 (legacy).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
@@ -98,7 +161,13 @@ class InstallGnuplot:
         return True
 
 
-    def Configure(self):
+    def Configure(self) -> bool:
+        """Configure gnuplot 4.6.5 (legacy) before compilation.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Input
         theCommands=['./configure','--prefix='+self.installdir, '--with-png', '--with-jpeg', '--with-pdf']
         logname=os.path.normpath(self.installdir+'/configuration.log')
@@ -115,7 +184,13 @@ class InstallGnuplot:
         return ok
 
 
-    def Install(self):
+    def Install(self) -> bool:
+        """Install gnuplot 4.6.5 (legacy) in its definitive folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Input
         theCommands=['make', 'install', '-j'+str(self.ncores)]
         logname=os.path.normpath(self.installdir+'/compilation.log')
@@ -131,7 +206,13 @@ class InstallGnuplot:
             logging.getLogger('MA5').error(logname)
         return ok
 
-    def Check(self):
+    def Check(self) -> bool:
+        """Check that gnuplot 4.6.5 (legacy) has been properly installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the expected files are present.
+        """
         # Check folders
         dirs = [self.installdir+"/bin",\
                 self.installdir+"/libexec",\
@@ -149,7 +230,8 @@ class InstallGnuplot:
             return False
         return True
 
-    def display_log(self):
+    def display_log(self) -> None:
+        """Log the paths of the installation log files."""
         logging.getLogger('MA5').error("More details can be found into the log files:")
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/wget.log"))
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
@@ -157,7 +239,13 @@ class InstallGnuplot:
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/compilation.log"))
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/installation.log"))
 
-    def NeedToRestart(self):
+    def NeedToRestart(self) -> bool:
+        """Tell whether MadAnalysis 5 must be restarted after the installation.
+
+        Returns:
+            ``bool``:
+            ``True`` if a restart (new configuration check and library build) is needed.
+        """
         return True
 
 

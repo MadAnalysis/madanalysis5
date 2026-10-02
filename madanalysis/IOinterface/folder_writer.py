@@ -22,16 +22,36 @@
 ################################################################################
 
 
+"""Removal and creation of folders (with optional user confirmation)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import os
 import shutil
 import logging
 from six.moves import input
 
 class FolderWriter:
+    """Static helpers to remove and create folders."""
 
     @staticmethod
-    def RemoveDirectory(path,question=False):
+    def RemoveDirectory(path: str,question: bool = False) -> tuple[bool, bool]:
+        """Remove a folder and its content.
+
+        Args:
+            path (``str``): folder to remove.
+            question (``bool``, default ``False``): ask for confirmation (not in forced mode).
+
+        Returns:
+            ``tuple[bool, bool]``:
+            ``(done, no_error)``: ``(True, True)`` if the folder has been removed or does not
+            exist, ``(False, True)`` if the user refused, ``(False, False)`` if the removal
+            failed.
+
+        .. warning::
+            A tuple is always truthy: ``if not FolderWriter.RemoveDirectory(...)`` never
+            detects a failure (see the FIXME notes at the call sites).
+        """
 
         from madanalysis.core.main import Main
 
@@ -61,12 +81,27 @@ class FolderWriter:
         
         
     @staticmethod
-    def CreateDirectory(path,question=False,overwrite=False):
+    def CreateDirectory(path: str,question: bool = False,overwrite: bool = False) -> bool:
+        """Create a folder, possibly replacing an existing one.
+
+        Args:
+            path (``str``): folder to create.
+            question (``bool``, default ``False``): ask whether an existing folder can be removed
+                (otherwise an existing folder is an error).
+            overwrite (``bool``, default ``False``): silently replace an existing folder (also
+                done in forced mode).
+
+        Returns:
+            ``bool``:
+            ``True`` if the folder has been created.
+        """
 
         from madanalysis.core.main import Main
 
         # Checking if the directory is already defined
         if os.path.isdir(path) and (overwrite or Main.forced):
+            # FIXME: RemoveDirectory returns a (non-empty, hence truthy) tuple: this test never fails
+            # (same below).
             if not FolderWriter.RemoveDirectory(path,False):
                 return False
         

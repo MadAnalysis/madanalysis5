@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file SortingService.h
+ * @brief Sorting of particle collections and selection of the n-th ranked particle (SORTER).
+ */
+
 #ifndef SORT_SERVICE_h
 #define SORT_SERVICE_h
 
@@ -36,65 +41,134 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
+/** @brief Shortcut to the SortingService singleton. */
 #define SORTER MA5::SortingService::getInstance()
 
 
 namespace MA5
 {
 
+/** @brief Observable used to order a collection (decreasing order). */
 enum OrderingObservable{Eordering, Pordering, PTordering, 
                         ETordering, PXordering, PYordering,
                         PZordering, ETAordering};
 
+/** @brief Comparison predicates (decreasing order) used by SortingService::sort. */
 struct PointerComparison
 {
   template<typename T>
+  /**
+   * @brief Order two particles by decreasing energy.
+   *
+   * @tparam T particle type.
+   * @param part1 first particle.
+   * @param part2 second particle.
+   * @return true if part1 comes first.
+   */
   static MAbool ESortPredicate(T* part1, 
                              T* part2)
   { return part1->e() > part2->e(); }
 
   template<typename T>
+  /**
+   * @brief Order two particles by decreasing transverse energy.
+   *
+   * @tparam T particle type.
+   * @param part1 first particle.
+   * @param part2 second particle.
+   * @return true if part1 comes first.
+   */
   static MAbool ETSortPredicate(T* part1, 
                               T* part2)
   { return part1->et() > part2->et(); }
 
   template<typename T>
+  /**
+   * @brief Order two particles by decreasing momentum magnitude.
+   *
+   * @tparam T particle type.
+   * @param part1 first particle.
+   * @param part2 second particle.
+   * @return true if part1 comes first.
+   */
   static MAbool PSortPredicate(T* part1, 
                              T* part2)
   { return part1->p() > part2->p(); }
 
   template<typename T>
+  /**
+   * @brief Order two particles by decreasing transverse momentum.
+   *
+   * @tparam T particle type.
+   * @param part1 first particle.
+   * @param part2 second particle.
+   * @return true if part1 comes first.
+   */
   static MAbool PTSortPredicate(T* part1, 
                               T* part2)
   { return part1->pt() > part2->pt(); }
 
   template<typename T>
+  /**
+   * @brief Order two particles by decreasing pseudorapidity.
+   *
+   * @tparam T particle type.
+   * @param part1 first particle.
+   * @param part2 second particle.
+   * @return true if part1 comes first.
+   */
   static MAbool ETASortPredicate(T* part1, 
                                T* part2)
   { return part1->eta() > part2->eta(); }
 
   template<typename T>
+  /**
+   * @brief Order two particles by decreasing x component of the momentum.
+   *
+   * @tparam T particle type.
+   * @param part1 first particle.
+   * @param part2 second particle.
+   * @return true if part1 comes first.
+   */
   static MAbool PXSortPredicate(T* part1, 
                               T* part2)
   { return part1->px() > part2->px(); }
 
   template<typename T>
+  /**
+   * @brief Order two particles by decreasing y component of the momentum.
+   *
+   * @tparam T particle type.
+   * @param part1 first particle.
+   * @param part2 second particle.
+   * @return true if part1 comes first.
+   */
   static MAbool PYSortPredicate(T* part1, 
                        T* part2)
   { return part1->py() > part2->py(); }
 
   template<typename T>
+  /**
+   * @brief Order two particles by decreasing z component of the momentum.
+   *
+   * @tparam T particle type.
+   * @param part1 first particle.
+   * @param part2 second particle.
+   * @return true if part1 comes first.
+   */
   static MAbool PZSortPredicate(T* part1, 
                               T* part2)
   { return part1->pz() > part2->pz(); }
 
 };
 
+/** @brief Singleton sorting particle collections. */
 class SortingService
 {
   // -------------------------------------------------------------
   //                      data members
   // -------------------------------------------------------------
+  /** @brief Unique instance. */
   static SortingService* service_;
   // -------------------------------------------------------------
 
@@ -102,17 +176,28 @@ class SortingService
   // -------------------------------------------------------------
 
 public:
-  /// GetInstance
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static SortingService* getInstance()
   {
     if (service_==0) service_ = new SortingService;
     return service_;
   }
 
-  /// sort particle
+  /**
+   * @brief Sort a collection of particle pointers in decreasing order of an observable.
+   *
+   * @tparam T particle type.
+   * @param parts collection (sorted in place).
+   * @param obs ordering observable.
+   */
   template<typename T> static void sort(std::vector<T*>& parts,
             OrderingObservable obs=PTordering)
   {
+    // FIXME: Pordering is not handled: the collection is left unsorted.
     if (obs==PTordering) 
         std::sort(parts.begin(),parts.end(),
                   PointerComparison::PTSortPredicate<T>);
@@ -136,7 +221,14 @@ public:
                   PointerComparison::PZSortPredicate<T>);
   }
 
-  /// rank filter
+  /**
+   * @brief Select the particle of a given rank.
+   *
+   * @param ref collection (copied, then sorted).
+   * @param rank rank: 1, 2, ... from the first; -1, -2, ... from the last.
+   * @param obs ordering observable.
+   * @return a vector with the selected particle, or an empty vector if the rank is 0 or larger than the collection.
+   */
   static std::vector<const MCParticleFormat*> 
   rankFilter(std::vector<const MCParticleFormat*> ref, MAint16 rank,
              OrderingObservable obs=PTordering)
@@ -169,7 +261,14 @@ public:
     return parts;
   }
 
-  /// rank filter
+  /**
+   * @brief Select the particle of a given rank.
+   *
+   * @param ref collection (copied, then sorted).
+   * @param rank rank: 1, 2, ... from the first; -1, -2, ... from the last.
+   * @param obs ordering observable.
+   * @return a vector with the selected particle, or an empty vector if the rank is 0 or larger than the collection.
+   */
   static std::vector<const RecParticleFormat*> 
   rankFilter(std::vector<const RecParticleFormat*> ref, MAint16 rank,
              OrderingObservable obs=PTordering)

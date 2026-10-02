@@ -22,7 +22,17 @@
 ################################################################################
 
 
+"""Legacy configuration checks for zlib, Delphes and Delphes-MA5tune.
+
+Delphes and Delphes-MA5tune are still detected here (there is no ``detect_delphes``
+module). With ``getpaths=True``, the checks are silent and also consider the
+deactivated installations (``tools/DEACT_<package>``); this is used to (re)activate
+Delphes/Delphes-MA5tune on demand.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 import glob
 import os
@@ -32,16 +42,40 @@ import platform
 from shell_command    import ShellCommand
 
 class ConfigChecker:
+    """Search of headers and libraries in the standard system folders.
+
+    Attributes:
+        paths (``list[str]``): folders of ``$PATH``.
+        libs (``list[str]``): library search folders (``LD_LIBRARY_PATH``,
+            ``DYLD_LIBRARY_PATH``, ``LIBRARY_PATH`` and standard folders).
+        includes (``list[str]``): header search folders (``CPLUS_INCLUDE_PATH`` and
+            standard folders).
+    """
 
     @staticmethod
-    def AddIfValid(path,container):
+    def AddIfValid(path: str,container: list[str]) -> None:
+        """Add the folders matching a glob pattern to a list (duplicates skipped).
+
+        Args:
+            path (``str``): glob pattern.
+            container (``list[str]``): list to fill.
+        """
         dirs=glob.glob(path)
         for item in dirs:
             if not (item in container):
                 container.append(item)
 
 
-    def __init__(self, archi_info, user_info, session_info, script=False, debug=False):
+    def __init__(self, archi_info: Any, user_info: Any, session_info: Any, script: bool = False, debug: bool = False) -> None:
+        """Create the checker and fill the search folders.
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration.
+            user_info (``UserInfo``): user options.
+            session_info (``SessionInfo``): session information.
+            script (``bool``, default ``False``): script mode.
+            debug (``bool``, default ``False``): print detailed information.
+        """
 
         # Getting parameter from the main program
         self.archi_info   = archi_info
@@ -60,30 +94,59 @@ class ConfigChecker:
         self.debug=debug
         self.logger = logging.getLogger('MA5')
 
-    def FillMA5Path(self):
+    def FillMA5Path(self) -> None:
+        """Export ``MA5_BASE`` in the environment of the Python process."""
         os.environ['MA5_BASE']=self.archi_info.ma5dir
 
 
-    def fillPaths(self):
+    def fillPaths(self) -> None:
+        """Fill :attr:`paths` from ``$PATH``."""
         # Filling container with paths included in $PATH
         try:
             self.paths = os.environ['PATH'].split(':')
         except:
             os.environ['PATH']=''
 
-    def PrintOK(self,text):
+    def PrintOK(self,text: str) -> None:
+        """Log ``<text>[OK]``.
+
+        Args:
+            text (``str``): formatted package name.
+        """
         self.logger.info(text+'\x1b[32m'+'[OK]'+'\x1b[0m')
 
-    def PrintFAIL(self,text,warning=False):
+    def PrintFAIL(self,text: str,warning: bool = False) -> None:
+        """Log ``<text>[DISABLED]`` (warning) or ``<text>[FAILURE]``.
+
+        Args:
+            text (``str``): formatted package name.
+            warning (``bool``, default ``False``): log ``[DISABLED]`` instead of ``[FAILURE]``.
+        """
         if warning:
             self.logger.info(text + '\x1b[35m'+'[DISABLED]'+'\x1b[0m')
         else:
             self.logger.info(text + '\x1b[31m'+'[FAILURE]'+'\x1b[0m')
 
-    def PrintDEACTIVATED(self,text):
+    def PrintDEACTIVATED(self,text: str) -> None:
+        """Log ``<text>[DEACTIVATED]``.
+
+        Args:
+            text (``str``): formatted package name.
+        """
         self.logger.info(text+'\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m')
 
-    def PrintLibrary(self,text,tab=5,width=25):
+    def PrintLibrary(self,text: str,tab: int = 5,width: int = 25) -> str:
+        """Format a package name for the status table.
+
+        Args:
+            text (``str``): package name.
+            tab (``int``, default ``5``): indentation.
+            width (``int``, default ``25``): width of the name column.
+
+        Returns:
+            ``str``:
+            The formatted name.
+        """
         mytab = '%'+str(tab)+'s'
         mytab = mytab % ' '
         mytab += '- '
@@ -92,7 +155,8 @@ class ConfigChecker:
         return mytab+mywidth
 
 
-    def fillHeaders(self):
+    def fillHeaders(self) -> None:
+        """Fill :attr:`includes` from ``$CPLUS_INCLUDE_PATH`` and standard folders."""
         # Filling container with paths included in CPLUS_INCLUDE_PATH
         try:
             cplus_include_path = os.environ['CPLUS_INCLUDE_PATH'].split(':')
@@ -108,7 +172,8 @@ class ConfigChecker:
         ConfigChecker.AddIfValid('/opt/local/include',self.includes)
 
 
-    def fillLibraries(self):
+    def fillLibraries(self) -> None:
+        """Fill :attr:`libs` from the library path variables and standard folders."""
         # Filling container with paths included in LD_LIBRARY_PATH
         try:
             ld_library_path = os.environ['LD_LIBRARY_PATH'].split(':')
@@ -140,19 +205,70 @@ class ConfigChecker:
         ConfigChecker.AddIfValid('/opt/local/lib*',self.libs)
 
 
-    def FindLibraryWithPattern(self,pattern,files):
+    def FindLibraryWithPattern(self,pattern: str,files: list[str]) -> tuple[str, str]:
+        """Find the first library matching a pattern in :attr:`libs`.
+
+        Args:
+            pattern (``str``): glob pattern.
+            files (``list[str]``): accepted file names.
+
+        Returns:
+            ``tuple[str, str]``:
+            Folder and file (empty strings if not found).
+        """
         return self.FindFilesWithPattern(self.libs,pattern,files)
 
-    def FindLibraryWithPattern2(self,pattern,files):
+    def FindLibraryWithPattern2(self,pattern: str,files: list[str]) -> tuple[str, list[str]]:
+        """Find the libraries matching a pattern in the first matching folder of :attr:`libs`.
+
+        Args:
+            pattern (``str``): glob pattern.
+            files (``list[str]``): accepted file names.
+
+        Returns:
+            ``tuple[str, list[str]]``:
+            Folder and files (``""`` and ``[]`` if not found).
+        """
         return self.FindFilesWithPattern2(self.libs,pattern,files)
 
-    def FindHeader(self,file):
+    def FindHeader(self,file: str) -> tuple[str, str]:
+        """Find a header in :attr:`includes`.
+
+        Args:
+            file (``str``): header name.
+
+        Returns:
+            ``tuple[str, str]``:
+            Folder and file (empty strings if not found).
+        """
         return self.FindFilesWithPattern(self.includes,file,[file])
 
-    def FindHeader2(self,file):
+    def FindHeader2(self,file: str) -> tuple[str, list[str]]:
+        """Find a header in :attr:`includes` (all matches of the first folder).
+
+        Args:
+            file (``str``): header name.
+
+        Returns:
+            ``tuple[str, list[str]]``:
+            Folder and files.
+        """
         return self.FindFilesWithPattern2(self.includes,file,[file])
 
-    def FindFilesWithPattern(self,paths,pattern,targets):
+    def FindFilesWithPattern(self,paths: list[str],pattern: str,targets: list[str]) -> tuple[str, str]:
+        """Find files matching a pattern and one of the target names in a list of folders.
+
+        The ``ExternalSymLink`` folders of MadAnalysis 5 are skipped.
+
+        Args:
+            paths (``list[str]``): folders to search.
+            pattern (``str``): glob pattern.
+            targets (``list[str]``): accepted file names.
+
+        Returns:
+            ``tuple[str, str]``:
+            First folder and file found (empty strings if not found).
+        """
         result_files=[]
         result_paths=[]
         for path in paths:
@@ -177,7 +293,18 @@ class ConfigChecker:
         else:
             return os.path.normpath(result_paths[0]), os.path.normpath(result_files[0])
 
-    def FindFilesWithPattern2(self,paths,pattern,targets):
+    def FindFilesWithPattern2(self,paths: list[str],pattern: str,targets: list[str]) -> tuple[str, list[str]]:
+        """Same as :meth:`FindFilesWithPattern`, returning all matches located in the first folder.
+
+        Args:
+            paths (``list[str]``): folders to search.
+            pattern (``str``): glob pattern.
+            targets (``list[str]``): accepted file names.
+
+        Returns:
+            ``tuple[str, list[str]]``:
+            Folder and files (``""`` and ``[]`` if not found).
+        """
         result_files=[]
         result_paths=[]
         for path in paths:
@@ -212,7 +339,13 @@ class ConfigChecker:
 
 
 
-    def checkZLIB(self):
+    def checkZLIB(self) -> bool:
+        """Legacy detection of zlib (superseded by :mod:`madanalysis.system.detect_zlib`).
+
+        Returns:
+            ``bool``:
+            ``True`` if zlib is found.
+        """
 
         # Checking if zlib is present
         package_name = self.PrintLibrary("Zlib")
@@ -275,6 +408,7 @@ class ConfigChecker:
             # lib
             self.logger.debug("Look for the libraries in folder "+self.archi_info.zlib_lib_path+" ...")
             mypath, myfiles = self.FindFilesWithPattern2([self.archi_info.zlib_lib_path],"libz.*",libnames)
+            # FIXME: IndexError when no library is found (myfiles is empty); the test below is never reached.
             self.archi_info.zlib_lib=os.path.normpath(myfiles[0])
             self.logger.debug("-> result: "+str(self.archi_info.zlib_lib))
             if self.archi_info.zlib_lib=="":
@@ -292,6 +426,7 @@ class ConfigChecker:
             # header
             self.logger.debug("Look for the header file zlib.h ...")
             mypath, myfile = self.FindHeader('zlib.h')
+            # FIXME: os.path.normpath('') returns '.', so the test below never detects a missing header.
             self.archi_info.zlib_inc_path = os.path.normpath(mypath)
             self.logger.debug("-> result for the path: "+str(self.archi_info.zlib_inc_path))
             self.logger.debug("-> result for the file: "+str(os.path.normpath(myfile)))
@@ -326,7 +461,20 @@ class ConfigChecker:
         return True
 
 
-    def checkDelphes(self, getpaths=False):
+    def checkDelphes(self, getpaths: bool = False) -> bool:
+        """Detect Delphes and fill the corresponding architecture information.
+
+        The locations given by the user are used first, then ``tools/delphes`` (or
+        ``tools/DEACT_delphes`` with ``getpaths``), then the system folders. ROOT is required.
+
+        Args:
+            getpaths (``bool``, default ``False``): silent mode that also accepts deactivated
+                installations.
+
+        Returns:
+            ``bool``:
+            ``True`` if Delphes is available.
+        """
         # Checking if Delphes is present
         if not getpaths:
             package_name = self.PrintLibrary("Delphes")
@@ -463,6 +611,8 @@ class ConfigChecker:
             # header
             if not getpaths:
                 self.logger.debug("Look for the header file /modules/ParticlePropagator.h ...")
+            # FIXME: with a leading '/', the target check 'file.endswith("/" + target)' never matches:
+            # Delphes is never found in the system folders.
             mypath, myfile = self.FindHeader('/modules/ParticlePropagator.h')
             if mypath!='' and myfile!='':
                 if not os.path.normpath(mypath) in self.archi_info.delphes_inc_paths:
@@ -499,12 +649,16 @@ class ConfigChecker:
                     self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
             self.archi_info.delphes_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphes_original_libs])
+            # NOTE: duplicate of the previous line.
             self.archi_info.delphes_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphes_original_libs])
             delphes_dict=glob.glob(os.path.dirname(self.archi_info.delphes_lib)+'/*.pcm')
             self.archi_info.delphes_original_libs.extend([fl for fl in delphes_dict if not fl in self.archi_info.delphes_original_libs])
+            # NOTE: removes the last library folder whatever it is.
             if getpaths:
                self.libs=self.libs[:-1]
 
+        # FIXME: os.stat('') raises FileNotFoundError when the library path was found but not the
+        # library itself (delphes_lib is empty).
         self.archi_info.libraries['Delphes']=self.archi_info.delphes_lib+":"+str(os.stat(self.archi_info.delphes_lib).st_mtime)
         self.archi_info.delphes_priority=(force or ma5installation)
 
@@ -513,12 +667,23 @@ class ConfigChecker:
         # Ok
         if not getpaths:
             self.PrintOK(package_name)
+        # NOTE: the paths are absolute, so startswith('DEACT') never matches (no-op).
         self.includes=[x for x in self.includes if not x.startswith('DEACT')]
         self.libs=[x for x in self.libs if not x.startswith('DEACT')]
         return True
 
 
-    def checkDelphesMA5tune(self,getpaths=False):
+    def checkDelphesMA5tune(self,getpaths: bool = False) -> bool:
+        """Detect Delphes-MA5tune (same logic as :meth:`checkDelphes`).
+
+        Args:
+            getpaths (``bool``, default ``False``): silent mode that also accepts deactivated
+                installations.
+
+        Returns:
+            ``bool``:
+            ``True`` if Delphes-MA5tune is available.
+        """
         # Checking if Delphes-MA5tune is present
         if not getpaths:
             package_name = self.PrintLibrary("Delphes-MA5tune")
@@ -671,10 +836,22 @@ class ConfigChecker:
         self.libs=[x for x in self.libs if not x.startswith('DEACT')]
         return True
 
-    def checkPAD(self):
+    def checkPAD(self) -> bool:
+        """Check whether ``tools/PAD`` exists.
+
+        Returns:
+            ``bool``:
+            ``True`` if the folder exists.
+        """
         return os.path.isdir(os.path.join(self.archi_info.ma5dir,'tools','PAD'))
 
-    def checkPADForMA5tune(self):
+    def checkPADForMA5tune(self) -> bool:
+        """Check whether ``tools/PADForMA5tune`` exists.
+
+        Returns:
+            ``bool``:
+            ``True`` if the folder exists.
+        """
         return os.path.isdir(os.path.join(self.archi_info.ma5dir,'tools','PADForMA5tune'))
 
 

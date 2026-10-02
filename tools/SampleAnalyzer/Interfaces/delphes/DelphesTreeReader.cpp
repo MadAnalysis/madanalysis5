@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // STL headers
+/**
+ * @file DelphesTreeReader.cpp
+ * @brief Implementation of MA5::DelphesTreeReader.
+ */
+
 #include <sstream>
 
 // SampleHeader headers
@@ -219,6 +224,8 @@ void DelphesTreeReader::FillEvent(EventFormat &myEvent, SampleFormat &mySample)
             LHEFWeight *weight = dynamic_cast<LHEFWeight *>(data_.Weight_->At(i));
             if (weight == 0)
                 continue;
+            // FIXME: weight->ID is the LHE weight identifier (e.g. 1001), not an index: w.at() throws
+            //   std::out_of_range for such identifiers.
             w.at(weight->ID) = weight->Weight;
         }
         myEvent.mc()->setWeights(w);
@@ -243,6 +250,8 @@ void DelphesTreeReader::FillEvent(EventFormat &myEvent, SampleFormat &mySample)
         {
             // Getting the i-th particle
             GenParticle *part = dynamic_cast<GenParticle *>(data_.GenParticle_->At(i));
+            // NOTE: if the cast fails, the following particles are shifted with respect to `mothers` and
+            //   `gentable`.
             if (part == 0)
                 continue;
 
@@ -405,6 +414,7 @@ void DelphesTreeReader::FillEvent(EventFormat &myEvent, SampleFormat &mySample)
             if (header1 != 0)
             {
                 // Set event-weight
+                // FIXME: debugging message printed for every event.
                 INFO << " FIX ME " << header1->Weight << endmsg;
                 myEvent.mc()->setWeight(0, header1->Weight);
             }
@@ -414,6 +424,7 @@ void DelphesTreeReader::FillEvent(EventFormat &myEvent, SampleFormat &mySample)
                 if (header2 == 0)
                     continue;
                 // Set event-weight
+                // FIXME: debugging message printed for every event.
                 INFO << " FIX ME " << header2->Weight << endmsg;
                 myEvent.mc()->setWeight(0, header2->Weight);
             }
@@ -711,6 +722,8 @@ void DelphesTreeReader::FillEvent(EventFormat &myEvent, SampleFormat &mySample)
                 track->charge_ = true;
             else
                 track->charge_ = false;
+            // FIXME: the track energy is set to its pT (SetPtEtaPhiE(PT, Eta, Phi, PT)), which is only correct for
+            //   a massless particle at eta = 0.
             track->momentum_.SetPtEtaPhiE(ref->PT, ref->Eta, ref->Phi, ref->PT);
             track->etaOuter_ = ref->EtaOuter;
             track->phiOuter_ = ref->PhiOuter;

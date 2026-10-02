@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file HistoLogX.h
+ * @brief Histogram with a logarithmic binning.
+ */
+
 #ifndef HISTO_LOGX_H
 #define HISTO_LOGX_H
 
@@ -34,6 +39,7 @@
 namespace MA5
 {
 
+    /** @brief Histogram with bins of equal width in log10(x). */
     class HistoLogX : public Histo
     {
 
@@ -41,7 +47,7 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     protected:
-        // Histogram boundaries in Log scale
+        /** @brief log10 of the bounds. */
         MAfloat64 log_xmin_;
         MAfloat64 log_xmax_;
 
@@ -49,10 +55,17 @@ namespace MA5
         //                       method members
         // -------------------------------------------------------------
     public:
-        /// Constructor withtout argument
+        /** @brief Constructor. */
         HistoLogX() { initialised_ = false; }
 
-        /// Constructor with argument
+        /**
+         * @brief Constructor.
+         *
+         * @param name name.
+         * @param nbins number of bins (100 if 0).
+         * @param xmin lower bound (> 0, 0.1 otherwise).
+         * @param xmax upper bound.
+         */
         HistoLogX(const std::string &name, MAuint32 nbins,
                   MAfloat64 xmin, MAfloat64 xmax) : Histo(name)
         {
@@ -105,13 +118,22 @@ namespace MA5
             initialised_ = false;
         }
 
-        /// Destructor
+        /** @brief Destructor. */
         virtual ~HistoLogX() {}
 
-        /// Filling histogram
+        /**
+         * @brief Fill the histogram.
+         *
+         * @param value value of the observable.
+         * @param weights weights of the event.
+         */
         void Fill(MAfloat64 value, const WeightCollection &weights);
 
-        /// Write the plot in a Text file
+        /**
+         * @brief Write the histogram in the SAF format.
+         *
+         * @param output output stream.
+         */
         virtual void Write_TextFormat(std::ostream *output);
     };
 

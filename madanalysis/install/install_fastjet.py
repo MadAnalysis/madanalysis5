@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Installation of FastJet (``install fastjet``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 
 import logging
 import os
@@ -35,7 +42,22 @@ log = logging.getLogger("MA5")
 
 
 class InstallFastjet:
-    def __init__(self, main):
+    """Installer of FastJet (``install fastjet``).
+
+    The methods are called by
+    :meth:`madanalysis.install.install_manager.InstallManager.Execute` in the following
+    order (only when defined): ``Detect``/``Remove``, ``GetNcores``,
+    ``CreatePackageFolder``, ``CreateTmpFolder``, ``Download``, ``Unpack``, ``Configure``,
+    ``Build``, ``PreCheck``, ``Clean``, ``Install``, ``Check`` and ``NeedToRestart``.
+
+    FastJet 3.5.1 is downloaded from fastjet.fr and installed in ``tools/fastjet`` (all plugins enabled).
+    """
+    def __init__(self, main: Main) -> None:
+        """Prepare the installation of FastJet (folders, download URLs).
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main = main
         self.installdir = os.path.normpath(
             self.main.archi_info.ma5dir + "/tools/fastjet/"
@@ -47,7 +69,13 @@ class InstallFastjet:
         self.ncores = 1
         self.files = {"fastjet.tar.gz": "https://fastjet.fr/repo/fastjet-3.5.1.tar.gz"}
 
-    def Detect(self):
+    def Detect(self) -> bool:
+        """Check whether FastJet is already installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the installation folder exists.
+        """
         if not os.path.isdir(self.toolsdir):
             log.debug("The folder '" + self.toolsdir + "' is not found")
             return False
@@ -56,30 +84,60 @@ class InstallFastjet:
             return False
         return True
 
-    def Remove(self, question=True):
+    def Remove(self, question: bool = True) -> tuple[bool, bool]:
+        """Remove the previous installation of FastJet.
+
+        Args:
+            question (``bool``, default ``True``): ask the user for confirmation.
+
+        Returns:
+            ``tuple[bool, bool]``:
+            Result of :meth:`~madanalysis.IOinterface.folder_writer.FolderWriter.RemoveDirectory`:
+            whether the operation succeeded and whether the folder was removed/kept on the
+            user's request.
+        """
         from madanalysis.IOinterface.folder_writer import FolderWriter
 
         return FolderWriter.RemoveDirectory(self.installdir, question)
 
-    def GetNcores(self):
+    def GetNcores(self) -> None:
+        """Ask the number of cores used for the compilation (all cores in forced mode)."""
         self.ncores = InstallService.get_ncores(
             self.main.archi_info.ncores, self.main.forced
         )
 
-    def CreatePackageFolder(self):
+    def CreatePackageFolder(self) -> bool:
+        """Create the installation folder of FastJet.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if not InstallService.create_tools_folder(self.toolsdir):
             return False
         if not InstallService.create_package_folder(self.toolsdir, "fastjet"):
             return False
         return True
 
-    def CreateTmpFolder(self):
+    def CreateTmpFolder(self) -> bool:
+        """Create (clean) the temporary unpacking folder and the download folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ok = InstallService.prepare_tmp(self.untardir, self.downloaddir)
         if ok:
             self.tmpdir = self.untardir
         return ok
 
-    def Download(self):
+    def Download(self) -> bool:
+        """Download the source files of FastJet.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
             return False
@@ -100,7 +158,13 @@ class InstallFastjet:
         # Ok
         return True
 
-    def Unpack(self):
+    def Unpack(self) -> bool:
+        """Unpack the downloaded files of FastJet.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Logname
         logname = os.path.normpath(self.installdir + "/unpack.log")
         # Unpacking the tarball
@@ -113,15 +177,19 @@ class InstallFastjet:
         self.tmpdir = packagedir
         return True
 
-    def Configure(self):
+    def Configure(self) -> bool:
+        """Configure FastJet before compilation.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Input
         initial_env = os.environ.get("CXXFLAGS", "")
         os.environ["CXXFLAGS"] = initial_env + " -std=c++11 -fPIC "
-        theCommands = [
-            "./configure",
-            "--prefix=" + self.installdir,
-            "--enable-allplugins",
-        ]
+        theCommands = [ "./configure", "--prefix=" + self.installdir, "--enable-allplugins"]
+        if self.main.archi_info.has_root and self.main.archi_info.root_compiler:
+            theCommands.append("CXX=" +  self.main.archi_info.root_compiler)
         log.debug("Configuring fastjet with prefix %s", self.installdir)
         log.debug("Configuring fastjet with CXXFLAGS %s", os.environ["CXXFLAGS"])
         logname = os.path.normpath(self.installdir + "/configuration.log")
@@ -143,7 +211,13 @@ class InstallFastjet:
             log.error(logname)
         return ok
 
-    def Build(self):
+    def Build(self) -> bool:
+        """Compile FastJet.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Input
         theCommands = ["make", "-j" + str(self.ncores)]
         logname = os.path.normpath(self.installdir + "/compilation.log")
@@ -160,7 +234,13 @@ class InstallFastjet:
             log.error(logname)
         return ok
 
-    def Install(self):
+    def Install(self) -> bool:
+        """Install FastJet in its definitive folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Input
         theCommands = ["make", "install"]
         logname = os.path.normpath(self.installdir + "/installation.log")
@@ -171,13 +251,20 @@ class InstallFastjet:
         )
         # return result
         if not ok:
+            # NOTE: the message says 'build' although this is the installation step.
             log.error(
                 "impossible to build the project. For more details, see the log file:"
             )
             log.error(logname)
         return ok
 
-    def Check(self):
+    def Check(self) -> bool:
+        """Check that FastJet has been properly installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the expected files are present.
+        """
         # Check folders
         dirs = [
             self.installdir + "/include",
@@ -211,7 +298,8 @@ class InstallFastjet:
 
         return True
 
-    def display_log(self):
+    def display_log(self) -> None:
+        """Log the paths of the installation log files."""
         log.error("More details can be found into the log files:")
         log.error(" - " + os.path.normpath(self.installdir + "/wget.log"))
         log.error(" - " + os.path.normpath(self.installdir + "/unpack.log"))
@@ -219,5 +307,11 @@ class InstallFastjet:
         log.error(" - " + os.path.normpath(self.installdir + "/compilation.log"))
         log.error(" - " + os.path.normpath(self.installdir + "/installation.log"))
 
-    def NeedToRestart(self):
+    def NeedToRestart(self) -> bool:
+        """Tell whether MadAnalysis 5 must be restarted after the installation.
+
+        Returns:
+            ``bool``:
+            ``True`` if a restart (new configuration check and library build) is needed.
+        """
         return True

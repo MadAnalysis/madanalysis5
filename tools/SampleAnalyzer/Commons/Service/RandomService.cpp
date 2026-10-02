@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file RandomService.cpp
+ * @brief Static members of MA5::RandomService.
+ */
+
 #include "SampleAnalyzer/Commons/Service/RandomService.h"
 
 using namespace MA5;

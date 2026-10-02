@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file Isolation.h
+ * @brief Isolation toolbox (PHYSICS->Isol) and jet cleaning.
+ */
+
 #ifndef ISOLATION_SERVICE_h
 #define ISOLATION_SERVICE_h
 
@@ -39,17 +44,23 @@
 namespace MA5
 {
 
+/** @brief Isolation toolbox: isolation based on tracks, calorimeter towers, both, or energy-flow objects, and jet cleaning. */
 class Isolation
 {
 
   public:
 
 
+  /** @brief Isolation based on the tracks. */
   IsolationTracker     *tracker;
+  /** @brief Isolation based on the calorimeter towers. */
   IsolationCalorimeter *calorimeter;
+  /** @brief Isolation based on the tracks and the calorimeter towers. */
   IsolationCombined    *combined;
+  /** @brief Isolation based on the energy-flow objects. */
   IsolationEFlow       *eflow;
 
+  /** @brief Constructor (creates the isolation tools). */
   Isolation()
   {
     tracker     = new IsolationTracker;
@@ -58,6 +69,7 @@ class Isolation
     eflow       = new IsolationEFlow;
   }
 
+  /** @brief Destructor. */
   ~Isolation()
   {
     delete tracker;
@@ -67,19 +79,47 @@ class Isolation
   }
 
 
-  // -----------------------------------------------------------------------------
-  // JetCleaning
-  // -----------------------------------------------------------------------------
+  /**
+   * @brief Remove from a jet collection the soft jets and the jets overlapping with leptons.
+   *
+   * For each lepton, the closest jet within DeltaRmax is removed.
+   *
+   * @param uncleaned_jets jets.
+   * @param leptons leptons.
+   * @param DeltaRmax maximum distance for the overlap removal.
+   * @param PTmin minimum jet pT.
+   * @return the cleaned jets.
+   */
   std::vector<const RecJetFormat*>
     JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
                 const std::vector<const RecLeptonFormat*>& leptons,
                 MAfloat64 DeltaRmax = 0.1, MAfloat64 PTmin = 0.5) const;
 
+  /**
+   * @brief Remove from a jet collection the soft jets and the jets overlapping with photons.
+   *
+   * For each photon, the closest jet within DeltaRmax is removed.
+   *
+   * @param uncleaned_jets jets.
+   * @param photons photons.
+   * @param DeltaRmax maximum distance for the overlap removal.
+   * @param PTmin minimum jet pT.
+   * @return the cleaned jets.
+   */
   std::vector<const RecJetFormat*>
     JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
                 const std::vector<const RecPhotonFormat*>& photons,
                 MAfloat64 DeltaRmax = 0.1, MAfloat64 PTmin = 0.5) const;
 
+  /**
+   * @brief Remove from a jet collection the soft jets and the jets overlapping with leptons.
+   *
+   * @param uncleaned_jets jets.
+   * @param leptons leptons.
+   * @param DeltaRmax maximum distance for the overlap removal.
+   * @param PTmin minimum jet pT.
+   * @return the cleaned jets (pointers into uncleaned_jets).
+   */
   std::vector<const RecJetFormat*>
     JetCleaning(const std::vector<RecJetFormat>& uncleaned_jets,
                 const std::vector<const RecLeptonFormat*>& leptons,
@@ -90,6 +130,15 @@ class Isolation
     return JetCleaning(uncleaned_jets2,leptons,DeltaRmax,PTmin);
   }
 
+  /**
+   * @brief Remove from a jet collection the soft jets and the jets overlapping with photons.
+   *
+   * @param uncleaned_jets jets.
+   * @param photons photons.
+   * @param DeltaRmax maximum distance for the overlap removal.
+   * @param PTmin minimum jet pT.
+   * @return the cleaned jets (pointers into uncleaned_jets).
+   */
   std::vector<const RecJetFormat*>
     JetCleaning(const std::vector<RecJetFormat>& uncleaned_jets,
                 const std::vector<const RecPhotonFormat*>& photons,

@@ -22,11 +22,30 @@
 ################################################################################
 
 
+"""Configuration of the hadronic-tau identification of the SampleAnalyzer jet clusterer.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 
 
 class TauIdentification:
+    """Hadronic-tau identification.
+
+    Two methods are available: ``hadron-based`` (default; taus are built from the
+    hadronic tau decay products) and ``jet-based`` (jets matched with a hadronic tau
+    within :attr:`matching_dr`).
+
+    Attributes:
+        matching_dr (``float``): Delta R used by the jet-based method.
+        reconstruction_method (``str``): ``"hadron-based"`` or ``"jet-based"``.
+        exclusive (``bool``): exclusive matching (jet-based method).
+
+    .. note::
+        :attr:`userVariables` is a **class** attribute modified by
+        :meth:`user_SetParameter`.
+    """
 
     default_matching_dr = 0.3
     default_exclusive = False
@@ -36,18 +55,25 @@ class TauIdentification:
         "tau_id.reconstruction_method": ["jet-based", "hadron-based"],
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise the parameters to their default values."""
         self.matching_dr = TauIdentification.default_matching_dr
         self.reconstruction_method = TauIdentification.default_reconstruction_method
         self.exclusive = TauIdentification.default_exclusive
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log the hadronic-tau identification parameters."""
         logging.getLogger("MA5").info("  + hadronic-tau identification:")
         if self.reconstruction_method == "jet-based":
             self.user_DisplayParameter("tau_id.matching_dr")
         self.user_DisplayParameter("tau_id.reconstruction_method")
 
-    def user_DisplayParameter(self, parameter):
+    def user_DisplayParameter(self, parameter: str) -> None:
+        """Log the value of one parameter.
+
+        Args:
+            parameter (``str``): full name of the parameter (e.g. ``tau_id.matching_dr``).
+        """
         if parameter == "tau_id.matching_dr":
             logging.getLogger("MA5").info(f"    + DeltaR matching = {self.matching_dr:.2f}")
         elif parameter == "tau_id.reconstruction_method":
@@ -63,20 +89,53 @@ class TauIdentification:
                 "'clustering' has no parameter called '" + parameter + "'"
             )
 
-    def SampleAnalyzerConfigString(self):
+    def SampleAnalyzerConfigString(self) -> dict[str, str]:
+        """Get the options passed to the SampleAnalyzer jet clusterer.
+
+        Returns:
+            ``dict[str, str]``:
+            Options ``tau_id.matching_dr``, ``tau_id.reconstruction_method``, ``tau_id.exclusive``.
+        """
         return {
             "tau_id.matching_dr": str(self.matching_dr),
             "tau_id.reconstruction_method": "1" if self.reconstruction_method == "jet-based" else "0",
             "tau_id.exclusive": "1" if self.exclusive else "0",
         }
 
-    def user_GetValues(self, variable):
+    def user_GetValues(self, variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): full name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            Suggested values, or an empty list.
+        """
         return TauIdentification.userVariables.get(variable, [])
 
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the currently settable parameters.
+
+        Returns:
+            ``list[str]``:
+            Keys of :attr:`userVariables`.
+        """
         return list(TauIdentification.userVariables.keys())
 
-    def user_SetParameter(self, parameter, value):
+    def user_SetParameter(self, parameter: str, value: str) -> bool | None:
+        """Set a tau-tagging parameter (``set main.fastsim.tau_id.<parameter> = <value>``).
+
+        Args:
+            parameter (``str``): ``tau_id.reconstruction_method`` (``hadron-based`` or
+                ``jet-based``), ``tau_id.matching_dr`` or ``tau_id.exclusive`` (both only
+                relevant for the jet-based method).
+            value (``str``): value typed by the user.
+
+        Returns:
+            ``bool | None``:
+            ``False`` on error, ``None`` otherwise.
+        """
         # matching deltar
         if parameter == "tau_id.matching_dr":
             try:
@@ -105,6 +164,8 @@ class TauIdentification:
             self.exclusive = (value == "true")
 
         # reconstruction method
+        # FIXME: 'if' instead of 'elif': after setting 'tau_id.matching_dr' or 'tau_id.exclusive',
+        # execution continues to the final else-branch and logs a spurious 'no parameter' error.
         if parameter == "tau_id.reconstruction_method":
             if value in TauIdentification.userVariables["tau_id.reconstruction_method"]:
                 self.reconstruction_method = value

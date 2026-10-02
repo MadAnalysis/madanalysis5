@@ -22,13 +22,37 @@
 ################################################################################
 
 
+"""Detection of HEPTopTagger (``tools/HEPTopTagger``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging, os
 from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectHEPTopTagger:
-    def __init__(self, archi_info, user_info, session_info, debug):
+    """Detector of HEPTopTagger (``tools/HEPTopTagger``).
+
+    The methods are called by
+    :meth:`madanalysis.system.detect_manager.DetectManager.Execute` in the following
+    order (only when defined): ``IsItVetoed``, ``AreDependenciesInstalled``,
+    ``ManualDetection``, ``ToolsDetection``, ``AutoDetection``, ``ExtractInfo`` and
+    ``SaveInfo``.
+
+    Attributes:
+        name (``str``): name displayed in the configuration check.
+        mandatory (``bool``): whether MadAnalysis 5 can run without the package.
+    """
+    def __init__(self, archi_info: Any, user_info: Any, session_info: Any, debug: bool) -> None:
+        """Create the detector of HEPTopTagger (``tools/HEPTopTagger``).
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration, filled by :meth:`SaveInfo`.
+            user_info (``UserInfo``): user options (vetoes, forced paths).
+            session_info (``SessionInfo``): session information, filled by :meth:`SaveInfo`.
+            debug (``bool``): print detailed information.
+        """
         self.archi_info = archi_info
         self.user_info = user_info
         self.session_info = session_info
@@ -42,7 +66,13 @@ class DetectHEPTopTagger:
         self.version = ""
         self.logger = logging.getLogger("MA5")
 
-    def IsItVetoed(self):
+    def IsItVetoed(self) -> bool:
+        """Check whether HEPTopTagger (``tools/HEPTopTagger``) has been vetoed by the user (``installation_options.dat``).
+
+        Returns:
+            ``bool``:
+            ``True`` if vetoed.
+        """
         if self.user_info.fastjet_veto:
             self.logger.debug("user setting: veto on FastJet")
             return True
@@ -50,9 +80,12 @@ class DetectHEPTopTagger:
             self.logger.debug("no user veto")
             return False
 
-    def detect_files(self):
-        """
-        Detect HEPTopTagger files
+    def detect_files(self) -> tuple[int, str]:
+        """Check that FastJet, FastJet contrib and the HEPTopTagger sources are available.
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status and message.
         """
         msg = ""
 
@@ -82,19 +115,52 @@ class DetectHEPTopTagger:
         # Ok
         return DetectStatusType.FOUND, msg
 
-    def ManualDetection(self):
+    def ManualDetection(self) -> tuple[int, str]:
+        """Look for HEPTopTagger (``tools/HEPTopTagger``) in the location given by the user (``installation_options.dat``).
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         return self.detect_files()
 
-    def ToolsDetection(self):
+    def ToolsDetection(self) -> tuple[int, str]:
+        """Look for HEPTopTagger (``tools/HEPTopTagger``) in the ``tools`` folder of MadAnalysis 5 (local installation).
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         return self.detect_files()
 
-    def AutoDetection(self):
+    def AutoDetection(self) -> tuple[int, str]:
+        """Look for HEPTopTagger (``tools/HEPTopTagger``) on the system.
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         return self.detect_files()
 
-    def ExtractInfo(self):
+    def ExtractInfo(self) -> bool:
+        """Extract detailed information about the detected HEPTopTagger (``tools/HEPTopTagger``) (version, paths, ...).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         return True
 
-    def SaveInfo(self):
+    def SaveInfo(self) -> bool:
+        """Store the information about HEPTopTagger (``tools/HEPTopTagger``) in the architecture/session information.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # archi_info
         self.archi_info.has_heptoptagger = True
 

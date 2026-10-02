@@ -22,28 +22,66 @@
 ################################################################################
 
 
+"""Writer of the ``user::Initialize`` method of the generated analysis."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import logging
 
-def WriteHadronicList(file,main):
+def WriteHadronicList(file: TextIO,main: Main) -> None:
+    """Register the PDG identifiers of the ``hadronic`` multiparticle.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+    """
     file.write('  // definition of the multiparticle "hadronic"\n')
     for item in main.multiparticles.Get("hadronic"):
         file.write('  PHYSICS->mcConfig().AddHadronicId('+str(item)+');\n')
 
 
-def WriteInvisibleList(file,main):
+def WriteInvisibleList(file: TextIO,main: Main) -> None:
+    """Register the PDG identifiers of the ``invisible`` multiparticle.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+    """
     file.write('  // definition of the multiparticle "invisible"\n')
     for item in main.multiparticles.Get("invisible"):
         file.write('  PHYSICS->mcConfig().AddInvisibleId('+str(item)+');\n')
 
 
-def WriteJobInitialize(file,main):
+def WriteJobInitialize(file: TextIO,main: Main) -> None:
+    """Write ``user::Initialize``.
+
+    The method configures the isolation (RECO mode), declares the signal regions
+    (``myregion`` if none) and declares the event cuts and the histograms in the
+    region manager, attached to their regions.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+    """
 
     # Function header
     file.write('MAbool user::Initialize(const MA5::Configuration& cfg,\n')
     file.write('                      const std::map<std::string,std::string>& parameters)\n')
     file.write('{\n')
+
+    # mcConfig initialization
+    if main.mode==MA5RunningType.PARTON:
+        file.write('  // Initializing PhysicsService for MC\n') 
+        file.write('  PHYSICS->mcConfig().Reset();\n\n')
+        WriteHadronicList(file,main)
+        file.write('\n')
+        WriteInvisibleList(file,main)
+        file.write('\n')
 
     # recConfig initialization
     if main.mode==MA5RunningType.RECO:
@@ -125,6 +163,8 @@ def WriteJobInitialize(file,main):
                 else:
                     # NPID and NAPID
                     if item.observable.name in ["NPID", "NAPID"] :
+                        # FIXME: missing closing quote: the generated C++ line does not compile (branch reached
+                        # only when an item has no region while regions are defined).
                         file.write('  Manager()->AddHistoFrequency(\"' + str(counter) + '_' + item.observable.name +');\n');
                     # Histo with LogX
                     elif item.logX:

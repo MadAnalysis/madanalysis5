@@ -22,9 +22,23 @@
 ################################################################################
 
 
+"""Configuration of the SISCone jet-clustering algorithm (``set main.fastsim.<parameter>``).
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 class ClusteringSisCone():
+    """Parameters of the SISCone jet-clustering algorithm (FastJet).
+
+    User-settable parameters (default values in the ``default_*`` class attributes):
+
+        * ``radius``: cone radius R;
+        * ``overlap``: overlap threshold (split-merge parameter);
+        * ``npassmax``: maximum number of passes (0 = no limit);
+        * ``input_ptmin``: minimum transverse momentum of the input particles (protojets);
+        * ``ptmin``: minimum transverse momentum (GeV) of the jets;
+    """
     
     default_radius       = 0.4
     default_overlap      = 0.5
@@ -38,7 +52,8 @@ class ClusteringSisCone():
                       "input_ptmin" : [str(default_input_ptmin)],\
                       "ptmin"       : [str(default_ptmin)] }
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise all parameters to their default values."""
         self.radius       = ClusteringSisCone.default_radius
         self.ptmin        = ClusteringSisCone.default_ptmin
         self.overlap      = ClusteringSisCone.default_overlap
@@ -46,7 +61,8 @@ class ClusteringSisCone():
         self.input_ptmin  = ClusteringSisCone.default_input_ptmin
 
         
-    def Display(self):
+    def Display(self) -> None:
+        """Log all parameters."""
         self.user_DisplayParameter("radius")
         self.user_DisplayParameter("overlap")
         self.user_DisplayParameter("npassmax")
@@ -54,7 +70,12 @@ class ClusteringSisCone():
         self.user_DisplayParameter("ptmin")
 
 
-    def user_DisplayParameter(self,parameter):
+    def user_DisplayParameter(self,parameter: str) -> None:
+        """Log the value of one parameter.
+
+        Args:
+            parameter (``str``): name of the parameter.
+        """
         if parameter=="radius":
             logging.getLogger('MA5').info("  + cone radius = "+str(self.radius))
         elif parameter=="overlap":
@@ -69,7 +90,15 @@ class ClusteringSisCone():
             logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
 
-    def SampleAnalyzerConfigString(self):
+    def SampleAnalyzerConfigString(self) -> dict[str, str]:
+        """Get the options passed to the SampleAnalyzer jet clusterer.
+
+        The keys are ``cluster.R``, ``cluster.PTmin``, ``cluster.OverlapThreshold``, ``cluster.NPassMax``, ``cluster.Protojet_ptmin``.
+
+        Returns:
+            ``dict[str, str]``:
+            Option names and values, written in the generated ``main.cpp``.
+        """
         mydict = {}
         mydict['cluster.R']                = str(self.radius)
         mydict['cluster.PTmin']            = str(self.ptmin)
@@ -79,18 +108,43 @@ class ClusteringSisCone():
         return mydict
 
         
-    def user_GetValues(self,variable):
+    def user_GetValues(self,variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            The default value as a one-element list, or an empty list.
+        """
         try:
             return ClusteringSisCone.userVariables[variable]
         except:
             return []
 
     
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the user-settable parameters.
+
+        Returns:
+            ``list[str]``:
+            Parameter names.
+        """
         return list(ClusteringSisCone.userVariables.keys())
 
 
-    def user_SetParameter(self,parameter,value):
+    def user_SetParameter(self,parameter: str,value: str) -> bool | None:
+        """Set a parameter (``set main.fastsim.<parameter> = <value>``).
+
+        Args:
+            parameter (``str``): name of the parameter.
+            value (``str``): value typed by the user.
+
+        Returns:
+            ``bool | None``:
+            ``False`` for invalid values, ``None`` otherwise (success or unknown parameter).
+        """
         # radius
         if parameter=="radius":
             try:
@@ -137,6 +191,7 @@ class ClusteringSisCone():
             if number<0:
                 logging.getLogger('MA5').error("the input PT min cannot be negative.")
                 return False
+            # FIXME: the input PT min is stored in 'self.areafraction' instead of 'self.input_ptmin'.
             self.areafraction=number
 
         # ptmin

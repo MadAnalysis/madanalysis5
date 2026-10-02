@@ -22,7 +22,10 @@
 ################################################################################
 
 
+"""Sequence of conditions and connectors forming the criterion of a cut."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 from madanalysis.enumeration.operator_type     import OperatorType
 from madanalysis.enumeration.connector_type    import ConnectorType
 from madanalysis.selection.condition_connector import ConditionConnector
@@ -31,12 +34,34 @@ from six.moves import range
 
 
 class ConditionSequence():
+    """Ordered list alternating :class:`~madanalysis.selection.condition_type.ConditionType`
+    (or nested :class:`ConditionSequence`) and
+    :class:`~madanalysis.selection.condition_connector.ConditionConnector` objects.
 
-    def __init__(self,mother=False):
+    Attributes:
+        sequence (``list``): conditions, nested sequences and connectors.
+        mother (``bool``): ``True`` for the top-level sequence (displayed without
+            parentheses).
+    """
+
+    def __init__(self,mother: bool = False) -> None:
+        """Create an empty sequence.
+
+        Args:
+            mother (``bool``, default ``False``): whether this is the top-level sequence.
+        """
         self.sequence = []
         self.mother   = mother
 
-    def GetStringDisplay(self):
+    def GetStringDisplay(self) -> str:
+        """Get the user-level representation of the sequence.
+
+        The pattern ``obs > X and obs < Y`` is displayed as ``X < obs < Y``.
+
+        Returns:
+            ``str``:
+            Representation of the conditions.
+        """
         msg=""
 
         # Case : X < obs < Y
@@ -47,6 +72,8 @@ class ConditionSequence():
            self.sequence[0].observable == self.sequence[2].observable and \
            self.sequence[1].value == ConnectorType.AND:
             
+            # NOTE: the first condition is displayed with its original operator, e.g. 'X > obs'
+            # for 'obs > X' (operator not inverted).
             msg+=str(self.sequence[0].threshold)+" "
             msg+=OperatorType.convert2string(self.sequence[0].operator)+" "
             msg+=self.sequence[0].observable.name+" "

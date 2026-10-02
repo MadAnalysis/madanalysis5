@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ConvertService.h
+ * @brief Singleton converting values to and from strings (CONVERT).
+ */
+
 #ifndef CONVERT_SERVICE_H
 #define CONVERT_SERVICE_H
 
@@ -38,19 +43,13 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
-// ShortCut to access to ConvertService
+/** @brief Shortcut to the ConvertService singleton. */
 #define CONVERT MA5::ConvertService::GetInstance()   
 
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class ConvertService contains static methods used for converting
-/// all types into string type.
-///
-/// ConvertService is a singleton-pattern-based class : only one instance.
-/// Getting the only one instance : ConvertService::GetInstance()
-//////////////////////////////////////////////////////////////////////////////
+/** @brief Singleton converting values to and from strings through a std::stringstream. */
 class ConvertService
 {
   // -------------------------------------------------------------
@@ -58,10 +57,10 @@ class ConvertService
   // -------------------------------------------------------------
  private :
 
-  /// Pointer to the unique instance of ConvertService
+  /** @brief Unique instance. */
   static ConvertService* Service_;
 
-  /// Streamer used for the conversion
+  /** @brief Stream used for the conversions. */
   std::stringstream Converter_;
 
 
@@ -70,28 +69,34 @@ class ConvertService
   // -------------------------------------------------------------
  private:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   ConvertService() 
   {}
 
-  /// Destructor
+  /** @brief Destructor. */
   ~ConvertService()
   {}
 
-  /// (Re)initialzing the streamer
+  /** @brief Clear the content of the stream. */
   void Initialize()
+  // FIXME: the error flags of the stream are not cleared: after a failed conversion, all the
+  // following conversions fail as well.
   { Converter_.str(""); }
 
  public:
 
-  /// Getting the unique instance of ConvertService
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static ConvertService* GetInstance()
   {
     if (Service_==0) Service_ = new ConvertService;
     return Service_;
   }
 
-  /// Deleting the unique instance of Convert Service
+  /** @brief Delete the unique instance. */
   static void Kill()
   {
     if (Service_!=0) delete Service_;
@@ -100,6 +105,13 @@ class ConvertService
 
   /// Conversion function to std::string
   template <class T> 
+  /**
+   * @brief Convert a value to a string.
+   *
+   * @tparam T type of the value (must support operator<<).
+   * @param value value.
+   * @return the string.
+   */
   const std::string ToString(const T& value)
   {
     Initialize(); 
@@ -109,6 +121,13 @@ class ConvertService
 
   /// Conversion function to MAint32
   template <class T> 
+  /**
+   * @brief Convert a value to a 32-bit integer.
+   *
+   * @tparam T type of the value.
+   * @param value value.
+   * @return the integer (0 with an error if the conversion fails).
+   */
   const MAint32 ToMAint32(const T& value)
   {
     Initialize(); 
@@ -130,6 +149,13 @@ class ConvertService
 
   /// Conversion function to MAuint32
   template <class T> 
+  /**
+   * @brief Convert a value to an unsigned 32-bit integer.
+   *
+   * @tparam T type of the value.
+   * @param value value.
+   * @return the integer (0 with an error if the conversion fails).
+   */
   const MAuint32 ToMAuint32(const T& value)
   {
     Initialize(); 
@@ -151,6 +177,13 @@ class ConvertService
 
   /// Conversion function to MAfloat32
   template <class T> 
+  /**
+   * @brief Convert a value to a single-precision float.
+   *
+   * @tparam T type of the value.
+   * @param value value.
+   * @return the float (0 with an error if the conversion fails).
+   */
   const MAfloat32 ToFloat(const T& value)
   {
     Initialize(); 
@@ -170,7 +203,12 @@ class ConvertService
     return convert;
   }
 
-  /// Conversion function to lower case
+  /**
+   * @brief Convert a string to lower case.
+   *
+   * @param value string.
+   * @return the lower-case string.
+   */
   const std::string ToLower(const std::string& value) const
   {
     std::string result=value;
@@ -179,7 +217,12 @@ class ConvertService
     return result;
   }
 
-  /// Conversion function to upper case
+  /**
+   * @brief Convert a string to upper case.
+   *
+   * @param value string.
+   * @return the upper-case string.
+   */
   const std::string ToUpper(const std::string& value) const
   {
     std::string result=value;
@@ -188,14 +231,23 @@ class ConvertService
     return result;
   }
 
-  /// Test the success of the last conversion
+  /**
+   * @brief Test the success of the last conversion (not implemented).
+   *
+   * @return always true.
+   */
   MAbool Success()
   {
     return true;
   }
 
-  /// Test the failure of the last conversion
+  /**
+   * @brief Test the failure of the last conversion (not implemented).
+   *
+   * @return always true.
+   */
   MAbool Fail()
+  // FIXME: Success() and Fail() both always return true.
   {
     return true;
   }

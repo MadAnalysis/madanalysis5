@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file WriterTextBase.h
+ * @brief Base class of the writers of text files (plain or gzip-compressed).
+ */
+
 #ifndef WRITER_TEXT_BASE_h
 #define WRITER_TEXT_BASE_h
 
@@ -38,6 +43,7 @@
 namespace MA5
 {
 
+/** @brief Base class of the writers of text files (plain or gzip-compressed). */
 class WriterTextBase : public WriterBase
 {
 
@@ -45,10 +51,10 @@ class WriterTextBase : public WriterBase
   //                        data members
   // -------------------------------------------------------------
  protected:
-  /// Streaming for reading input
+  /** @brief Output stream. */
   std::ostream* output_;
 
-  /// Configuration
+  /** @brief Run configuration. */
   const Configuration* cfg_;
 
   // -------------------------------------------------------------
@@ -56,36 +62,62 @@ class WriterTextBase : public WriterBase
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   WriterTextBase()
   {
     output_=0;
   }
 
-  /// Destructor
+  /** @brief Destructor (deletes the output stream). */
   virtual ~WriterTextBase()
   {
     if (output_ !=0) delete output_;
   }
 
-  /// Initialize
+  /**
+   * @brief Open the output file (gzip-compressed if the name ends with .gz).
+   *
+   * @param cfg run configuration.
+   * @param filename output file name.
+   * @return true (the program exits if the file cannot be opened).
+   */
   virtual MAbool Initialize(const Configuration* cfg,
                           const std::string& filename);
 
-  /// Read the sample (virtual pure)
+  /**
+   * @brief Write the header of the file.
+   *
+   * @param mySample sample.
+   * @return false in case of error.
+   */
   virtual MAbool WriteHeader(const SampleFormat& mySample) = 0;
 
-  /// Read the event (virtual pure)
+  /**
+   * @brief Write an event.
+   *
+   * @param myEvent event.
+   * @param mySample sample.
+   * @return false in case of error.
+   */
   virtual MAbool WriteEvent(const EventFormat& myEvent,
                           const SampleFormat& mySample) = 0;
 
-  /// Finalize the event (virtual pure)
+  /**
+   * @brief Write the footer of the file.
+   *
+   * @param mySample sample.
+   * @return false in case of error.
+   */
   virtual MAbool WriteFoot(const SampleFormat& mySample) = 0;
 
-  /// Finalize
+  /**
+   * @brief Close the file.
+   *
+   * @return true.
+   */
   virtual MAbool Finalize();
 
-  /// MA5 logo
+  /** @brief Write the MadAnalysis 5 banner. */
   void WriteMA5header();
  
 };

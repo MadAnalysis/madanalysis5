@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file gz_file.h
+ * @brief Wrapper of a zlib file handle (hides zlib.h from the other headers).
+ */
+
 #ifndef GZ_FILE_H
 #define GZ_FILE_H
 
@@ -36,6 +41,7 @@ namespace MA5
 // -------------------------------------------------------------
 //                      CLASS GZ_FILE
 // -------------------------------------------------------------
+/** @brief Wrapper of a zlib file handle. */
 class gz_file
 {
 
@@ -44,6 +50,7 @@ class gz_file
   // -------------------------------------------------------------
  private:
 
+  /** @brief zlib handle of the compressed file. */
   gzFile file; // file handle for compressed file
 
   // -------------------------------------------------------------
@@ -52,6 +59,11 @@ class gz_file
   
  public:
 
+  /**
+   * @brief Accessor to the zlib handle.
+   *
+   * @return the handle.
+   */
   gzFile& get()
   { return file; }
 

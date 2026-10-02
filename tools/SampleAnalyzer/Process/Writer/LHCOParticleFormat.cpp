@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file LHCOParticleFormat.cpp
+ * @brief Implementation of MA5::LHCOParticleFormat.
+ */
+
 #include <sstream>
 #include <iomanip>
 

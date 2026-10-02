@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // STL headers
+/**
+ * @file LHEReader.cpp
+ * @brief Implementation of MA5::LHEReader.
+ */
+
 #include <sstream>
 #include <cmath>
 
@@ -580,6 +585,7 @@ void LHEReader::FillWeightNames(const std::string &line, SampleFormat &mySample)
     if (startTagPos == std::string::npos || endTagPos == std::string::npos) return;
 
     // Extract the weight id -- Benj: we can have either a double quote or single quote
+    // NOTE: if 'id=' is missing, npos+3 wraps around to 2.
     std::size_t idPos = line.find("id=", startTagPos)+3;
     char quote = line[idPos];
     if (quote!='\'' && quote!='"') return;
@@ -599,6 +605,7 @@ void LHEReader::FillWeightNames(const std::string &line, SampleFormat &mySample)
     if (mySample.mc()->WeightNames().find(0) == mySample.mc()->WeightNames().end())
         mySample.mc()->SetWeightName(0, "nominal");
 
+    // NOTE: every weight definition is printed at the INFO level.
     INFO << id << " : " << weight_name<< endmsg;
 
     // Print the id and weight_name

@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyzer headers
+/**
+ * @file CounterManager.cpp
+ * @brief Writing of the cut-flows in the SAF format.
+ */
+
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 
 using namespace MA5;
@@ -85,6 +90,7 @@ void CounterManager::Write_TextFormat(SAFWriter &output) const
         *output.GetStream() << "\"" << counters_[i].name_ << "\"";
         for (MAuint32 jj = 0; jj < static_cast<MAuint32>(nsp); jj++)
             *output.GetStream() << " ";
+        // NOTE: the label is '<n>st cut' for every n.
         *output.GetStream() << "# " << i + 1 << "st cut" << std::endl;
 
         // nentries

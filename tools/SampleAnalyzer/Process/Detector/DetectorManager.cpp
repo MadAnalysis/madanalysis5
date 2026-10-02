@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file DetectorManager.cpp
+ * @brief Implementation of MA5::DetectorManager.
+ */
+
 #include "SampleAnalyzer/Process/Detector/DetectorManager.h"
 
 

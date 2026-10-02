@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Installation of the FastJet contrib libraries (``install fastjet-contrib``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.install.install_service import InstallService
 from shell_command import ShellCommand
 import os
@@ -30,8 +37,23 @@ import sys
 import logging
 
 class InstallFastjetContrib:
+    """Installer of the FastJet contrib libraries (``install fastjet-contrib``).
 
-    def __init__(self,main):
+    The methods are called by
+    :meth:`madanalysis.install.install_manager.InstallManager.Execute` in the following
+    order (only when defined): ``Detect``/``Remove``, ``GetNcores``,
+    ``CreatePackageFolder``, ``CreateTmpFolder``, ``Download``, ``Unpack``, ``Configure``,
+    ``Build``, ``PreCheck``, ``Clean``, ``Install``, ``Check`` and ``NeedToRestart``.
+
+    fjcontrib is installed into the local FastJet installation (``tools/fastjet``).
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Prepare the installation of the FastJet contrib libraries (folders, download URLs).
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main       = main
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/fastjet/')
         self.bindir     = os.path.normpath(self.installdir+'/bin/fastjet-config')
@@ -42,18 +64,31 @@ class InstallFastjetContrib:
         self.ncores     = 1
         self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.052.tar.gz"}
 
-    def GetNcores(self):
+    def GetNcores(self) -> None:
+        """Ask the number of cores used for the compilation (all cores in forced mode)."""
         self.ncores = InstallService.get_ncores(self.main.archi_info.ncores,\
                                                 self.main.forced)
 
 
-    def CreateTmpFolder(self):
+    def CreateTmpFolder(self) -> bool:
+        """Create (clean) the temporary unpacking folder and the download folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ok = InstallService.prepare_tmp(self.untardir, self.downloaddir)
         if ok:
             self.tmpdir=self.untardir
         return ok
         
-    def Download(self):
+    def Download(self) -> bool:
+        """Download the source files of the FastJet contrib libraries.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
             return False
@@ -65,7 +100,13 @@ class InstallFastjetContrib:
         return True
 
 
-    def Unpack(self):
+    def Unpack(self) -> bool:
+        """Unpack the downloaded files of the FastJet contrib libraries.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack_contrib.log')
         # Unpacking the tarball
@@ -77,11 +118,19 @@ class InstallFastjetContrib:
         return True
 
 
-    def Configure(self):
+    def Configure(self) -> bool:
+        """Configure the FastJet contrib libraries before compilation.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Input
         # TODO: figure out how to give `-std=c++11 -fPIC` together to CXXFLAGS
         # using " or ' doesn't work on linux systems
         theCommands = ['./configure', '--fastjet-config=' + self.bindir, 'CXXFLAGS=-fPIC']
+        if self.main.archi_info.has_root and self.main.archi_info.root_compiler:
+            theCommands.append("CXX=" + self.main.archi_info.root_compiler)
         logname=os.path.normpath(self.installdir+'/configuration_contrib.log')
         # Execute
         logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
@@ -96,7 +145,13 @@ class InstallFastjetContrib:
         return ok
 
         
-    def Build(self):
+    def Build(self) -> bool:
+        """Compile the FastJet contrib libraries.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Input
         theCommands=['make','-j'+str(self.ncores)]
         logname=os.path.normpath(self.installdir+'/compilation_contrib.log')
@@ -113,7 +168,13 @@ class InstallFastjetContrib:
         return ok
 
 
-    def Install(self):
+    def Install(self) -> bool:
+        """Install the FastJet contrib libraries in its definitive folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Input
         theCommands=['make','install']
         logname=os.path.normpath(self.installdir+'/installation_contrib.log')
@@ -130,7 +191,13 @@ class InstallFastjetContrib:
         return ok
 
 
-    def Check(self):
+    def Check(self) -> bool:
+        """Check that the FastJet contrib libraries has been properly installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the expected files are present.
+        """
         # Check folders
         dirs = [self.installdir+"/include/fastjet/contrib",\
                 self.installdir+"/lib",\
@@ -161,7 +228,8 @@ class InstallFastjetContrib:
         
         return True
 
-    def display_log(self):
+    def display_log(self) -> None:
+        """Log the paths of the installation log files."""
         logging.getLogger('MA5').error("More details can be found into the log files:")
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/wget_contrib.log"))
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/unpack_contrib.log"))
@@ -169,7 +237,13 @@ class InstallFastjetContrib:
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/compilation_contrib.log"))
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/installation_contrib.log"))
 
-    def NeedToRestart(self):
+    def NeedToRestart(self) -> bool:
+        """Tell whether MadAnalysis 5 must be restarted after the installation.
+
+        Returns:
+            ``bool``:
+            ``True`` if a restart (new configuration check and library build) is needed.
+        """
         return True
     
         

@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Detection of ROOT."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 
 import logging
 import os
@@ -34,7 +38,27 @@ from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectRoot:
-    def __init__(self, archi_info, user_info, session_info, debug):
+    """Detector of ROOT.
+
+    The methods are called by
+    :meth:`madanalysis.system.detect_manager.DetectManager.Execute` in the following
+    order (only when defined): ``IsItVetoed``, ``AreDependenciesInstalled``,
+    ``ManualDetection``, ``ToolsDetection``, ``AutoDetection``, ``ExtractInfo`` and
+    ``SaveInfo``.
+
+    Attributes:
+        name (``str``): name displayed in the configuration check.
+        mandatory (``bool``): whether MadAnalysis 5 can run without the package.
+    """
+    def __init__(self, archi_info: Any, user_info: Any, session_info: Any, debug: bool) -> None:
+        """Create the detector of ROOT.
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration, filled by :meth:`SaveInfo`.
+            user_info (``UserInfo``): user options (vetoes, forced paths).
+            session_info (``SessionInfo``): session information, filled by :meth:`SaveInfo`.
+            debug (``bool``): print detailed information.
+        """
         self.archi_info = archi_info
         self.user_info = user_info
         self.session_info = session_info
@@ -52,7 +76,13 @@ class DetectRoot:
         self.version = []
         self.logger = logging.getLogger("MA5")
 
-    def IsItVetoed(self):
+    def IsItVetoed(self) -> bool:
+        """Check whether ROOT has been vetoed by the user (``installation_options.dat``).
+
+        Returns:
+            ``bool``:
+            ``True`` if vetoed.
+        """
         if self.user_info.root_veto:
             self.logger.debug("user setting: veto on Root")
             return True
@@ -60,7 +90,14 @@ class DetectRoot:
             self.logger.debug("no user veto")
             return False
 
-    def ManualDetection(self):
+    def ManualDetection(self) -> tuple[int, str]:
+        """Look for ROOT in the location given by the user (``installation_options.dat``).
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         msg = ""
 
         # User setting
@@ -85,7 +122,14 @@ class DetectRoot:
 
         return DetectStatusType.FOUND, msg
 
-    def ToolsDetection(self):
+    def ToolsDetection(self) -> tuple[int, str]:
+        """Look for ROOT in the ``tools`` folder of MadAnalysis 5 (local installation).
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         msg = ""
 
         # Detection of root-config
@@ -101,7 +145,14 @@ class DetectRoot:
         self.bin_file = folder + "/root-config"
         return DetectStatusType.FOUND, msg
 
-    def AutoDetection(self):
+    def AutoDetection(self) -> tuple[int, str]:
+        """Look for ROOT on the system.
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         msg = ""
 
         # Trying to call root-config with which
@@ -109,6 +160,7 @@ class DetectRoot:
         if len(result) == 0:
             msg = (
                 'ROOT module called "root-config" is not detected.\n'
+                # NOTE: typo ':n' instead of ':\n' in the messages.
                 + "Two explanations :n"
                 + " - ROOT is not installed. You can download it "
                 + "from http://root.cern.ch\n"
@@ -147,13 +199,20 @@ class DetectRoot:
                     + " - ROOT binary folder must be placed in the "
                     + "global environment variable $PATH"
                 )
+                # FIXME: this expression is not returned (no-op).
                 DetectStatusType.ISSUE, msg
             self.logger.debug("  which-all:     ")
             for file in result:
                 self.logger.debug("    - " + str(file))
         return DetectStatusType.FOUND, msg
 
-    def ExtractInfo(self):
+    def ExtractInfo(self) -> bool:
+        """Extract detailed information about the detected ROOT (version, paths, ...).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Using root-config for getting lib and header paths as well as the version number
         self.logger.debug("Trying to get library and header paths ...")
         theCommands = [
@@ -172,6 +231,8 @@ class DetectRoot:
                 + " - ROOT binary folder must be placed in the "
                 + "global environment variable $PATH"
             )
+            # FIXME: a non-empty tuple is truthy: DetectManager treats this failure as a success
+            # (same below).
             return False, msg
 
         # Extracting ROOT library and header path
@@ -236,7 +297,13 @@ class DetectRoot:
         # Ok
         return True
 
-    def SaveInfo(self):
+    def SaveInfo(self) -> bool:
+        """Store the information about ROOT in the architecture/session information.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # archi_info
         self.archi_info.has_root = True
         self.archi_info.root_priority = self.force

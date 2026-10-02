@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Fastjet headers
+/**
+ * @file RecEventFormat.cpp
+ * @brief Implementation of MA5::RecEventFormat.
+ */
+
 #ifdef MA5_FASTJET_MODE
 #include "fastjet/PseudoJet.hh"
 #endif
@@ -62,6 +67,7 @@ namespace MA5
         TET_ = 0.;
         THT_ = 0.;
         Meff_ = 0.;
+        // NOTE: the Monte Carlo pointers are only cleared (not owned).
         MCHadronicTaus_.clear();
         MCMuonicTaus_.clear();
         MCElectronicTaus_.clear();

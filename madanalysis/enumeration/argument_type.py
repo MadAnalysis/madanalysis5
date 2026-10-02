@@ -22,15 +22,38 @@
 ################################################################################
 
 
+"""Types of the arguments of an observable (used when parsing ``plot``/cut commands)."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
+        """Metaclass turning the class attribute access ``ArgumentType.NAME`` into an integer code.
 
-        def __getattr__(self, name):
+        Accessing ``ArgumentType.NAME`` returns the index of ``NAME`` in ``ArgumentType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
+
+        def __getattr__(self, name: str) -> int:
+            """Get the integer code of an enumeration entry.
+
+            Args:
+                name (``str``): name of the entry (e.g. ``ArgumentType.PARTICLE``).
+
+            Raises:
+                ``ValueError``: if ``name`` is not a key of ``values``.
+
+            Returns:
+                ``int``:
+                Index of the entry in ``values``.
+            """
             return list(self.values.keys()).index(name)
 
 @six.add_metaclass(metaclass)
 class ArgumentType(object):
+    """Kinds of observable arguments: ``COMBINATION``, ``PARTICLE``, ``INTEGER`` and ``FLOAT``.
+    """
     values = { 'COMBINATION' : [],\
                'PARTICLE' : [],\
                'INTEGER'      : [],

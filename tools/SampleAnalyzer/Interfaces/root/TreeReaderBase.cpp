@@ -23,6 +23,11 @@
 
 
 // ROOT header
+/**
+ * @file TreeReaderBase.cpp
+ * @brief Compilation unit of MA5::TreeReaderBase.
+ */
+
 #include <TChain.h>
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include <TObject.h>

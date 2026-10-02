@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LHCOWriter.h
+ * @brief Writer of LHCO files (reconstructed objects).
+ */
+
 #ifndef LHCO_WRITER_BASE_h
 #define LHCO_WRITER_BASE_h
 
@@ -39,6 +44,7 @@
 namespace MA5
 {
 
+/** @brief Writer of LHC Olympics files. */
 class LHCOWriter : public WriterTextBase
 {
 
@@ -47,6 +53,7 @@ class LHCOWriter : public WriterTextBase
   // -------------------------------------------------------------
  protected:
 
+  /** @brief Number of events written. */
   MAuint32 counter_;
 
   // -------------------------------------------------------------
@@ -54,34 +61,86 @@ class LHCOWriter : public WriterTextBase
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   LHCOWriter() : WriterTextBase()
   { counter_=0; }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~LHCOWriter()
   {}
 
-  /// Read the sample (virtual)
+  /**
+   * @brief Write the header of the file (format description and original header).
+   *
+   * @param mySample sample.
+   * @return true.
+   */
   virtual MAbool WriteHeader(const SampleFormat& mySample);
 
-  /// Read the event (virtual)
+  /**
+   * @brief Write an event (events without reconstructed objects are skipped).
+   *
+   * @param myEvent event.
+   * @param mySample sample.
+   * @return true.
+   */
   virtual MAbool WriteEvent(const EventFormat& myEvent, 
                           const SampleFormat& mySample);
 
-  /// Finalize the event (virtual)
+  /**
+   * @brief Write the footer of the file.
+   *
+   * @param mySample sample.
+   * @return true.
+   */
   virtual MAbool WriteFoot(const SampleFormat& mySample);
  
  private:
 
 
-  // Writing a reconstructed jet
-
+  /**
+   * @brief Fill an LHCO line from a jet.
+   *
+   * @param jet jet.
+   * @param lhco line to fill.
+   */
   void WriteJet(const RecJetFormat& jet, LHCOParticleFormat* lhco);
+  /**
+   * @brief Fill an LHCO line from a muon (the isolation variables are encoded in the HAD/EM column).
+   *
+   * @param muon muon.
+   * @param lhco line to fill.
+   * @param myEvent reconstructed event.
+   * @param npart number of objects written before the jets.
+   */
   void WriteMuon(const RecLeptonFormat& muon, LHCOParticleFormat* lhco, const RecEventFormat* myEvent, MAuint32 npart);
+  /**
+   * @brief Fill an LHCO line from an electron.
+   *
+   * @param electron electron.
+   * @param lhco line to fill.
+   */
   void WriteElectron(const RecLeptonFormat& electron, LHCOParticleFormat* lhco);
+  /**
+   * @brief Fill an LHCO line from a photon.
+   *
+   * @param photon photon.
+   * @param lhco line to fill.
+   */
   void WritePhoton(const RecPhotonFormat& photon, LHCOParticleFormat* lhco);
+  /**
+   * @brief Fill an LHCO line from a tau.
+   *
+   * @param tau tau.
+   * @param lhco line to fill.
+   */
   void WriteTau(const RecTauFormat& tau, LHCOParticleFormat* lhco);
+  /**
+   * @brief Fill an LHCO line from the missing transverse momentum.
+   *
+   * @param met missing transverse momentum.
+   * @param lhco line to fill.
+   */
   void WriteMET(const ParticleBaseFormat& met, LHCOParticleFormat* lhco);
 
 

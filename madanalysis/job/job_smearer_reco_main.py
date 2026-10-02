@@ -22,12 +22,40 @@
 ################################################################################
 
 
+"""Writer of the SFS smearer source file (``new_smearer_reco.cpp``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.fastsim.fastsim import SuperFastSim
 import madanalysis.observable.observable_list as observable_list
 class JobSmearerRecoMain:
+    """Writer of the ``NewSmearer`` smearing methods.
+
+    Each method applies, in this order, the reconstruction efficiency (the object is
+    dropped with probability ``1 - acceptance``), the Gaussian smearing of the
+    kinematic observables and the scaling of the observables.
+
+    Attributes:
+        fastsim (``SuperFastSim``): SFS configuration.
+        electron_smearing (``bool``): electrons are modified.
+        muon_smearing (``bool``): muons are modified.
+        photon_smearing (``bool``): photons are modified.
+        tau_smearing (``bool``): hadronic taus are modified.
+        jet_smearing (``bool``): jets are modified.
+        constituent_smearing (``bool``): jet constituents are smeared.
+        track_smearing (``bool``): tracks are modified.
+    """
 
     ## Initialization
-    def __init__(self, fastsim):
+    def __init__(self, fastsim: SuperFastSim) -> None:
+        """Determine which object types must be modified.
+
+        Args:
+            fastsim (``SuperFastSim``): SFS configuration (``main.superfastsim``).
+        """
         self.fastsim = fastsim
         self.electron_smearing    = False
         self.muon_smearing        = False
@@ -84,7 +112,12 @@ class JobSmearerRecoMain:
 
 
     ## Writing NewTagger.h
-    def WriteNewSmearerRecoSource(self, file):
+    def WriteNewSmearerRecoSource(self, file: TextIO) -> None:
+        """Write ``new_smearer_reco.cpp``.
+
+        Args:
+            file (``TextIO``): output C++ file.
+        """
         # header
         file.write('#include "SampleAnalyzer/User/Analyzer/new_smearer_reco.h"\n')
         if self.fastsim.smearer.rules != {}:
@@ -110,7 +143,15 @@ class JobSmearerRecoMain:
         if self.track_smearing:
             self.WriteSmearingMethod(file,'Track',['track'])
 
-    def WriteSmearingMethod(self,file,obj,reco_list):
+    def WriteSmearingMethod(self,file: TextIO,obj: str,reco_list: list[str]) -> None:
+        """Write the method ``NewSmearer::<obj>Smearer``.
+
+        Args:
+            file (``TextIO``): output C++ file.
+            obj (``str``): object type (``Jet``, ``Constituent``, ``Tau``, ``Muon``,
+                ``Electron``, ``Photon`` or ``Track``), also used as C++ variable name.
+            reco_list (``list[str]``): identifiers of the object in the rules.
+        """
         file.write('/// '+obj+' smearing method\n')
         file.write('MCParticleFormat NewSmearer::'+obj+'Smearer(const MCParticleFormat * part)\n')
         file.write('{\n')
@@ -126,6 +167,7 @@ class JobSmearerRecoMain:
 
         # If constituents method is in use, jet smearing is only done for constituents
         if (obj != 'Jet') or (obj=='Jet' and self.fastsim.jetrecomode == 'jets'):
+            # NOTE: this local variable shadows the observable_list module inside this method only.
             observable_list = ['PT','ETA','PHI','E','PX','PY','PZ']
             if obj in ['Electron','Muon','Photon','Tau','Track']:
                 observable_list += ['D0','DZ']
@@ -138,7 +180,15 @@ class JobSmearerRecoMain:
         file.write('}\n\n')
 
 
-    def PrintSmearer(self, true_list, list_obs, file, obj):
+    def PrintSmearer(self, true_list: list[str], list_obs: list[str], file: TextIO, obj: str) -> None:
+        """Write the Gaussian smearing of the observables of an object.
+
+        Args:
+            true_list (``list[str]``): identifiers of the object in the rules.
+            list_obs (``list[str]``): observables that can be smeared.
+            file (``TextIO``): output C++ file.
+            obj (``str``): C++ variable name of the object.
+        """
         check_initializer = 0
         for key, val in self.fastsim.smearer.rules.items():
             if val['id_true'] in true_list and val['obs'] in list_obs:
@@ -173,6 +223,7 @@ class JobSmearerRecoMain:
                                '->momentum().SetPtEtaPhiE('+obj+'->pt(), '+\
                                obj+'->eta(), smeared_object, '+ obj+'->e());\n')
                 elif val['obs'] == 'PX':
+                    # FIXME: negative smeared px/py/pz values are set to 0 (only PT and E are positive).
                     file.write('      if (smeared_object < 0.) smeared_object = 0.;\n')
                     file.write('      '+obj+\
                                '->momentum().SetPxPyPzE(smeared_object,'+\
@@ -197,7 +248,14 @@ class JobSmearerRecoMain:
                 check_initializer+=1
 
 
-    def PrintReco(self, reco_list, file, obj):
+    def PrintReco(self, reco_list: list[str], file: TextIO, obj: str) -> None:
+        """Write the reconstruction-efficiency test of an object.
+
+        Args:
+            reco_list (``list[str]``): identifiers of the object in the rules.
+            file (``TextIO``): output C++ file.
+            obj (``str``): C++ variable name of the input particle.
+        """
         for key, val in self.fastsim.reco.rules.items():
             if val['id_reco'] in reco_list:
                 eff_str = []
@@ -208,6 +266,7 @@ class JobSmearerRecoMain:
                     my_eff_str += eff_val['function'].tocpp_call(obj,\
                                  'reco_'+str(val['id_reco'])+'_'+str(eff_key))
                     eff_str.append(my_eff_str)
+                # NOTE: several matching rules would redeclare 'acceptance' in the generated C++.
                 file.write('      MAdouble64 acceptance = ' + ' + '.join(eff_str) +';\n')
                 file.write('      if (RANDOM->flat() > acceptance)\n')
                 file.write('      {\n')
@@ -215,7 +274,17 @@ class JobSmearerRecoMain:
                 file.write('      }\n')
 
 
-    def PrintScaling(self, true_list, list_obs, file, obj):
+    def PrintScaling(self, true_list: list[str], list_obs: list[str], file: TextIO, obj: str) -> None:
+        """Write the scaling of the observables of an object.
+
+        For jets in constituent mode, only JES rules are applied.
+
+        Args:
+            true_list (``list[str]``): identifiers of the object in the rules.
+            list_obs (``list[str]``): observables that can be scaled.
+            file (``TextIO``): output C++ file.
+            obj (``str``): C++ variable name of the object.
+        """
         check_initializer = 0
         for key, val in self.fastsim.scaling.rules.items():
             if obj == 'Jet' and self.fastsim.jetrecomode == 'constituents' and val['id_true'] != 'JES':

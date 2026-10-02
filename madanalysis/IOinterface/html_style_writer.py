@@ -22,16 +22,29 @@
 ################################################################################
 
 
+"""Writer of the CSS style sheet of the HTML report."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import madanalysis.IOinterface.text_file_writer as TextFileWriter
 class HTMLCSSWriter(TextFileWriter.TextFileWriter):
-    """Generate HTML CSS page sheet"""
+    """Generator of the ``style.css`` file of the HTML report.
 
-    def __init__(self, filename):
+    Attributes:
+        page (``list[str]``): CSS rules to write.
+    """
+
+    def __init__(self, filename: str) -> None:
+        """Create the writer.
+
+        Args:
+            filename (``str``): path of the CSS file.
+        """
         TextFileWriter.TextFileWriter.__init__(self,filename)
         self.page=[]
 
-    def WriteCSSLinks(self):
+    def WriteCSSLinks(self) -> None:
+        """Add the rules of the links."""
         self.page.append('a:link {text-decoration: none; color:#424242; ' + \
            'background-color: #FFFFFF; font-size:11px;}\n')
         self.page.append('a:visited {text-decoration: none; color:#424242; ' + \
@@ -39,12 +52,14 @@ class HTMLCSSWriter(TextFileWriter.TextFileWriter):
         self.page.append('a:hover {font-weight:bold; font-size:11px;}\n\n')
 
 
-    def WriteCSSbody(self):
+    def WriteCSSbody(self) -> None:
+        """Add the rules of the page body."""
         self.page.append('body  { width: 1024px; height: 768px; margin: 10px auto; ' + \
            'color: #000000; font-family: \'Verdana\',Serif; font-size: 12px; ' + \
            'background-color: #FFFFFF; }\n\n')
 
-    def WriteCSStop(self):
+    def WriteCSStop(self) -> None:
+        """Add the rules of the top banner."""
         self.page.append('#top { height: 83px; font-family :\'Verdana\',Serif; ' + \
            'font-size: 11px; margin: auto; ' + \
            'background-color: #FFFFFF; text-align:center;}\n')
@@ -56,7 +71,8 @@ class HTMLCSSWriter(TextFileWriter.TextFileWriter):
         self.page.append('.top h1 { text-align: top ; margin: auto;  font-size: 32px; ' + \
            'font-family: \'Verdana\', Serif; font-weight:bold; }\n\n')
 
-    def WriteCSSmenu(self):
+    def WriteCSSmenu(self) -> None:
+        """Add the rules of the left menu."""
         self.page.append('#menu { float:left; background-color : #FFFFFF; color: #000000; ' + \
           'width: 150px; height: 697px; font-family: \'Verdana\',Serif; font-size: 12px; ' + \
           'margin: auto; padding: 0 0 0 10px ; }\n')
@@ -66,7 +82,8 @@ class HTMLCSSWriter(TextFileWriter.TextFileWriter):
         self.page.append('.menu ul { list-style-type: square; }\n')
         self.page.append('.menu li { margin:0 0 0 -15px; padding: 0; }\n\n')
 
-    def WriteCSSmain(self):
+    def WriteCSSmain(self) -> None:
+        """Add the rules of the main panel."""
         self.page.append('#main { float: right; margin: auto; width: 864px; height: 697px; ' + \
           'padding: 0; background-color: #FFFFFF; color: #000000; ' + \
           'font-family: \'Verdana\',Serif; font-size: 12px; overflow: auto; }\n')
@@ -88,7 +105,8 @@ class HTMLCSSWriter(TextFileWriter.TextFileWriter):
 
 
 
-    def WriteCSS(self):
+    def WriteCSS(self) -> None:
+        """Write all rules into the file (which must be open)."""
         for item in self.page:
             self.file.write(item)
 

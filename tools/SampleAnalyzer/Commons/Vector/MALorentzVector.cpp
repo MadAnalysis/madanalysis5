@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file MALorentzVector.cpp
+ * @brief Implementation of MA5::MALorentzVector.
+ */
+
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 using namespace MA5;
 
@@ -54,6 +59,8 @@ const MAdouble64& MALorentzVector::operator() (MAuint8 i) const
   else if (i==3) return e_;
   else
   {
+      // NOTE: the message contains a printf-style '%d' and the index is printed as a character; e_ is
+      // returned (not 0).
       std::cout << "Error : operator()() bad index (%d) returning 0"
           << i << std::endl;
   }

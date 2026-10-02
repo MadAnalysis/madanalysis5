@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LogMsgValue.h
+ * @brief Occurrences of a logged message.
+ */
+
 #ifndef LOG_MSG_VALUE_H
 #define LOG_MSG_VALUE_H
 
@@ -36,10 +41,7 @@
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class LogMsgValue contains the occurence of an exception and extra
-/// information.
-//////////////////////////////////////////////////////////////////////////////
+/** @brief Number of occurrences of a message and name of the function issuing it. */
 class LogMsgValue
 {
   // -------------------------------------------------------------
@@ -47,10 +49,10 @@ class LogMsgValue
   // -------------------------------------------------------------
  private:
 
-  /// Occurence of the exception
+  /** @brief Number of occurrences. */
   MAuint32 Counter_;
 
-  /// Name of the function from where the exception is thrown
+  /** @brief Name of the function issuing the message. */
   std::string Function_;
   
   // -------------------------------------------------------------
@@ -58,36 +60,57 @@ class LogMsgValue
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument 
+  /** @brief Constructor. */
   LogMsgValue() : Counter_(0)
   { }
 
-  /// Constructor with arguments 
+  /**
+   * @brief Constructor.
+   *
+   * @param Counter number of occurrences.
+   * @param Function function name.
+   */
   LogMsgValue(const MAuint32& Counter, 
               const std::string& Function) : Counter_(Counter), Function_(Function)
   { }
   
-  /// Destructor
+  /** @brief Destructor. */
   ~LogMsgValue()
   {}
 
-  /// Reset
+  /** @brief Reset the content. */
   void Reset()
   { Counter_=0; Function_=""; } 
   
-  /// Accessor to the occurence
+  /**
+   * @brief Accessor to the number of occurrences.
+   *
+   * @return the number.
+   */
   const MAuint32& GetCounter() const
   {return Counter_;}
 
-  /// Accessor to the name of the function
+  /**
+   * @brief Accessor to the function name.
+   *
+   * @return the name.
+   */
   const std::string& GetFunction() const
   {return Function_;}
   
-  /// Mutator related to the occurence
+  /**
+   * @brief Set the number of occurrences.
+   *
+   * @param Counter number.
+   */
   void SetCounter(const MAuint32& Counter)
   {Counter_=Counter;}
 
-  /// Mutator related to name of the function
+  /**
+   * @brief Set the function name.
+   *
+   * @param Function name.
+   */
   void SetFunction(const std::string& Function)
   {Function_=Function;}
 

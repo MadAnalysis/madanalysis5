@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MultiRegionCounterManager.h
+ * @brief Collection of the cuts of an analysis.
+ */
+
 #ifndef __MULTIREGIONCOUNTERMANAGER_H
 #define __MULTIREGIONCOUNTERMANAGER_H
 
@@ -38,26 +43,27 @@
 namespace MA5
 {
 
+/** @brief Collection of the cuts of an analysis (owned). */
 class MultiRegionCounterManager
 {
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
  private:
-  /// Collection of cuts
+  /** @brief Cuts. */
   std::vector<MultiRegionCounter*> cuts_;
 
   // -------------------------------------------------------------
   //                      method members
   // -------------------------------------------------------------
  public:
-  /// constructor
+  /** @brief Constructor. */
   MultiRegionCounterManager() {};
 
-  /// Destructor
+  /** @brief Destructor (the cuts are deleted by Reset()/Finalize()). */
   ~MultiRegionCounterManager() { };
 
-  /// Reset
+  /** @brief Delete all the cuts. */
   void Reset()
   {
     for (MAuint32 i=0;i<cuts_.size();i++)
@@ -65,17 +71,31 @@ class MultiRegionCounterManager
     cuts_.clear();
   }
 
-  /// Finalizing
+  /** @brief Delete all the cuts. */
   void Finalize() { Reset(); }
 
-  /// Get methods
+  /**
+   * @brief Accessor to the cuts.
+   *
+   * @return a copy of the collection.
+   */
   std::vector<MultiRegionCounter*> GetCuts()
     { return cuts_; }
 
+  /**
+   * @brief Number of cuts.
+   *
+   * @return the number of cuts.
+   */
   MAuint32 GetNcuts()
     { return cuts_.size(); }
 
-  /// Adding a Cut to the manager with the link to the appropriate SRs
+  /**
+   * @brief Create a cut attached to regions.
+   *
+   * @param name name of the cut.
+   * @param regions regions.
+   */
   void AddCut(const std::string& name,std::vector<RegionSelection*> regions)
   {
     MultiRegionCounter* mycut = new MultiRegionCounter(name);

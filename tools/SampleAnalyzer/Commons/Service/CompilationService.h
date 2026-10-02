@@ -22,10 +22,18 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file CompilationService.h
+ * @brief Compilation helpers (UNUSED macro silencing unused-variable warnings).
+ */
+
+// FIXME: same include guard as TimeService.h (TIMER_SERVICE_H): whichever header is included second
+// is silently skipped.
 #ifndef TIMER_SERVICE_H
 #define TIMER_SERVICE_H
 
 
+/** @brief Mark a variable as intentionally unused (silences compiler warnings). */
 #define UNUSED(expr) do {(void)(expr);} while(0);
 
 #endif

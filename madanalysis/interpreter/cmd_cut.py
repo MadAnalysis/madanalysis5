@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Interpreter commands ``select`` and ``reject``: declare cuts."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.interpreter.cmd_base           import CmdBase
 from madanalysis.interpreter.cmd_selection_base import CmdSelectionBase
 from madanalysis.multiparticle.particle_object  import ParticleObject
@@ -43,15 +50,45 @@ from six.moves import range
 
 
 class CmdCut(CmdBase,CmdSelectionBase):
-    """Command CUT"""
+    """Commands ``select`` and ``reject``.
 
-    def __init__(self,main,cut_type):
+    Two kinds of cuts exist:
+
+    * event cuts: ``select|reject <conditions> [{ regions }] [[ options ]]``;
+    * candidate (object) cuts: ``select|reject ( <particles> ) <conditions> ...``, where
+      the observables of the conditions apply to the candidates.
+
+    Conditions are ``<observable>[(<args>)] <operator> <threshold>`` or double conditions
+    ``<threshold> <operator> <observable> <operator> <threshold>``, combined with
+    ``and``/``or`` and parentheses.
+
+    Attributes:
+        cut_type (``int``): :class:`~madanalysis.enumeration.cut_type.CutType` value
+            (``SELECT`` or ``REJECT``).
+    """
+
+    def __init__(self,main: Main,cut_type: int) -> None:
+        """Register the ``select`` or ``reject`` command.
+
+        Args:
+            main (``Main``): session state.
+            cut_type (``int``): :class:`~madanalysis.enumeration.cut_type.CutType` value.
+        """
         self.cut_type=cut_type
         CmdBase.__init__(self,main,\
                          CutType.convert2cmdname(self.cut_type))
 
 
-    def do(self,args):
+    def do(self,args: list[str]) -> None:
+        """Parse the command and add the cut(s) to the selection.
+
+        For candidate cuts attached to regions of different clusters, one cut is
+        declared per cluster.
+
+        Args:
+            args (``list[str]``): arguments of the command (split by
+                :meth:`~madanalysis.interpreter.interpreter_base.InterpreterBase.split_arg`).
+        """
 
         # Skipping empty args
         if len(args)==0:
@@ -168,6 +205,8 @@ class CmdCut(CmdBase,CmdSelectionBase):
             result = self.extract_sequence(condition,\
                                            args[:endCondition],\
                                            partType=None)
+        # NOTE: an empty condition list (e.g. 'select (mu)') makes extract_sequence fail with
+        # an IndexError (current.sequence[-1] on an empty sequence).
         if result==None:
             return
 
@@ -221,7 +260,16 @@ class CmdCut(CmdBase,CmdSelectionBase):
                         title=title[:title.find(', regions')]
                     self.logger.warning(title + ' { ' + ' '.join(subCutRegionNames) + ' }')
 
-    def clean_sequence(self,sequence):
+    def clean_sequence(self,sequence: list[str]) -> list[str]:
+        """Remove the redundant parentheses surrounding a whole condition sequence.
+
+        Args:
+            sequence (``list[str]``): words of the sequence.
+
+        Returns:
+            ``list[str]``:
+            The sequence without the outer parentheses.
+        """
         if len(sequence)<2:
             return sequence
         if sequence[0]=='(' and sequence[-1]==')':
@@ -238,7 +286,20 @@ class CmdCut(CmdBase,CmdSelectionBase):
             return sequence
 
 
-    def extract_sequence(self,current,sequence,partType):
+    def extract_sequence(self,current: ConditionSequence,sequence: list[str],partType: int | None) -> bool | None:
+        """Decode a sequence of conditions (recursively for parentheses) into ``current``.
+
+        Args:
+            current (``ConditionSequence``): sequence to fill.
+            sequence (``list[str]``): words of the conditions.
+            partType (``int | None``): :class:`~madanalysis.enumeration.argument_type.ArgumentType`
+                of the candidate (``PARTICLE`` or ``COMBINATION``), or ``None`` for an event
+                cut.
+
+        Returns:
+            ``bool | None``:
+            ``True`` on success, ``None`` on syntax error.
+        """
 
         # Remove extra braces
         words=self.clean_sequence(sequence)
@@ -285,6 +346,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
             elif words[iword] in ['or','and']:
                 if len(current.sequence)==0 or \
                        current.sequence[-1].__class__.__name__=="ConditionConnector":
+                    # FIXME: the error is logged but the parsing continues (no 'return None').
                     logging.getLogger('MA5').error("connector '"+words[iword]+\
                                   "' must be used only after a condition block")
                 else:
@@ -327,6 +389,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
             iword+=1
 
         # Last check
+        # FIXME: IndexError if the sequence is empty.
         if current.sequence[-1].__class__.__name__=="ConditionConnector":
             logging.getLogger('MA5').error("a condition cannot be finished with a connector '" +\
                           current.sequence[-1].GetStringDisplay()+"'.")
@@ -335,7 +398,16 @@ class CmdCut(CmdBase,CmdSelectionBase):
         return True 
 
 
-    def layout_condition(self,words):
+    def layout_condition(self,words: list[str]) -> list[str]:
+        """Glue two-character operators (``==``, ``<=``, ``>=``, ``!=``) split by the parser.
+
+        Args:
+            words (``list[str]``): words of a condition.
+
+        Returns:
+            ``list[str]``:
+            Words with the operators glued.
+        """
 
         # Empty case
         if len(words)==0:
@@ -355,7 +427,21 @@ class CmdCut(CmdBase,CmdSelectionBase):
         return args
         
 
-    def extract_condition(self,current,words,partType):
+    def extract_condition(self,current: ConditionSequence,words: list[str],partType: int | None) -> bool | None:
+        """Decode one (simple or double) condition and append it to ``current``.
+
+        A double condition ``a < obs < b`` is stored as a sub-sequence ``obs > a and obs <
+        b``.
+
+        Args:
+            current (``ConditionSequence``): sequence to fill.
+            words (``list[str]``): words of the condition.
+            partType (``int | None``): type of the candidate (see :meth:`extract_sequence`).
+
+        Returns:
+            ``bool | None``:
+            ``True`` on success, ``None`` on syntax error.
+        """
 
         # layout condition
         words = self.layout_condition(words)
@@ -391,6 +477,8 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 return None
 
             # extracting operator
+            # NOTE: extract_operator receives a string here; indexing the string emulates the
+            # expected list of characters.
             operator1=self.extract_operator(words[1])
             if operator1==OperatorType.UNKNOWN:
                 logging.getLogger('MA5').error("operator '"+words[1]+"' is unknown.")
@@ -510,8 +598,19 @@ class CmdCut(CmdBase,CmdSelectionBase):
         return True    
             
         
-    def decodeConditions(self,args2):
+    def decodeConditions(self,args2: list[str]) -> None:
+        """Legacy decoder of conditions (unused).
+
+        Args:
+            args2 (``list[str]``): words of the conditions.
+
+        Returns:
+            ``None``:
+            Never returns normally (see the FIXME in the code).
+        """
             
+        # FIXME: dead code: 'ConditionBlock' and 'args' are undefined (NameError); the
+        # ConditionType signature also differs.
         conditions=ConditionBlock()
         current=conditions
         nparameter=0
@@ -587,7 +686,8 @@ class CmdCut(CmdBase,CmdSelectionBase):
             
 
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``select``/``reject`` command."""
         logging.getLogger('MA5').info("   Syntax: " + CutType.convert2cmdname(self.cut_type) +\
                      " observable_name ( multiparticle1 multiparticle2 ... ) operator threshold { regions } [ option1 option 2 ]")
         logging.getLogger('MA5').info("   Declares a cut: ")
@@ -598,7 +698,19 @@ class CmdCut(CmdBase,CmdSelectionBase):
         logging.getLogger('MA5').info("    - regions to which this cut applies can be (optionally) given (or it applies to all regions).")
 
 
-    def complete(self,text,args,begidx,endidx):
+    def complete(self,text: str,args: list[str],begidx: int,endidx: int) -> list[str]:
+        """Tab completion of the ``select``/``reject`` command.
+
+        Args:
+            text (``str``): word being completed.
+            args (``list[str]``): input line split by the interpreter (brackets isolated).
+            begidx (``int``): start index of ``text`` in the line.
+            endidx (``int``): end index of ``text`` in the line.
+
+        Returns:
+            ``list[str]``:
+            Possible completions.
+        """
         # cut ( part ... ) > = 100 and ... { } [ ]
         # 0   1 2    3
 

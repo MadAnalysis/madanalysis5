@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file Selector.h
+ * @brief Wrappers of the FastJet selectors used by Filter.
+ */
+
 #ifndef MADANALYSIS5_SELECTOR_H
 #define MADANALYSIS5_SELECTOR_H
 
@@ -35,20 +40,33 @@ using namespace std;
 namespace MA5 {
     namespace Substructure {
 
+        /** @brief Forward declaration (friend class). */
         class Filter;
         // These classes act as placeholder for Fastjet selectors
 
+        /** @brief Wrapper of a FastJet selector. */
         class Selector {
             friend class SelectorNHardest;
             friend class SelectorPtFractionMin;
             friend class Filter;
 
             protected:
+                /** @brief Wrapped FastJet selector. */
                 fastjet::Selector selector_;
 
             public:
+                /** @brief Constructor (empty selector). */
                 Selector() {}
+                /** @brief Destructor. */
                 virtual ~Selector( ) {}
+                /**
+                 * @brief Combine two selectors (logical AND).
+                 *
+                 * Takes a non-const reference, so a temporary cannot be used as right operand.
+                 *
+                 * @param s2 second selector.
+                 * @return the combined selector.
+                 */
                 Selector operator * (Selector & s2)
                 {
                     Selector new_selector;
@@ -58,22 +76,48 @@ namespace MA5 {
                 }
 
             private:
+                /**
+                 * @brief Accessor to the wrapped selector.
+                 *
+                 * @return a copy of the FastJet selector.
+                 */
                 fastjet::Selector __get() {return selector_;}
+                /**
+                 * @brief Set the wrapped selector.
+                 *
+                 * @param selector FastJet selector.
+                 */
                 void __set(fastjet::Selector selector) { selector_ = selector;}
         };
 
+        /** @brief Selector keeping the n hardest jets. */
         class SelectorNHardest: public Selector {
             public:
+                /** @brief Constructor (empty selector). */
                 SelectorNHardest(){}
+                /** @brief Destructor. */
                 virtual ~SelectorNHardest() {}
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param n number of jets to keep.
+                 */
                 SelectorNHardest(MAint32 n)
                 { selector_ = fastjet::SelectorNHardest(n); }
         };
 
+        /** @brief Selector keeping the jets carrying at least a given fraction of the total pT. */
         class SelectorPtFractionMin: public Selector {
             public:
+                /** @brief Constructor (empty selector). */
                 SelectorPtFractionMin(){}
+                /** @brief Destructor. */
                 virtual ~SelectorPtFractionMin() {}
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param frac minimum pT fraction.
+                 */
                 SelectorPtFractionMin(MAfloat32 frac)
                 { selector_ = fastjet::SelectorPtFractionMin(frac); }
         };

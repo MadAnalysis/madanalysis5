@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file RecJetFormat.cpp
+ * @brief Implementation of MA5::RecJetFormat (FastJet mode only).
+ */
+
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 
 #ifdef MA5_FASTJET_MODE
@@ -56,6 +61,7 @@ namespace MA5 {
         output_jets.reserve(current_jets.size());
         for (auto &jet: current_jets)
         {
+            // NOTE: allocated with new: the caller owns the subjets.
             RecJetFormat * NewJet = new RecJetFormat(jet);
             output_jets.push_back(NewJet);
         }
@@ -78,6 +84,7 @@ namespace MA5 {
         output_jets.reserve(current_jets.size());
         for (auto &jet: current_jets)
         {
+            // NOTE: allocated with new: the caller owns the subjets.
             RecJetFormat * NewJet = new RecJetFormat(jet);
             output_jets.push_back(NewJet);
         }

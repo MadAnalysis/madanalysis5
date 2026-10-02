@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // STL headers
+/**
+ * @file HEPMCReader.cpp
+ * @brief Implementation of MA5::HEPMCReader.
+ */
+
 #include <sstream>
 
 // SampleHeader headers
@@ -416,6 +421,7 @@ void HEPMCReader::FillUnits(const std::string &line, SampleFormat &mySample)
     str << line;
     std::string tmp;
 
+    // NOTE: the comment says 'N' but this is the U line.
     // character 'N'
     str >> tmp;
 
@@ -568,6 +574,8 @@ void HEPMCReader::FillEventVertexLine(const std::string &line, EventFormat &myEv
     str >> linecode;     // character 'V'
     str >> barcode;      // barcode
     str >> vertex.id_;   // id
+    // NOTE: the vertex positions are not converted with length_unit_ (the SFS smearer uses the unit of
+    // the sample instead).
     str >> vertex.x_;    // x
     str >> vertex.y_;    // y
     str >> vertex.z_;    // z

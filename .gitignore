@@ -166,3 +166,4 @@ fastjet-config
 tools/SampleAnalyzer/Bin
 tools/PAD
 tools/PADForSFS
+validation/outputs/*.saf

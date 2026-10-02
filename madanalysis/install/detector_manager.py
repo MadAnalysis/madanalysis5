@@ -22,15 +22,42 @@
 ################################################################################
 
 
+"""Automatic (de)activation of Delphes and Delphes-MA5tune when a job needs one of them.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.install.install_manager      import InstallManager
 class DetectorManager():
+    """Make sure that the Delphes flavour required by the fast-simulation package is active.
 
-    def __init__(self, main):
+    Delphes and Delphes-MA5tune cannot be active at the same time: the other one is
+    deactivated first.
+    """
+
+    def __init__(self, main: Main) -> None:
+        """Create the manager.
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main   = main
         self.forced = self.main.forced
 
-    def manage(self, detector):
+    def manage(self, detector: str) -> bool:
+        """Activate a detector simulation if it is selected but not active.
+
+        Args:
+            detector (``str``): ``"delphes"`` or ``"delphesMA5tune"`` (other values are ignored).
+
+        Returns:
+            ``bool``:
+            ``False`` if the (de)activation failed, ``True`` otherwise.
+        """
         # initialization
         # Getting the 'already installed' flags
         import logging

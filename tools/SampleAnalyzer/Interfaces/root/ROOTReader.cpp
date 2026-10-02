@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file ROOTReader.cpp
+ * @brief Implementation of MA5::ROOTReader.
+ */
+
 #include <sstream>
 
 // ROOT headers
@@ -102,6 +107,7 @@ MAbool ROOTReader::Initialize(const std::string& rawfilename,
 
   // Cleaning the file (remove rfio or local location)
   filename_ = rawfilename;
+  // FIXME: the result of CleanFilename() is discarded: the rfio:/file: prefix is not removed.
   CleanFilename(filename_);
 
   // Opening the file
@@ -197,6 +203,7 @@ MAbool ROOTReader::SelectTreeReader()
 MAbool ROOTReader::Finalize()
 {
   // OK!
+  // NOTE: neither the TFile nor the tree reader is deleted (memory leak per file).
   if (source_!=0) source_->Close();
   return true;
 }

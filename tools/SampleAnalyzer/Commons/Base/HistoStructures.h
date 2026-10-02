@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file HistoStructures.h
+ * @brief Counters split into events with positive and negative weights.
+ */
+
 #ifndef BASICS_h
 #define BASICS_h
 
@@ -28,12 +33,14 @@
 
 namespace MA5
 {
+    /** @brief Numbers of entries with positive and negative weights. */
     struct ENTRIES
     {
         MAint32 positive = 0;
         MAint32 negative = 0;
     };
 
+    /** @brief Sums of weights for positive and negative weights (absolute value for the latter). */
     struct WEIGHTS
     {
         MAdouble64 positive = 0.0;

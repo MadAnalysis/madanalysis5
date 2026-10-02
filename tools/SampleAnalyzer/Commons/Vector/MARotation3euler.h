@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MARotation3euler.h
+ * @brief Rotation defined by Euler angles.
+ */
+
 #ifndef MARotation3euler_h
 #define MARotation3euler_h
 
@@ -43,6 +48,7 @@
 namespace MA5
 {
 
+/** @brief Rotation defined by the Euler angles (phi, theta, psi). */
 class MARotation3euler
 {
 
@@ -53,6 +59,7 @@ class MARotation3euler
   // -------------------------------------------------------------
  protected:
   
+  /** @brief Rotation matrix. */
   MAMatrix m_; 
 
 
@@ -61,18 +68,31 @@ class MARotation3euler
   // -------------------------------------------------------------
  public :
 
-  // Constructors
+  /** @brief Constructor (empty matrix: setAngles() must be called before use). */
   MARotation3euler()
   {}
 
+  /**
+   * @brief Constructor.
+   *
+   * @param phi first Euler angle.
+   * @param theta second Euler angle.
+   * @param psi third Euler angle.
+   */
   MARotation3euler(MAdouble64 phi, MAdouble64 theta, MAdouble64 psi)
   { setAngles(phi,theta,psi); }
   
-  // Destructor
+  /** @brief Destructor. */
   ~MARotation3euler()
   {}
 
-  // Setting the rotation angle
+  /**
+   * @brief Set the Euler angles (and compute the rotation matrix).
+   *
+   * @param phi first Euler angle.
+   * @param theta second Euler angle.
+   * @param psi third Euler angle.
+   */
   void setAngles(MAdouble64 phi, MAdouble64 theta, MAdouble64 psi)
   {
     MAdouble64 cphi   = std::cos(phi);
@@ -93,29 +113,48 @@ class MARotation3euler
     m_[2][2] =  ctheta;
   }
   
-  // Rotate a MALorentzVector
+  /**
+   * @brief Rotate the spatial part of a four-vector in place.
+   *
+   * @param q four-vector.
+   */
   void rotate(MALorentzVector& q) const
   { rotate(q.Vect()); }
 
-  // Rotate a MAVector3
+  /**
+   * @brief Rotate a three-vector in place.
+   *
+   * @param p three-vector.
+   */
   void rotate(MAVector3& p) const
   {
     p = operator*(p);
   }
 
-  // Operator *
+  /**
+   * @brief Rotated copy of a four-vector.
+   *
+   * @param q four-vector.
+   * @return the rotated four-vector.
+   */
   MALorentzVector operator* (const MALorentzVector& q) const
   {
     return MALorentzVector(operator*(q.Vect()),q.E());
   }
   
-  // Operator *
+  /**
+   * @brief Rotated copy of a three-vector.
+   *
+   * @param p three-vector.
+   * @return the rotated vector (see the FIXME).
+   */
   MAVector3 operator* (const MAVector3& p) const
   {
     MAVector3 result;
     for (MAuint32 i=0;i<3;i++)
       for (MAuint32 j=0;j<3;j++)
       {
+        // FIXME: '=' instead of '+=': only the last term of the matrix-vector product is kept.
         result[i] = m_[i][j]*p[j];
       }
     return result;

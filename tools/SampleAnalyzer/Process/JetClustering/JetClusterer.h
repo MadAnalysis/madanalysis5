@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file JetClusterer.h
+ * @brief Reconstruction of an event from the Monte Carlo record (SFS/FastJet mode).
+ */
+
 #ifndef JET_CLUSTERER_H
 #define JET_CLUSTERER_H
 
@@ -42,104 +47,167 @@ namespace MA5
 
     class ClusterAlgoBase;
 
+    /**
+     * @brief Reconstruction of an event from its Monte Carlo record.
+     *
+     * From the final-state particles, the JetClusterer builds the tracks, electrons, muons,
+     * photons and hadronic taus (with the SFS smearing), clusters the remaining hadrons
+     * into jets (primary and additional jet collections), computes MET/MHT/TET, applies
+     * the b/c/tau taggers and fills the isolation cones.
+     */
     class JetClusterer
     {
         //--------------------------------------------------------------------------
         //                              data members
         //--------------------------------------------------------------------------
     protected:
+        /** @brief Clustering algorithm of the primary jets (owned). */
         ClusterAlgoBase *algo_;
-        /// SFS smearer
+        /** @brief SFS smearer (owned). */
         SmearerBase *mySmearer_;
-        /// b/c/tau tagger
+        /** @brief SFS tagger (owned). */
         SFSTaggerBase *myTagger_;
 
-        /// pointer to tagger options
+        /** @brief Options of the tagger (owned). */
         SFSTaggerBaseOptions *myTaggerOptions_;
 
-        /// @brief Exclusive id for tau-elec-photon-jet
-        /// @code ExclusiveId_ = true; @endcode
-        /// Exclusive algorithm: FS Leptons (photons) originated from hadronic decays
-        /// will not be included in Lepton (photon) collection.
-        /// @code ExclusiveId_ = false; @endcode
-        /// Includive algorithm: All FS leptons (photons) will be included in
-        /// their corresponding containers.
+        /**
+         * @brief Exclusive identification.
+         *
+         * true: final-state leptons (photons) coming from hadron decays are not included in the
+         * lepton (photon) collections and the identified objects are removed from the jet
+         * inputs; false: all final-state leptons (photons) are kept and only the muons are
+         * removed from the jet inputs.
+         */
         MAbool ExclusiveId_;
 
-        /// Primary Jet ID
+        /** @brief Identifier of the primary jet collection. */
         std::string JetID_;
 
 #ifdef MA5_FASTJET_MODE
-        /// Jet collection configurations
+        /** @brief Additional jet collections (standard FastJet algorithms), by identifier. */
         std::map<std::string, ClusterAlgoBase *> cluster_collection_;
 
-        // Jet collection configuration with VariableR
+        /** @brief Additional jet collections (variable-R), by identifier. */
         std::map<std::string, Substructure::ClusterBase *> substructure_collection_;
 #endif
 
-        // Track Isolation radius
+        /** @brief Radii of the track isolation cones. */
         std::vector<MAfloat64> isocone_track_radius_;
 
-        // Electron Isolation radius
+        /** @brief Radii of the electron isolation cones. */
         std::vector<MAfloat64> isocone_electron_radius_;
 
-        // Muon Isolation radius
+        /** @brief Radii of the muon isolation cones. */
         std::vector<MAfloat64> isocone_muon_radius_;
 
-        // Photon Isolation radius
+        /** @brief Radii of the photon isolation cones. */
         std::vector<MAfloat64> isocone_photon_radius_;
 
         //--------------------------------------------------------------------------
         //                              method members
         //--------------------------------------------------------------------------
     public:
-        /// Constructor
+        /**
+         * @brief Constructor.
+         *
+         * @param algo clustering algorithm of the primary jets (owned).
+         */
         JetClusterer(ClusterAlgoBase *algo);
 
-        /// Destructor
+        /** @brief Destructor (deletes the algorithms, the smearer and the tagger). */
         ~JetClusterer();
 
-        /// Initialization
+        /**
+         * @brief Initialise the clusterer from the options of main.cpp.
+         *
+         * Recognised options: `exclusive_id`, `bjet_id.*`, `cjet_id.*`, `tau_id.*` (tagger),
+         * `cluster.*` (clustering algorithm), `jetid` and `isolation.<object>.radius`.
+         *
+         * @param options options.
+         * @return false if no algorithm is defined.
+         */
         MAbool Initialize(const std::map<std::string, std::string> &options);
 
-        /// Jet clustering
+        /**
+         * @brief Reconstruct an event.
+         *
+         * @param mySample current sample.
+         * @param myEvent event (the reconstructed part is filled).
+         * @return false if the Monte Carlo information is missing.
+         */
         MAbool Execute(SampleFormat &mySample, EventFormat &myEvent);
 
-        /// Finalization
+        /** @brief Delete the algorithm, the smearer and the tagger. */
         void Finalize();
 
-        /// Generic loader for the smearer module
+        /**
+         * @brief Replace the default smearer (e.g. by the generated NewSmearer) and initialise it.
+         *
+         * @param smearer smearer (owned).
+         */
         void LoadSmearer(SmearerBase *smearer)
         {
             mySmearer_ = smearer;
             mySmearer_->Initialize();
         }
 
-        /// Generic Loader for tagger module
+        /**
+         * @brief Replace the default tagger (e.g. by the generated NewTagger) and initialise it.
+         *
+         * @param tagger tagger (owned).
+         */
         void LoadTagger(SFSTaggerBase *tagger)
         {
+            // NOTE: the previous smearer/tagger created by Initialize() is not deleted (memory leak).
             myTagger_ = tagger;
             myTagger_->Initialize();
             myTagger_->SetOptions(*myTaggerOptions_);
         }
 
-        // Load additional Jets
+        /**
+         * @brief Declare an additional jet collection (`define jet_algorithm`).
+         *
+         * @param options options: JetID, algorithm and cluster.* parameters.
+         * @return false for an unknown parameter or algorithm type.
+         */
         MAbool LoadJetConfiguration(std::map<std::string, std::string> options);
 
-        /// Accessor to the jet clusterer name
+        /**
+         * @brief Accessor to the name of the clustering algorithm.
+         *
+         * @return the name.
+         */
         std::string GetName();
 
-        /// Accessor to the tagger parameters
+        /** @brief Print the parameters of the tagger. */
         void TaggerParameters();
 
-        /// Print parameters
+        /** @brief Print the parameters of the clustering algorithm. */
         void PrintParam();
 
-        /// Accessor to the jet clusterer parameters
+        /**
+         * @brief Accessor to the parameters of the clustering algorithm.
+         *
+         * @return a printable summary.
+         */
         std::string GetParameters();
 
     private:
+        /**
+         * @brief Is the particle the last one of its type in its decay chain?
+         *
+         * @param part particle.
+         * @param myEvent event (unused).
+         * @return true if no daughter has the same PDG code.
+         */
         MAbool IsLast(const MCParticleFormat *part, EventFormat &myEvent);
+        /**
+         * @brief Collect the final-state descendants of a particle.
+         *
+         * @param part particle.
+         * @param finalstates set to extend.
+         */
         void GetFinalState(const MCParticleFormat *part, std::set<const MCParticleFormat *> &finalstates);
     };
 

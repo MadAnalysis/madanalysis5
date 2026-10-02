@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file RegionSelection.cpp
+ * @brief Implementation of MA5::RegionSelection.
+ */
+
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 
 

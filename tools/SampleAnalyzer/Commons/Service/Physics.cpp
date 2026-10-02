@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file Physics.cpp
+ * @brief Static members of MA5::PhysicsService.
+ */
+
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 
 

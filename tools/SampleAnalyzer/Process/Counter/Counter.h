@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file Counter.h
+ * @brief Counter of the events passing a cut, for each event weight.
+ */
+
 #ifndef COUNTER_h
 #define COUNTER_h
 
@@ -38,6 +43,13 @@ namespace MA5
 {
     class CounterManager;
 
+    /**
+     * @brief Counter of the events passing a cut.
+     *
+     * For each weight of the event (multiweight support), the number of entries, the sum of
+     * weights and the sum of squared weights are accumulated separately for positive and
+     * negative weights.
+     */
     class Counter
     {
         friend class CounterManager;
@@ -46,36 +58,37 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     public:
-        /// name of the analysis
+        /** @brief Name of the cut. */
         std::string name_;
 
-        /// number of times the function Increment is called
-        /// first = positive weight ; second = negative weight
+        /** @brief Number of entries, per weight (positive/negative weights). */
         std::vector<ENTRIES> nentries_;
 
-        /// sum of weights
-        /// first = positive weight ; second = negative weight
+        /** @brief Sum of the weights, per weight (positive/negative weights). */
         std::vector<WEIGHTS> sumweights_;
 
-        /// sum of squared weights
-        /// first = positive weight ; second = negative weight
+        /** @brief Sum of the squared weights, per weight (positive/negative weights). */
         std::vector<WEIGHTS> sumweights2_;
 
         // -------------------------------------------------------------
         //                       method members
         // -------------------------------------------------------------
     public:
-        /// Constructor without argument
+        /**
+         * @brief Constructor.
+         *
+         * @param name name of the cut.
+         */
         Counter(const std::string &name = "unkwown")
         {
             name_ = name;
             Reset();
         }
 
-        /// Destructor
+        /** @brief Destructor. */
         ~Counter() {}
 
-        /// Reset
+        /** @brief Remove all the entries. */
         void Reset()
         {
             nentries_.clear();
@@ -83,8 +96,18 @@ namespace MA5
             sumweights2_.clear();
         }
 
+        /**
+         * @brief Number of weights.
+         *
+         * @return the number of weights.
+         */
         MAint32 size() { return nentries_.size(); }
 
+        /**
+         * @brief Reset and size the counter for a given set of weights.
+         *
+         * @param multiweight weights of an event (only the size is used).
+         */
         void Initialise(const WeightCollection &multiweight)
         {
             Reset();
@@ -94,11 +117,30 @@ namespace MA5
             sumweights2_.resize(n);
         }
 
+        /**
+         * @brief Accessor to the numbers of entries.
+         *
+         * @return a copy of the numbers of entries.
+         */
         std::vector<ENTRIES> nentries() { return nentries_; }
+        /**
+         * @brief Accessor to the sums of weights.
+         *
+         * @return a copy of the sums.
+         */
         std::vector<WEIGHTS> sumW() { return sumweights_; }
+        /**
+         * @brief Accessor to the sums of squared weights.
+         *
+         * @return a copy of the sums.
+         */
         std::vector<WEIGHTS> sumW2() { return sumweights2_; }
 
-        /// Increment the counter
+        /**
+         * @brief Count an event.
+         *
+         * @param multiweight weights of the event.
+         */
         void Increment(const WeightCollection &multiweight)
         {
             for (MAuint32 idx = 0; idx < multiweight.size(); idx++)
@@ -113,6 +155,9 @@ namespace MA5
                 else
                 {
                     nentries_[idx].negative++;
+                    // FIXME: the negative weights are summed with their sign, whereas Histo stores their absolute value
+                    // and the Python cut-flow (CutFlowForDataset) computes positive minus negative sums: events with
+                    // negative weights are then added instead of subtracted.
                     sumweights_[idx].negative += w;
                     sumweights2_[idx].negative += w * w;
                 }

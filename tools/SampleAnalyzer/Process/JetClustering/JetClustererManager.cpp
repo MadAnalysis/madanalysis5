@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file JetClustererManager.cpp
+ * @brief Implementation of MA5::JetClustererManager.
+ */
+
 #include "SampleAnalyzer/Process/JetClustering/JetClustererManager.h"
 
 #ifdef FASTJET_USE

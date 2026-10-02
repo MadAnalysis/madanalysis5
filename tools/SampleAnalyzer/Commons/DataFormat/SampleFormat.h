@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file SampleFormat.h
+ * @brief Container of the information of a sample (file).
+ */
+
 #ifndef SAMPLE_DATAFORMAT_H
 #define SAMPLE_DATAFORMAT_H
 
@@ -48,6 +53,12 @@ namespace MA5
     class SampleAnalyzer;
 
 
+    /**
+     * @brief Sample (event file): name, number of events, generator, format and header.
+     *
+     * The generator-level and reconstruction-level information are allocated on demand
+     * with InitializeMC() and InitializeRec().
+     */
     class SampleFormat
     {
         friend class LHEReader;
@@ -59,12 +70,18 @@ namespace MA5
         // -------------------------------------------------------------
     private:
 
+        /** @brief Name of the file. */
         std::string                 name_;      /// file name
+        /** @brief Number of events in the file. */
         MAuint64                    nevents_;   /// number of events in the file
+        /** @brief Generator-level information (null if not initialised). */
         MCSampleFormat  *           mc_;
+        /** @brief Reconstruction-level information (null if not initialised). */
         RecSampleFormat *           rec_;
+        /** @brief Generator and format of the sample. */
         MA5GEN::GeneratorType       sample_generator_;
         MA5FORMAT::SampleFormatType sample_format_;
+        /** @brief Header lines of the file. */
         std::vector<std::string>    header_;    /// file header
 
 
@@ -73,7 +90,7 @@ namespace MA5
         // -------------------------------------------------------------
     public :
 
-        /// Constructor withtout arguments
+        /** @brief Constructor. */
         SampleFormat()
         {
             rec_=0;
@@ -84,49 +101,83 @@ namespace MA5
             header_.clear();
         }
 
-        /// Destructor
+        /** @brief Destructor (the MC/Rec parts are not freed: see Delete()). */
         ~SampleFormat()
         {
         }
 
-        /// Accessor to Monte Carlo information (read-only)
+        /**
+         * @brief Accessor to the generator-level information (read-only).
+         *
+         * @return the information, or 0 if not initialised.
+         */
         const MCSampleFormat * mc() const
         { return mc_; }
 
-        /// Accessor to reconstruction information (read-only)
+        /**
+         * @brief Accessor to the reconstruction-level information (read-only).
+         *
+         * @return the information, or 0 if not initialised.
+         */
         const RecSampleFormat * rec() const
         { return rec_; }
 
-        /// Accessor to Monte Carlo information
+        /**
+         * @brief Accessor to the generator-level information.
+         *
+         * @return the information, or 0 if not initialised.
+         */
         MCSampleFormat * mc()
         { return mc_; }
 
-        /// Accessor to reconstruction information
+        /**
+         * @brief Accessor to the reconstruction-level information.
+         *
+         * @return the information, or 0 if not initialised.
+         */
         RecSampleFormat * rec()
         { return rec_; }
 
-        /// Accessor to the sample name
+        /**
+         * @brief Accessor to the file name.
+         *
+         * @return the name.
+         */
         const std::string& name() const
         { return name_; }
 
-        /// Accessor to the number of events
+        /**
+         * @brief Accessor to the number of events.
+         *
+         * @return the number of events.
+         */
         const MAuint64& nevents() const
         { return nevents_; }
 
-        /// Set the sample name
+        /**
+         * @brief Set the file name.
+         *
+         * @param name file name.
+         */
         void setName(const std::string& name)
         {name_=name;}
 
-        /// Set the number of events in the sample
+        /**
+         * @brief Set the number of events.
+         *
+         * @param v number of events.
+         */
         void setNEvents(MAuint64 v)
         {nevents_=v;}
 
-        /// Initialize MonteCarlo part
+        /** @brief Allocate the generator-level information (warning if already done). */
         void InitializeMC()
         {
             try
             {
                 if (mc_!=0) throw EXCEPTION_WARNING("MC part of the SampleFormat is already initialized.","",0);
+                // NOTE: the MC part keeps a pointer to sample_generator_: copying a SampleFormat leaves it pointing
+                // to the original object.
                 mc_=new MCSampleFormat(&sample_generator_);
             }
             catch(const std::exception& e)
@@ -135,7 +186,7 @@ namespace MA5
             }
         }
 
-        /// Initialize Rec part
+        /** @brief Allocate the reconstruction-level information (warning if already done). */
         void InitializeRec()
         {
             try
@@ -149,30 +200,47 @@ namespace MA5
             }
         }
 
-        /// Free allocates memory
+        /** @brief Free the MC and Rec parts. */
         void Delete()
         {
+            // NOTE: the pointers are not reset to 0.
             if (rec_!=0) delete rec_;
             if (mc_!=0)  delete mc_;
         }
 
-        /// Set the Generator Format
+        /**
+         * @brief Set the generator of the sample.
+         *
+         * @param value generator.
+         */
         void SetSampleGenerator(MA5GEN::GeneratorType value)
         { sample_generator_ = value; }
 
-        /// Set the Sample Format
+        /**
+         * @brief Set the format of the sample.
+         *
+         * @param value format.
+         */
         void SetSampleFormat(MA5FORMAT::SampleFormatType value)
         { sample_format_ = value; }
 
-        /// Accessor to the Generator Format
+        /**
+         * @brief Accessor to the generator of the sample.
+         *
+         * @return the generator.
+         */
         const MA5GEN::GeneratorType& sampleGenerator() const
         { return sample_generator_; }
 
-        /// Accessor to the Sample Format
+        /**
+         * @brief Accessor to the format of the sample.
+         *
+         * @return the format.
+         */
         const MA5FORMAT::SampleFormatType& sampleFormat() const
         { return sample_format_; }
 
-        /// Displaying subtitle for file
+        /** @brief Print the format and the generator of the sample. */
         void printSubtitle() const
         {
             // Sample format
@@ -193,6 +261,7 @@ namespace MA5
                 INFO << "an unknown generator "
                      << "(cross section assumed in pb)";
             else if (sample_generator_==MA5GEN::MG5) INFO << "MadGraph5";
+            // NOTE: typo in the message ('MadAnalysi5').
             else if (sample_generator_==MA5GEN::MA5) INFO << "MadAnalysi5";
             else if (sample_generator_==MA5GEN::PYTHIA6) INFO << "Pythia6";
             else if (sample_generator_==MA5GEN::PYTHIA8) INFO << "Pythia8";
@@ -205,11 +274,19 @@ namespace MA5
             INFO << "." << endmsg;
         }
 
-        /// Accessor to the header
+        /**
+         * @brief Accessor to the header lines.
+         *
+         * @return the lines.
+         */
         const std::vector<std::string>& header() const
         { return header_; }
 
-        /// Mutator relative to the header
+        /**
+         * @brief Append a header line.
+         *
+         * @param line line.
+         */
         void AddHeader(const std::string& line)
         { header_.push_back(line); }
 

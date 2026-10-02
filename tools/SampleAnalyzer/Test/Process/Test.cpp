@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file Test.cpp
+ * @brief Smoke test of libprocess (SampleAnalyzer manager, plugin lists, JetClusterer).
+ */
+
 #include <cstdlib>
 #include <map>
 #include <string>
@@ -33,7 +38,14 @@
 using namespace MA5;
 
 // simple test helper
+/** @brief Number of failed checks. */
 static int g_failures = 0;
+/**
+ * @brief Print the result of a check and count the failures.
+ *
+ * @param name description of the check.
+ * @param cond result of the check.
+ */
 static void CHECK(const char *name, bool cond)
 {
     if (cond)
@@ -50,6 +62,16 @@ static void CHECK(const char *name, bool cond)
 // -----------------------------------------------------------------------
 // main program
 // -----------------------------------------------------------------------
+/**
+ * @brief Initialise a SampleAnalyzer manager, print the plugin lists and run a few smoke tests.
+ *
+ * The markers BEGIN-SAMPLEANALYZER-TEST / END-SAMPLEANALYZER-TEST are checked by the
+ * Python front-end (LibraryWriter, madanalysis/IOinterface/library_writer.py) to validate the build.
+ *
+ * @param argc number of command-line arguments.
+ * @param argv command-line arguments.
+ * @return 0 if all checks pass, 1 otherwise.
+ */
 MAint32 main(MAint32 argc, MAchar *argv[])
 {
     std::cout << "BEGIN-SAMPLEANALYZER-TEST" << std::endl;

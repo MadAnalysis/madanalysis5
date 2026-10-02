@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file PlotBase.h
+ * @brief Base class of the histograms.
+ */
+
 #ifndef PLOT_BASE_H
 #define PLOT_BASE_H
 
@@ -38,6 +43,13 @@
 namespace MA5
 {
 
+    /**
+     * @brief Base class of the histograms (statistics common to all histogram types).
+     *
+     * All the containers have one entry per event weight (multiweight support), each
+     * storing separately the contributions of positive and negative weights (the latter in
+     * absolute value).
+     */
     class PlotBase
     {
 
@@ -45,29 +57,29 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     protected:
-        /// Name of the plots
+        /** @brief Name of the histogram. */
         std::string name_;
 
-        /// @brief number of events. entries object includes positive and negative accessors
+        /** @brief Number of events (positive/negative weights), per weight. */
         std::vector<ENTRIES> nevents_;
 
-        /// @brief Number of entries
+        /** @brief Number of entries, per weight. */
         std::vector<ENTRIES> nentries_;
 
-        /// @brief Sum of event-weight over events
+        /** @brief Sum of the event weights over the events, per weight. */
         std::vector<WEIGHTS> nevents_w_;
 
-        /// Flag telling whether a given histo has already been modified for an event
+        /** @brief Has the histogram not been filled yet for the current event? */
         MAbool fresh_event_;
 
-        /// @brief is the plot initialised
+        /** @brief Have the containers been sized for the event weights? */
         MAbool initialised_;
 
         // -------------------------------------------------------------
         //                       method members
         // -------------------------------------------------------------
     public:
-        /// Constructor without argument
+        /** @brief Constructor. */
         PlotBase()
         {
             // Reseting statistical counters
@@ -75,7 +87,11 @@ namespace MA5
             initialised_ = false;
         }
 
-        /// Constructor with argument
+        /**
+         * @brief Constructor.
+         *
+         * @param name name of the histogram.
+         */
         PlotBase(const std::string &name)
         {
             name_ = name;
@@ -83,27 +99,47 @@ namespace MA5
             initialised_ = false;
         }
 
-        /// Destructor
+        /** @brief Destructor. */
         virtual ~PlotBase() {}
 
-        /// Accesor for fresh_event
+        /**
+         * @brief Has the histogram not been filled yet for the current event?
+         *
+         * @return the flag.
+         */
         MAbool FreshEvent() { return fresh_event_; }
 
-        /// Modifier for fresh_event
+        /**
+         * @brief Set the fresh-event flag (the containers are sized at the first call).
+         *
+         * @param tag flag.
+         * @param EventWeight weights of the event.
+         */
         void SetFreshEvent(MAbool tag, const WeightCollection &EventWeight)
         {
             Initialize(EventWeight);
             fresh_event_ = tag;
         }
 
-        /// Write the plot in a ROOT file
+        /**
+         * @brief Write the histogram in the SAF format.
+         *
+         * @param output output stream.
+         */
         virtual void Write_TextFormat(std::ostream *output) = 0;
 
-        /// @brief Initialiser for the classes that inherits this class
+        /**
+         * @brief Size the containers specific to the derived class.
+         *
+         * @param multiweight weights of an event (only the size is used).
+         */
         virtual void _initialize(const WeightCollection &multiweight) = 0;
 
-        /// @brief Initialise the containers
-        /// @param multiweight multiweight collection
+        /**
+         * @brief Size the containers (only once).
+         *
+         * @param multiweight weights of an event (only the size is used).
+         */
         void Initialize(const WeightCollection &multiweight)
         {
             if (!initialised_)
@@ -117,7 +153,11 @@ namespace MA5
             }
         }
 
-        /// Increment number of events
+        /**
+         * @brief Count an event.
+         *
+         * @param weights weights of the event.
+         */
         void IncrementNEvents(const WeightCollection &weights)
         {
             for (MAuint32 idx = 0; idx < weights.size(); idx++)
@@ -137,10 +177,18 @@ namespace MA5
             fresh_event_ = false;
         }
 
-        /// Return Number of events
+        /**
+         * @brief Accessor to the numbers of events.
+         *
+         * @return the numbers of events, per weight.
+         */
         const std::vector<ENTRIES> &GetNEvents() { return nevents_; }
 
-        // Return the name
+        /**
+         * @brief Accessor to the name.
+         *
+         * @return the name.
+         */
         std::string GetName() { return name_; }
     };
 

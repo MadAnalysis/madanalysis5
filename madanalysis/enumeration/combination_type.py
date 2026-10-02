@@ -22,20 +22,60 @@
 ################################################################################
 
 
+"""Types of combinations of particles in observables (e.g. ``sPT``, ``dM``, ``rPT``)."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
+        """Metaclass turning the class attribute access ``CombinationType.NAME`` into an integer code.
 
-        def __getattr__(self, name):
+        Accessing ``CombinationType.NAME`` returns the index of ``NAME`` in ``CombinationType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
+
+        def __getattr__(self, name: str) -> int:
+            """Get the integer code of an enumeration entry.
+
+            Args:
+                name (``str``): name of the entry (e.g. ``CombinationType.SUMSCALAR``).
+
+            Raises:
+                ``ValueError``: if ``name`` is not a key of ``values``.
+
+            Returns:
+                ``int``:
+                Index of the entry in ``values``.
+            """
             return list(self.values.keys()).index(name)
 
-        def convert_from_string(self,lowerletters):
+        def convert_from_string(self,lowerletters: str) -> int:
+            """Get the combination code associated with an observable prefix.
+
+            Args:
+                lowerletters (``str``): prefix (e.g. ``'s'``, ``'dv'``, ``''``).
+
+            Returns:
+                ``int``:
+                Code of the combination, or the code of ``UNKNOWN`` if the prefix is not
+                recognised.
+            """
             for i,j in self.values.items():
                 if lowerletters in j:
                     return self.__getattr__(i)
             return self.__getattr__('UNKNOWN')
 
-        def convert2string(self,index):
+        def convert2string(self,index: int) -> str:
+            """Get the canonical prefix of a combination.
+
+            Args:
+                index (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                First accepted prefix, or ``'ERROR'`` for ``UNKNOWN``.
+            """
             if index==self.__getattr__('UNKNOWN'):
                 return 'ERROR'
             else:
@@ -46,6 +86,12 @@ class metaclass(type):
 
 @six.add_metaclass(metaclass)
 class CombinationType(object):
+    """Particle-combination prefixes of observables.
+
+    Each entry of ``values`` lists the accepted prefixes: ``s`` (scalar sum),
+    ``v`` (vector sum), ``ds``/``sd`` (scalar difference), ``d``/``dv``/``vd`` (vector
+    difference) and ``r`` (ratio). ``DEFAULT`` corresponds to no prefix.
+    """
     values = { 'UNKNOWN'    : [],\
                'DEFAULT'    : [''],\
                'SUMSCALAR'  : ['s'],\

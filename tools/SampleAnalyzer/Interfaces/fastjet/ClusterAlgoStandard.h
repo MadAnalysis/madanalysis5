@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ClusterAlgoStandard.h
+ * @brief Kt, anti-kt, Cambridge/Aachen and generalised-kt algorithms (pp or e+e- versions) (FastJet).
+ */
+
 #ifndef JETCLUSTERING_H
 #define JETCLUSTERING_H
 
@@ -32,6 +37,7 @@
 namespace MA5
 {
 
+/** @brief Jet clustering with the kt, anti-kt, Cambridge/Aachen and generalised-kt algorithms (pp or e+e- versions). */
 class ClusterAlgoStandard: public ClusterAlgoFastJet
 {
 //---------------------------------------------------------------------------------
@@ -39,13 +45,13 @@ class ClusterAlgoStandard: public ClusterAlgoFastJet
 //---------------------------------------------------------------------------------
   private :
 
-    /// jet-radius parameter
+    /** @brief Jet radius. */
     MAfloat64 R_;
 
-    /// generalised kt parameter
+    /** @brief Exponent of the generalised-kt algorithm. */
     MAfloat64 p_;
 
-    /// nature of the collision (True=pp,False=ee)
+    /** @brief Type of collisions (true: pp, false: e+e-). */
     MAbool collision_;
     
 //---------------------------------------------------------------------------------
@@ -53,30 +59,56 @@ class ClusterAlgoStandard: public ClusterAlgoFastJet
 //---------------------------------------------------------------------------------
   public :
 
-    /// Constructor with algorithm
+    /**
+     * @brief Constructor (R = 0.5, p = -1, pp collisions).
+     *
+     * @param Algo algorithm: kt, antikt, cambridge or genkt.
+     */
     ClusterAlgoStandard(std::string Algo): ClusterAlgoFastJet(Algo) 
     {R_=0.5; p_=-1.; collision_=true;}
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~ClusterAlgoStandard() 
     { }
 
-    /// Initialization
+    /**
+     * @brief Create the FastJet jet definition.
+     *
+     * @return false for an unknown algorithm.
+     */
     virtual MAbool Initialize();
 
-    /// Set parameter
+    /**
+     * @brief Set a parameter (`r`, `ptmin`, `p`, `collision` (pp/ee) and `exclusive`).
+     *
+     * @param key parameter name (lower case).
+     * @param value value.
+     * @return false for an unknown parameter.
+     */
     virtual MAbool SetParameter(const std::string& key, const std::string& value);
 
-    /// Print parameters
+    /** @brief Print the parameters. */
     virtual void PrintParam();
 
-    /// Accessor to the jet clusterer name
+    /**
+     * @brief Accessor to the name of the algorithm.
+     *
+     * @return the name.
+     */
     virtual std::string GetName();
 
-    /// Accessor to the jet clusterer parameters
+    /**
+     * @brief Accessor to the parameters.
+     *
+     * @return a printable summary.
+     */
     virtual std::string GetParameters();
 
-    /// Accessor to the collision type
+    /**
+     * @brief Accessor to the type of collisions.
+     *
+     * @return "pp" or "ee".
+     */
     std::string GetCollisionType() const;
 
 };

@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file StatusCode.h
+ * @brief Status returned by the event readers.
+ */
+
 #ifndef StatusCode_h
 #define StatusCode_h
 
@@ -33,9 +38,11 @@
 namespace MA5
 {
 
+  /** @brief Status returned when reading an event. */
   class StatusCode
   {
   public:
+    /** @brief KEEP: event read; SKIP: event to be skipped; FAILURE: end of file or error. */
     enum Type {KEEP=0, SKIP=1, FAILURE=2};
   };
 

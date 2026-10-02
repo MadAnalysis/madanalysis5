@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file WriterManager.cpp
+ * @brief Implementation of MA5::WriterManager.
+ */
+
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Process/Writer/WriterManager.h"
 #include "SampleAnalyzer/Process/Writer/LHEWriter.h"

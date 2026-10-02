@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file IsolationCalorimeter.h
+ * @brief Isolation based on the calorimeter towers.
+ */
+
 #ifndef ISOLATIONCALORIMETER_SERVICE_h
 #define ISOLATIONCALORIMETER_SERVICE_h
 
@@ -36,6 +41,13 @@
 namespace MA5
 {
 
+/**
+ * @brief Isolation based on the calorimeter towers.
+ *
+ * The pT of the particle is subtracted from the sum for photons and electrons
+ * (muons deposit little energy in the calorimeter).
+ */
+// NOTE: private inheritance (no 'public'): the object cannot be used through an IsolationBase pointer.
 class IsolationCalorimeter : IsolationBase
 {
   // -------------------------------------------------------------
@@ -46,19 +58,37 @@ class IsolationCalorimeter : IsolationBase
 
   public:
 
-    /// Constructor
+    /** @brief Constructor. */
     IsolationCalorimeter() {}
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~IsolationCalorimeter() {}
 
     // -------------------------------------------------------------
     //                Isolation of one particle
     // -------------------------------------------------------------
 
+    /**
+     * @brief Relative isolation of a lepton (sumIsolation / pT).
+     *
+     * @param part particle.
+     * @param event reconstructed event.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the relative isolation (0 for null pointers, 999 for pT = 0).
+     */
     virtual MAfloat64 relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
     { return relIsolation(&part, event, DR, PTmin); }
 
+    /**
+     * @brief Relative isolation of a lepton (sumIsolation / pT).
+     *
+     * @param part particle.
+     * @param event reconstructed event.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the relative isolation (0 for null pointers, 999 for pT = 0).
+     */
     virtual MAfloat64 relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
     {
       if (part==0) return 0;
@@ -67,9 +97,27 @@ class IsolationCalorimeter : IsolationBase
       return sumIsolation(part,event,DR,PTmin)/part->pt();
     }
 
+    /**
+     * @brief Absolute isolation of a lepton.
+     *
+     * @param part particle.
+     * @param event reconstructed event.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the absolute isolation (0 for null pointers).
+     */
     virtual MAfloat64 sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
     { return sumIsolation(&part, event, DR, PTmin); }
 
+    /**
+     * @brief Absolute isolation of a lepton.
+     *
+     * @param part particle.
+     * @param event reconstructed event.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the absolute isolation (0 for null pointers).
+     */
     virtual MAfloat64 sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
     {
       if (part==0) return 0;
@@ -80,9 +128,27 @@ class IsolationCalorimeter : IsolationBase
       return sum;
     }
 
+    /**
+     * @brief Relative isolation of a photon (sumIsolation / pT).
+     *
+     * @param part particle.
+     * @param event reconstructed event.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the relative isolation (0 for null pointers, 999 for pT = 0).
+     */
     virtual MAfloat64 relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
     { return relIsolation(&part, event, DR, PTmin); }
 
+    /**
+     * @brief Relative isolation of a photon (sumIsolation / pT).
+     *
+     * @param part particle.
+     * @param event reconstructed event.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the relative isolation (0 for null pointers, 999 for pT = 0).
+     */
     virtual MAfloat64 relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
     {
       if (part==0) return 0;
@@ -91,9 +157,27 @@ class IsolationCalorimeter : IsolationBase
       return (sumIsolation(part,event,DR,PTmin)/part->pt());
     }
 
+    /**
+     * @brief Absolute isolation of a photon.
+     *
+     * @param part particle.
+     * @param event reconstructed event.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the absolute isolation (0 for null pointers).
+     */
     virtual MAfloat64 sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
     { return sumIsolation(&part, event, DR, PTmin); }
 
+    /**
+     * @brief Absolute isolation of a photon.
+     *
+     * @param part particle.
+     * @param event reconstructed event.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the absolute isolation (0 for null pointers).
+     */
     virtual MAfloat64 sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
     {
       if (part==0) return 0;
@@ -108,6 +192,16 @@ class IsolationCalorimeter : IsolationBase
     //                Isolation of one collection
     // -------------------------------------------------------------
 
+    /**
+     * @brief Select the isolated leptons.
+     *
+     * @param leptons collection.
+     * @param event reconstructed event.
+     * @param threshold maximum relative isolation.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the leptons with a relative isolation below the threshold.
+     */
     virtual std::vector<const RecLeptonFormat*> getRelIsolated(const std::vector<RecLeptonFormat>& leptons, 
                                                                const RecEventFormat* event, 
                                                                const MAfloat64& threshold, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
@@ -117,6 +211,16 @@ class IsolationCalorimeter : IsolationBase
       return getRelIsolated(isolated, event, threshold, DR, PTmin);
     }
 
+    /**
+     * @brief Select the isolated leptons.
+     *
+     * @param leptons collection.
+     * @param event reconstructed event.
+     * @param threshold maximum relative isolation.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the leptons with a relative isolation below the threshold.
+     */
     virtual std::vector<const RecLeptonFormat*> getRelIsolated(const std::vector<const RecLeptonFormat*>& leptons, 
                                                                const RecEventFormat* event, 
                                                                const MAfloat64& threshold, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
@@ -131,6 +235,16 @@ class IsolationCalorimeter : IsolationBase
     }
 
 
+    /**
+     * @brief Select the isolated photons.
+     *
+     * @param photons collection.
+     * @param event reconstructed event.
+     * @param threshold maximum relative isolation.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the photons with a relative isolation below the threshold.
+     */
     virtual std::vector<const RecPhotonFormat*> getRelIsolated(const std::vector<RecPhotonFormat>& photons, 
                                                                const RecEventFormat* event, 
                                                                const MAfloat64& threshold, const MAfloat64& DR, MAfloat64 PTmin=0.5) const
@@ -140,6 +254,16 @@ class IsolationCalorimeter : IsolationBase
       return getRelIsolated(isolated, event, threshold, DR, PTmin);
     }
 
+    /**
+     * @brief Select the isolated photons.
+     *
+     * @param photons collection.
+     * @param event reconstructed event.
+     * @param threshold maximum relative isolation.
+     * @param DR cone radius.
+     * @param PTmin minimum pT of the objects in the cone.
+     * @return the photons with a relative isolation below the threshold.
+     */
     virtual std::vector<const RecPhotonFormat*> getRelIsolated(const std::vector<const RecPhotonFormat*>& photons, 
                                                                const RecEventFormat* event, 
                                                                const MAfloat64& threshold, const MAfloat64& DR, MAfloat64 PTmin=0.5) const

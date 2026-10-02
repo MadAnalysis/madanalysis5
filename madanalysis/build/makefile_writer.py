@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Writer of the Makefiles of the SampleAnalyzer libraries, test programs and jobs."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import IO, Any
 
 import logging
 import os
@@ -32,8 +36,12 @@ from string_tools import StringTools  # pylint: disable=import-error
 
 
 class MakefileWriter:
+    """Static helpers writing Makefiles."""
     class UserfriendlyMakefileOptions:
-        def __init__(self):
+        """Options of the global SampleAnalyzer Makefile (see :meth:`MakefileWriter.UserfriendlyMakefileForSampleAnalyzer`).
+        """
+        def __init__(self) -> None:
+            """Disable all components."""
             self.has_root = False
             self.has_commons = False
             self.has_process = False
@@ -43,7 +51,12 @@ class MakefileWriter:
             self.has_delphesMA5tune = False
 
     @staticmethod
-    def DefineColours(file):
+    def DefineColours(file: IO[str]) -> None:
+        """Write the Makefile variables defining the terminal colours.
+
+        Args:
+            file (``IO[str]``): Makefile being written.
+        """
         file.write("# Defining colours\n")
         file.write('GREEN  = "\\\\033[1;32m"\n')
         file.write('RED    = "\\\\033[1;31m"\n')
@@ -55,7 +68,21 @@ class MakefileWriter:
         file.write("\n")
 
     @staticmethod
-    def UserfriendlyMakefileForSampleAnalyzer(filename, options):
+    def UserfriendlyMakefileForSampleAnalyzer(filename: str, options: Any) -> bool:
+        """Write a global Makefile building all SampleAnalyzer components.
+
+        .. note::
+            Currently unused (the call in :meth:`madanalysis.core.main.Main.BuildLibrary` is
+            commented out).
+
+        Args:
+            filename (``str``): path of the Makefile.
+            options (``UserfriendlyMakefileOptions``): components to build.
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` if the file cannot be written.
+        """
 
         # Open the Makefile
         try:
@@ -162,7 +189,15 @@ class MakefileWriter:
         return True
 
     class MakefileOptions:
-        def __init__(self):
+        """Options of a component Makefile (see :meth:`MakefileWriter.Makefile`).
+
+        The flags select, for each external package, whether its preprocessor tag
+        (``*_tag``), its headers (``*_inc``), its libraries (``*_lib``) and the corresponding
+        MadAnalysis 5 interface library (``*_ma5lib``) are used. ``remove_fastjet_lib``
+        disables the linking of the FastJet libraries (to avoid conflicts with ROOT).
+        """
+        def __init__(self) -> None:
+            """Disable all options."""
             self.isMac = False
             self.has_commons = False
             self.has_process = False
@@ -201,18 +236,45 @@ class MakefileWriter:
 
     @staticmethod
     def Makefile(
-        MakefileName,
-        title,
-        ProductName,
-        ProductPath,
-        isLibrary,
-        cppfiles,
-        hfiles,
-        options,
-        archi_info,
-        toRemove,
-        moreIncludes=[],
-    ):
+        MakefileName: str,
+        title: str,
+        ProductName: str,
+        ProductPath: str,
+        isLibrary: bool,
+        cppfiles: list[str],
+        hfiles: list[str],
+        options: Any,
+        archi_info: Any,
+        toRemove: list[str],
+        moreIncludes: list[str] = [],
+    ) -> bool:
+        """Write the Makefile of a library or program.
+
+        The Makefile defines the compiler (ROOT's compiler if available), the compilation
+        flags (``-std=c++11 -O3 -fPIC`` plus package-dependent flags and the warning level
+        given by ``archi_info.compilation_severity``), the linking flags, the source and
+        header files and the ``all``, ``compile``, ``link``, ``clean`` and ``mrproper``
+        targets.
+
+        As a side effect, ``FASTJET_FLAG`` is set in the environment when FastJet is linked.
+
+        Args:
+            MakefileName (``str``): path of the Makefile.
+            title (``str``): title written in the header.
+            ProductName (``str``): name of the library or executable.
+            ProductPath (``str``): folder where the product is written.
+            isLibrary (``bool``): ``True`` for a shared library, ``False`` for an executable.
+            cppfiles (``list[str]``): wildcard patterns of the source files.
+            hfiles (``list[str]``): wildcard patterns of the header files.
+            options (``MakefileOptions``): packages to use.
+            archi_info (``ArchitectureInfo``): detected configuration.
+            toRemove (``list[str]``): extra files removed by ``make clean``/``mrproper``.
+            moreIncludes (``list[str]``, default ``[]``): extra include folders.
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` if the file cannot be written.
+        """
 
         # Open the Makefile
         try:
@@ -402,6 +464,7 @@ class MakefileWriter:
             file.write("LIBFLAGS += " + " ".join(libs) + "\n")
 
         # - root
+        # NOTE: the inner test below is redundant with this one.
         if options.has_root_ma5lib:
             libs = []
             if options.has_root_ma5lib:
@@ -425,6 +488,7 @@ class MakefileWriter:
 
         # - fastjet
         if options.has_fastjet_ma5lib or options.has_fastjet_lib:
+            # NOTE: side effect on the environment of the Python process.
             os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
             libs = []
             if options.has_fastjet_ma5lib:
@@ -468,7 +532,11 @@ class MakefileWriter:
             if options.has_delphesMA5tune_ma5lib:
                 libs.extend(["-ldelphesMA5tune_for_ma5"])
             if options.has_delphesMA5tune_lib:
-                libs.extend(["-lDelphesMA5tune"])
+                libs.append("-lDelphesMA5tune")
+                if any(os.path.isfile(os.path.join(archi_info.root_lib_path, filename)) for filename in ("libMinuit.so", "libMinuit.dylib", "libMinuit.a")):
+                    libs.append("-lMinuit")
+                else:
+                    logging.getLogger("MA5").warning("ROOT Minuit library not found: cms_sus_13_011 cannot be linked and is unavailable.")
             file.write("LIBFLAGS += " + " ".join(libs) + "\n")
 
         # Substructure module

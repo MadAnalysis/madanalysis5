@@ -22,31 +22,90 @@
 ################################################################################
 
 
+"""Subscript/superscript markers of the reports."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
-        def __getattr__(self, name):
+        """Metaclass turning the class attribute access ``ScriptType.NAME`` into an integer code.
+
+        Accessing ``ScriptType.NAME`` returns the index of ``NAME`` in ``ScriptType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
+        def __getattr__(self, name: str) -> int:
+                """Get the integer code of an enumeration entry.
+
+                Args:
+                    name (``str``): name of the entry (e.g. ``ScriptType.SUB``).
+
+                Raises:
+                    ``ValueError``: if ``name`` is not a key of ``values``.
+
+                Returns:
+                    ``int``:
+                    Index of the entry in ``values``.
+                """
                 return list(self.values.keys()).index(name)
 
-        def latexscript(self,script):
+        def latexscript(self,script: int) -> str:
+                """Get the LaTeX opening marker.
+
+                Args:
+                    script (``int``): integer code of the entry.
+
+                Returns:
+                    ``str``:
+                    E.g. ``'$_{'``.
+                """
                 name = list(self.values.keys())[script]
                 return self.values[name][0]
 
-        def latexscriptclose(self,script):
+        def latexscriptclose(self,script: int) -> str:
+                """Get the LaTeX closing marker.
+
+                Args:
+                    script (``int``): integer code of the entry.
+
+                Returns:
+                    ``str``:
+                    E.g. ``'}$'``.
+                """
                 name = list(self.values.keys())[script]
                 return self.values[name][1]
 
-        def htmlscript(self,script):
+        def htmlscript(self,script: int) -> str:
+                """Get the HTML opening tag.
+
+                Args:
+                    script (``int``): integer code of the entry.
+
+                Returns:
+                    ``str``:
+                    E.g. ``'<sub>'``.
+                """
                 name = list(self.values.keys())[script]
                 return self.values[name][2]
         
-        def htmlscriptclose(self,script):
+        def htmlscriptclose(self,script: int) -> str:
+                """Get the HTML closing tag.
+
+                Args:
+                    script (``int``): integer code of the entry.
+
+                Returns:
+                    ``str``:
+                    E.g. ``'</sub>'``.
+                """
                 name = list(self.values.keys())[script]
                 return self.values[name][3]
 
 
 @six.add_metaclass(metaclass)
 class ScriptType(object):
+        """Scripts. Each entry of ``values`` is ``[latex_open, latex_close, html_open, html_close]``.
+        """
         values = {'none' : ['','','',''],\
                           'SUB'   : ['$_{','}$','<sub>','</sub>'],\
                           'SUP'   : ['$^{','}$','<sup>','</sup>']}

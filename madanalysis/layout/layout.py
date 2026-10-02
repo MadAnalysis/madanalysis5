@@ -22,7 +22,21 @@
 ################################################################################
 
 
+"""Post-processing of a job: cut-flows, histograms, plots and HTML/LaTeX reports.
+
+:class:`Layout` gathers the results read from the SAF files (cut-flows, histograms,
+merging plots), generates the plotting scripts and runs them with ROOT or
+Matplotlib, then writes and compiles the reports.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, Union
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.dataset.dataset import Dataset
+    from madanalysis.interpreter.history import History
 from madanalysis.enumeration.sb_ratio_type             import SBratioType
 from madanalysis.enumeration.color_type                import ColorType
 from madanalysis.enumeration.cut_type                  import CutType
@@ -49,8 +63,24 @@ import logging
 from six.moves import range
 
 class Layout:
+    """Results of a job and report generator.
 
-    def __init__(self,main):
+    Attributes:
+        main (``Main``): session state.
+        input_path (``str``): job folder.
+        cutflow (``CutFlow``): cut-flows.
+        plotflow (``PlotFlow``): histograms.
+        merging (``MergingPlots``): DJR merging plots.
+        logger (``logging.Logger``): the ``MA5`` logger.
+        pdffile (``str``): path of the PDF report (set by :meth:`GenerateReport`).
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Create the containers of the results.
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main         = main
         self.input_path   = self.main.lastjob_name
         self.cutflow      = CutFlow(self.main)
@@ -58,7 +88,8 @@ class Layout:
         self.merging      = MergingPlots(self.main)
         self.logger       = logging.getLogger('MA5')
 
-    def Initialize(self):
+    def Initialize(self) -> None:
+        """Compute the cut-flow efficiencies and prepare the histograms."""
 
         # Calculating cut efficiencies
         self.cutflow.Initialize()
@@ -68,7 +99,16 @@ class Layout:
         self.merging.Initialize()
 
     @staticmethod
-    def DisplayInteger(value):
+    def DisplayInteger(value: int) -> str:
+        """Format an integer with thousands separators.
+
+        Args:
+            value (``int``): integer.
+
+        Returns:
+            ``str``:
+            The formatted integer (empty if ``value`` is not an ``int``).
+        """
         if type(value) is not int:
             return ""
         if value<0:
@@ -76,12 +116,23 @@ class Layout:
         elif value < 1000:
             return str(value)
         else:
+            # FIXME: '/' is a float division in Python 3: the recursive call returns '' for values >= 1000.
             return Layout.DisplayInteger(value / 1000) +\
                    "," + '%03d' % (value % 1000)
 
 
     @staticmethod
-    def Round_to_Ndigits(x,N):
+    def Round_to_Ndigits(x: float,N: int) -> str:
+        """Format a number with ``N`` significant digits (large numbers are kept integral).
+
+        Args:
+            x (``float``): number.
+            N (``int``): number of significant digits.
+
+        Returns:
+            ``str``:
+            The formatted number (``'nan'``/``'inf'`` for special values, empty if ``N < 1``).
+        """
         # Safety 1
         if N<1:
             return ""
@@ -104,7 +155,17 @@ class Layout:
 
 
     @staticmethod
-    def DisplayXsection(xsection,xerror):
+    def DisplayXsection(xsection: float,xerror: float) -> str:
+        """Format a cross section with its relative uncertainty (``value @ error%``).
+
+        Args:
+            xsection (``float``): cross section.
+            xerror (``float``): absolute uncertainty.
+
+        Returns:
+            ``str``:
+            The formatted cross section.
+        """
         # xsection and xerror are null
         if xsection==0. and xerror==0.:
             return "0.0 @ 0.0%"
@@ -125,7 +186,17 @@ class Layout:
 
 
     @staticmethod
-    def DisplayXsecCut(xsection,xerror):
+    def DisplayXsecCut(xsection: float,xerror: float) -> str:
+        """Format a number with its uncertainty (``value +/- error``) with consistent precision.
+
+        Args:
+            xsection (``float``): value.
+            xerror (``float``): absolute uncertainty.
+
+        Returns:
+            ``str``:
+            The formatted value.
+        """
         # xsection and xerror are null
         if xsection==0. and xerror==0.:
             return "0.0 +/- 0.0"
@@ -162,7 +233,19 @@ class Layout:
 
 
 
-    def DoPlots(self,histo_path,modes,output_paths):
+    def DoPlots(self,histo_path: str,modes: list[int],output_paths: list[str]) -> bool:
+        """Write the plotting scripts and run them with the selected graphical renderer.
+
+        Args:
+            histo_path (``str``): folder of the scripts.
+            modes (``list[int]``): report formats
+                (:class:`~madanalysis.enumeration.report_format_type.ReportFormatType`).
+            output_paths (``list[str]``): report folders (one per format).
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
 
         ListPlots = []
         
@@ -192,7 +275,17 @@ class Layout:
         return True
 
 
-    def CopyLogo(self,mode,output_path):
+    def CopyLogo(self,mode: int,output_path: str) -> bool:
+        """Copy the MadAnalysis 5 logo (in the format of the report) to a report folder.
+
+        Args:
+            mode (``int``): report format.
+            output_path (``str``): report folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` otherwise.
+        """
         
         # Filename
         filename = self.main.archi_info.ma5dir+"/madanalysis/input/" + \
@@ -215,7 +308,14 @@ class Layout:
             self.logger.error(" "+filename)
             return False
 
-    def WriteDatasetTable(self,report,dataset):
+    def WriteDatasetTable(self,report: HTMLReportWriter | LATEXReportWriter,dataset: Dataset) -> None:
+        """Write the description of a dataset (type, number of events, cross section, weights,
+        statistical significance) and the table of its files.
+
+        Args:
+            report (``HTMLReportWriter | LATEXReportWriter``): report being written.
+            dataset (``Dataset``): dataset.
+        """
 
         # Datatype
         datatype="signal"
@@ -285,6 +385,7 @@ class Layout:
         # Number of events after normalization, with the error
         text.Add('Normalization to the luminosity: ')
         text.SetColor(ColorType.BLUE)
+        # NOTE: the dataset weight is not applied when the user cross section is used.
         if dataset.xsection != 0.0:
             nlumi = int(dataset.xsection * 1000 * self.main.lumi)
         else:
@@ -444,6 +545,7 @@ class Layout:
           report.NewCell()
           text.Add('        ')
           text.SetColor(color)
+          # FIXME: 'ind' is a leftover index (last file): the test should use measured_global.
           if (dataset.measured_detail[ind].sumw_positive +\
               dataset.measured_detail[ind].sumw_negative)==0:
               text.Add(str(0.0))
@@ -462,7 +564,18 @@ class Layout:
         text.Reset()
 
     # Writing Final Table
-    def WriteFinalTable(self,report,cutinfo):
+    def WriteFinalTable(self,report: HTMLReportWriter | LATEXReportWriter,cutinfo: list[list[Any]]) -> bool | None:
+        """Write the summary cut-flow table (signal, background and figure of merit) of each
+        region.
+
+        Args:
+            report (``HTMLReportWriter | LATEXReportWriter``): report being written.
+            cutinfo (``list[list[Any]]``): ``[description, regions, cut_type]`` of every cut.
+
+        Returns:
+            ``bool | None``:
+            ``False`` if the cut-flows are inconsistent, ``None`` otherwise.
+        """
         # Information
         report.OpenBullet()
         text=TextReport()
@@ -679,7 +792,18 @@ class Layout:
             report.EndTable()
 
     # Writing Efficiency Table
-    def WriteEfficiencyTable(self,index,icut,report):
+    def WriteEfficiencyTable(self,index: int,icut: int,report: HTMLReportWriter | LATEXReportWriter) -> bool | None:
+        """Write the efficiency table of an event cut (per region and dataset).
+
+        Args:
+            index (``int``): index of the cut in the selection.
+            icut (``int``): 0-based index of the cut among the event cuts.
+            report (``HTMLReportWriter | LATEXReportWriter``): report being written.
+
+        Returns:
+            ``bool | None``:
+            ``False`` if the cut-flows are inconsistent, ``None`` otherwise.
+        """
         warning_test = False
         text=TextReport()
         myregs = self.main.selection[index].regions
@@ -793,6 +917,7 @@ class Layout:
                 report.WriteText(text)
                 report.NewLine()
                 for item in warnings:
+                    # FIXME: 'item' is unused: the warnings of the last dataset/cut are printed for every entry.
                     for line in self.cutflow.detail[i].warnings[id_flow][id_cut]:
                         report.NewCell()
                         text.Reset()
@@ -804,7 +929,13 @@ class Layout:
 
 
     # Writing Statistics Table
-    def WriteStatisticsTable(self,index,report):
+    def WriteStatisticsTable(self,index: int,report: HTMLReportWriter | LATEXReportWriter) -> None:
+        """Write the statistics table of a histogram (entries, mean, RMS, under/overflow).
+
+        Args:
+            index (``int``): index of the histogram among the histograms.
+            report (``HTMLReportWriter | LATEXReportWriter``): report being written.
+        """
         text=TextReport()
 #        text.Add("Statistics table")
         report.CreateTable([2.6,2.5,2.0,2.1,2.1,2.1,2.1],text)
@@ -906,6 +1037,7 @@ class Layout:
                 report.NewCell(ColorType.GREEN)
             if uflow_percent+oflow_percent>5 and uflow_percent+oflow_percent<15:
                 report.NewCell(ColorType.ORANGE)
+            # FIXME: a total of exactly 15% opens no cell (the table is misaligned); same below.
             if uflow_percent+oflow_percent>15:
                 report.NewCell(ColorType.RED)
             text.Reset()
@@ -948,7 +1080,13 @@ class Layout:
             report.EndTable()
 
     # Writing Statistics Table
-    def WriteStatisticsTablePID(self,index,report):
+    def WriteStatisticsTablePID(self,index: int,report: HTMLReportWriter | LATEXReportWriter) -> None:
+        """Write the statistics table of a ``NPID``/``NAPID`` histogram.
+
+        Args:
+            index (``int``): index of the histogram among the histograms.
+            report (``HTMLReportWriter | LATEXReportWriter``): report being written.
+        """
         text=TextReport()
         text.Add("Statistics table")
         report.CreateTable([2.6,4.1,2.3],text)
@@ -1029,7 +1167,18 @@ class Layout:
             report.EndTable()
 
 
-    def CreateFolders(self,histo_folder,output_paths,modes):
+    def CreateFolders(self,histo_folder: str,output_paths: list[str],modes: list[int]) -> bool:
+        """Create the folders of the plotting scripts and of the reports (with the logo).
+
+        Args:
+            histo_folder (``str``): folder of the plotting scripts.
+            output_paths (``list[str]``): report folders.
+            modes (``list[int]``): report formats.
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` otherwise.
+        """
 
         # Creating histo folder
         if not FolderWriter.CreateDirectory(histo_folder,True):
@@ -1048,7 +1197,21 @@ class Layout:
         return True
 
 
-    def GenerateReport(self,history,output_path,mode):
+    def GenerateReport(self,history: History,output_path: str,mode: int) -> bool:
+        """Write a report (HTML, LaTeX or pdfLaTeX source).
+
+        The report contains the command history, the configuration, the datasets, the
+        merging plots, one section per plot/cut and the summary cut-flow table.
+
+        Args:
+            history (``History``): command history.
+            output_path (``str``): report folder.
+            mode (``int``): report format.
+
+        Returns:
+            ``bool``:
+            ``False`` if the report cannot be opened, ``True`` otherwise.
+        """
         # Find a name for PDF file
         ma5_id = output_path.split('/')[-1]
         if self.main.session_info.has_pdflatex:
@@ -1280,20 +1443,42 @@ class Layout:
 
 
     @staticmethod
-    def CheckLatexLog(file):
+    def CheckLatexLog(file: str) -> bool:
+        """Check a LaTeX log file for errors (lines starting with ``!``).
+
+        Args:
+            file (``str``): path of the log file.
+
+        Returns:
+            ``bool``:
+            ``False`` if the file is missing or contains errors, ``True`` otherwise.
+        """
         if not os.path.isfile(file):
             return False
+        # FIXME: iterates over the characters of the file name instead of the file lines: the log
+        # is never read.
         for line in file:
             if line.startswith('!'):
                 return False
         return True
 
-    def CompileReport(self,mode,output_path):
+    def CompileReport(self,mode: int,output_path: str) -> bool | None:
+        """Compile a LaTeX report (twice) with ``latex`` or ``pdflatex``.
+
+        Args:
+            mode (``int``): report format (``LATEX`` or ``PDFLATEX``).
+            output_path (``str``): report folder.
+
+        Returns:
+            ``bool | None``:
+            ``False`` on error, ``None`` otherwise.
+        """
         
         # ---- LATEX MODE ----
         if mode==ReportFormatType.LATEX:
 
             # Launching latex and producing DVI file
+            # NOTE: the path is not quoted (fails with spaces).
             os.system('cd '+output_path+'; latex -interaction=nonstopmode main.tex > latex.log 2>&1;'+\
                       ' latex -interaction=nonstopmode main.tex >> latex.log 2>&1')
 
@@ -1338,5 +1523,6 @@ class Layout:
             name=os.path.normpath(output_path+'/main.pdf')
             if not os.path.isfile(name):
                 self.logger.error('PDF file cannot be produced')
+                # NOTE: the log file is called latex.log.
                 self.logger.error('Please have a look to the log file '+output_path+'/latex2.log')
                 return False

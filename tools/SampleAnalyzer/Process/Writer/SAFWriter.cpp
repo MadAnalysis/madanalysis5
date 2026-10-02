@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleHeader headers
+/**
+ * @file SAFWriter.cpp
+ * @brief Implementation of MA5::SAFWriter.
+ */
+
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 
 using namespace MA5;

@@ -22,7 +22,16 @@
 ################################################################################
 
 
+"""Interpreter commands ``submit`` and ``resubmit``: run the analysis and build the reports.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.interpreter.history import History
 
 import glob
 import logging
@@ -43,9 +52,28 @@ from madanalysis.misc.run_recast import RunRecast
 
 
 class CmdSubmit(CmdBase):
-    """Command SUBMIT"""
+    """Commands ``submit [<dirname>]`` and ``resubmit``.
 
-    def __init__(self, main, resubmit=False):
+    ``submit`` creates a SampleAnalyzer job folder (default ``ANALYSIS_<n>``), writes the
+    C++ analysis corresponding to the selection (or runs the PAD analyses in recasting
+    mode), compiles and runs it over all datasets, reads the output files and builds
+    the HTML/LaTeX reports. ``resubmit`` re-runs the last job only if commands affecting
+    the analysis have been typed since the last (re)submission, then regenerates the
+    reports.
+
+    Attributes:
+        resubmit (``bool``): ``True`` for the ``resubmit`` command.
+        forbiddenpaths (``list[str]``): MadAnalysis 5 folders that cannot be used as job
+            folders.
+    """
+
+    def __init__(self, main: Main, resubmit: bool = False) -> None:
+        """Register the ``submit`` or ``resubmit`` command.
+
+        Args:
+            main (``Main``): session state.
+            resubmit (``bool``, default ``False``): create the ``resubmit`` command.
+        """
         self.resubmit = resubmit
         if not resubmit:
             CmdBase.__init__(self, main, "submit")
@@ -58,13 +86,38 @@ class CmdSubmit(CmdBase):
             os.path.normpath(self.main.archi_info.ma5dir + "/madanalysis")
         )
 
-    def do(self, args, history):
+    def do(self, args: list[str], history: History) -> bool | None:
+        """Execute the ``submit`` or ``resubmit`` command.
+
+        Args:
+            args (``list[str]``): arguments of the command.
+            history (``History``): command history (saved in the job folder and the reports).
+
+        Returns:
+            ``bool | None``:
+            ``False`` for some errors, ``None`` otherwise.
+        """
         if not self.resubmit:
             return self.do_submit(args, history)
         else:
             return self.do_resubmit(args, history)
 
-    def do_resubmit(self, args, history):
+    def do_resubmit(self, args: list[str], history: History) -> bool | None:
+        """Update the last job and regenerate its reports.
+
+        The job is recompiled and re-run only if a command among ``plot``, ``select``,
+        ``reject``, ``remove``, ``define``, ``import``, ``set main.clustering``, ``set
+        main.merging``, ``set main.recast`` or ``set main.isolation`` has been typed since
+        the last (re)submission.
+
+        Args:
+            args (``list[str]``): arguments (ignored).
+            history (``History``): command history.
+
+        Returns:
+            ``bool | None``:
+            ``False`` if no job has been submitted before, ``None`` otherwise.
+        """
 
         # Start time
         chrono = Chronometer()
@@ -101,18 +154,8 @@ class CmdSubmit(CmdBase):
             for i in range(last_submit_cmd + 1, len(history)):
                 newhistory.append(history[i])
 
-        ReAnalyzeCmdList = [
-            "plot",
-            "select",
-            "reject",
-            "remove",
-            "set main.clustering",
-            "set main.merging",
-            "define",
-            "set main.recast",
-            "import",
-            "set main.isolation",
-        ]
+        ReAnalyzeCmdList = [ "plot", "select", "reject", "remove", "set main.clustering", "swap",
+          "set main.merging", "define", "set main.recast", "import", "set main.isolation" ]
 
         # Determining if we have to resubmit the job
         for cmd in newhistory:
@@ -142,6 +185,7 @@ class CmdSubmit(CmdBase):
             )
             # Submission
             if not self.submit(self.main.lastjob_name, history):
+                # NOTE: returns None (not False) on failure, as below.
                 return
             self.logger.info("   Updating the reports...")
         else:
@@ -167,7 +211,14 @@ class CmdSubmit(CmdBase):
 
         self.logger.info("   Well done! Elapsed time = " + chrono.Display())
 
-    def do_submit(self, args, history):
+    def do_submit(self, args: list[str], history: History) -> None:
+        """Create, compile and run a new job, then build the reports.
+
+        Args:
+            args (``list[str]``): optional job folder (a new ``ANALYSIS_<n>`` folder of the
+                current directory is appended to the list if empty).
+            history (``History``): command history.
+        """
 
         # Start time
         chrono = Chronometer()
@@ -246,7 +297,17 @@ class CmdSubmit(CmdBase):
         self.logger.info("   Well done! Elapsed time = " + chrono.Display())
 
     # Generating the reports
-    def CreateReports(self, args, history, layout):
+    def CreateReports(self, args: list[str], history: History, layout: Layout) -> None:
+        """Draw the plots and generate the HTML, PDF and DVI reports.
+
+        The outputs are written in the first free ``Output/<format>/MadAnalysis5job_<i>``
+        folders of the job.
+
+        Args:
+            args (``list[str]``): list whose first element is the job folder.
+            history (``History``): command history (written in the reports).
+            layout (``Layout``): layout holding the extracted results.
+        """
 
         output_paths = []
         modes = []
@@ -357,7 +418,23 @@ class CmdSubmit(CmdBase):
         else:
             self.logger.warning("latex not installed -> no DVI/PDF report.")
 
-    def submit(self, dirname, history):
+    def submit(self, dirname: str, history: History) -> bool:
+        """Create (or update) the job folder, and compile and run the analysis.
+
+        The Delphes packages are activated/installed if needed. In recasting mode, the
+        PAD analyses are run through :class:`~madanalysis.misc.run_recast.RunRecast` and
+        the CLs outputs are collected; otherwise the selection is written into the
+        SampleAnalyzer job, which is compiled, linked and run over every dataset. As a side
+        effect, the environment variable ``FASTJET_FLAG`` is set when FastJet is available.
+
+        Args:
+            dirname (``str``): path to the job folder.
+            history (``History``): command history (saved in the job folder).
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` otherwise.
+        """
 
         # checking if delphes is needed and installing/activating it if relevant
         detector_handler = DetectorManager(self.main)
@@ -479,6 +556,8 @@ class CmdSubmit(CmdBase):
         # SFS-FastJet mode, the analysis has to be compiled with the
         # `-DMA5_FASTJET_MODE` flag. This however needs to be deactivated for
         # Delphes-ROOT based analyses.
+        # NOTE: the sample type is guessed by substring matching on the whole path
+        # (e.g. any path containing 'root' is considered as a ROOT file).
         root_dataset, hepmc_dataset, lhco_dataset = False, False, False
         for dataset in self.main.datasets:
             for sample in dataset:
@@ -526,13 +605,24 @@ class CmdSubmit(CmdBase):
                     "    *******************************************************"
                 )
                 if not jobber.RunJob(item):
+                    # NOTE: a failed run is logged but submit still returns True.
                     self.logger.error("run over '" + item.name + "' aborted.")
                 self.logger.info(
                     "    *******************************************************"
                 )
         return True
 
-    def extract(self, dirname, layout):
+    def extract(self, dirname: str, layout: Layout) -> bool:
+        """Check the output files of a job and read them into the layout.
+
+        Args:
+            dirname (``str``): path to the job folder.
+            layout (``Layout``): layout to fill (nothing is read in recasting mode).
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` if files are missing.
+        """
         self.logger.info("   Checking SampleAnalyzer output...")
         jobber = JobReader(dirname)
         if not jobber.CheckDir():
@@ -562,7 +652,8 @@ class CmdSubmit(CmdBase):
                     )
         return True
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``submit`` or ``resubmit`` command."""
         if not self.resubmit:
             self.logger.info("   Syntax: submit <dirname>")
             self.logger.info(
@@ -577,7 +668,19 @@ class CmdSubmit(CmdBase):
             self.logger.info("   Update of an analysis already performed, if relevant.")
             self.logger.info("   In all cases, the HTML and PDF reports are regenerated.")
 
-    def complete(self, text, line, begidx, endidx):
+    def complete(self, text: str, line: str, begidx: int, endidx: int) -> list[str] | None:
+        """Tab completion of the ``submit`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Folders (``None`` for ``resubmit``).
+        """
 
         # Resubmission case
         if self.resubmit:

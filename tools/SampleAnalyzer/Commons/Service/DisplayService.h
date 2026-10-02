@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file DisplayService.h
+ * @brief Redirection of std::cout/std::cerr (DISPLAY).
+ */
+
 #ifndef DISPLAY_SERVICE_H
 #define DISPLAY_SERVICE_H
 
@@ -37,19 +42,13 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionType.h"
 
 
-// ShortCut to display and store an exception
+/** @brief Shortcut to the DisplayService singleton. */
 #define DISPLAY MA5::DisplayService::GetInstance()
 
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class ExceptionService manages the reports related to the logger
-/// ERROR and WARNING. 
-///
-/// ExceptionService is a singleton-pattern-based class : only one instance.
-/// Getting the only one instance : ExceptionService::GetInstance()
-//////////////////////////////////////////////////////////////////////////////
+/** @brief Singleton redirecting std::cout and std::cerr to string streams (e.g. to silence external libraries). */
 class DisplayService
 {
   // -------------------------------------------------------------
@@ -57,7 +56,7 @@ class DisplayService
   // -------------------------------------------------------------
  private :
 
-  /// Pointer to the unique instance of DisplayService
+  /** @brief Unique instance. */
   static DisplayService* Service_;
 
 
@@ -66,46 +65,68 @@ class DisplayService
   // -------------------------------------------------------------
  private:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   DisplayService() 
   {
     oldCoutStreamBuf_=0;
     oldCerrStreamBuf_=0;
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~DisplayService()
   {}
 
-  /// Private data
+  /** @brief Original stream buffers of std::cout and std::cerr during a redirection. */
   std::streambuf* oldCoutStreamBuf_;
   std::streambuf* oldCerrStreamBuf_;
 
  public:
 
-  /// Getting the unique instance of DisplayService
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static DisplayService* GetInstance()
   {
     if (Service_==0) Service_ = new DisplayService;
     return Service_;
   }
 
-  /// Deleting the unique instance of Display Service
+  /** @brief Delete the unique instance. */
   static void Kill()
   {
     if (Service_!=0) delete Service_;
     Service_=0;
   }
   
-  /// Redirecting std::cout to a stringstream
+  /**
+   * @brief Redirect std::cout to a string stream.
+   *
+   * @param str destination.
+   */
   void beginCoutRedirection(std::stringstream& str);
+  /** @brief Restore std::cout. */
   void endCoutRedirection();
 
-  /// Redirecting std::cerr to a stringstream
+  /**
+   * @brief Redirect std::cerr to a string stream.
+   *
+   * @param str destination.
+   */
   void beginCerrRedirection(std::stringstream& str);
+  /** @brief Restore std::cerr. */
   void endCerrRedirection();
 
-  /// Redirecting a stringstream to a file
+  /**
+   * @brief Write a string stream to a file (declared but never defined).
+   *
+   * @param str content.
+   * @param filename file name.
+   * @param recreate overwrite the file.
+   * @return success flag.
+   */
+  // NOTE: this method has no definition: calling it gives a link error.
   MAbool redirectToFile(std::stringstream& str,
                       const std::string& filename,
                       MAbool recreate=true);

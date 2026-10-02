@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file PdgTable.h
+ * @brief Table of particle properties indexed by PDG code.
+ */
+
 #ifndef PDGTABLE_H
 #define PDGTABLE_H
 
@@ -39,31 +44,71 @@
 namespace MA5
 {
 
+/** @brief Table of particle properties indexed by PDG code. */
 class PdgTable {
   public:
+  /** @brief Constructor (empty table). */
   PdgTable()
   {};
 
+  /** @brief Destructor. */
   ~PdgTable()
   {};
 
+  /**
+   * @brief Copy constructor.
+   *
+   * @param Table table to copy.
+   */
   PdgTable(const PdgTable& Table);
 
+  /**
+   * @brief Merge another table into this one (existing entries are kept).
+   *
+   * @param Table table to copy.
+   * @return this table.
+   */
   PdgTable& operator=(const PdgTable& Table);
 
+  /**
+   * @brief Accessor to the table.
+   *
+   * @return the entries, by PDG code.
+   */
   const std::map<MAint32, PdgDataFormat>& Table() 
   { return Table_; }
 
+  /**
+   * @brief Insert an entry (ignored if the PDG code already exists).
+   *
+   * @param Pdgid PDG code.
+   * @param p properties.
+   */
   void Insert(const MAint32 Pdgid, const PdgDataFormat &p);
 
+  /** @brief Print the table. */
   void Print() const;
 
+  /**
+   * @brief Get the properties of a particle.
+   *
+   * @param Pdgid PDG code.
+   * @return the properties, or an 'Unknown' entry (with a warning) if not found.
+   */
   const PdgDataFormat& operator[](const MAint32 Pdgid) const;
 
+  /**
+   * @brief Get the properties of a particle.
+   *
+   * @param Pdgid PDG code.
+   * @param verbose print a warning if the PDG code is unknown.
+   * @return the properties, or an 'Unknown' entry if not found.
+   */
   const PdgDataFormat& GetParticle(const MAint32 Pdgid, MAbool verbose=true) const;
 
   private:
 
+  /** @brief Entries, by PDG code, and the entry returned for unknown codes. */
   std::map<MAint32, PdgDataFormat> Table_;
   PdgDataFormat empty_;
 };

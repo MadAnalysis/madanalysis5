@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // FastJet headers
+/**
+ * @file Filter.cpp
+ * @brief Implementation of MA5::Substructure::Filter.
+ */
+
 #include "fastjet/tools/Filter.hh"
 
 // SampleAnalyser headers
@@ -46,6 +51,8 @@ namespace MA5 {
             if (algorithm == Substructure::cambridge) algo_ = fastjet::cambridge_algorithm;
             else if (algorithm == Substructure::kt)   algo_ = fastjet::kt_algorithm;
 
+            // NOTE: a previously allocated jet definition and filter are not deleted (memory leak if called
+            //   twice).
             JetDefinition_ = new fastjet::JetDefinition(algo_, radius);
             Rfilt_=-1.; rho_=rho;
             init_filter(selector, true);

@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file MAVector3.cpp
+ * @brief Implementation of MA5::MAVector3 (adapted from ROOT's TVector3).
+ */
+
 #include "SampleAnalyzer/Commons/Vector/MAVector3.h"
 using namespace MA5;
 

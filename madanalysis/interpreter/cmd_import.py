@@ -22,7 +22,16 @@
 ################################################################################
 
 
+"""Interpreter command ``import``: event files, UFO models and job folders."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.interpreter.history import History
+    from madanalysis.interpreter.interpreter import Interpreter
 from madanalysis.interpreter.cmd_define           import CmdDefine
 from madanalysis.enumeration.ma5_running_type     import MA5RunningType
 from madanalysis.IOinterface.ufo_reader           import UFOReader
@@ -41,13 +50,34 @@ import stat
 from six.moves import range
 
 class CmdImport(CmdBase.CmdBase):
-    """Command IMPORT"""
+    """Command ``import <path> [as <dataset>]``.
 
-    def __init__(self,main):
+    The path may be:
+
+    * event file(s) (wildcards allowed) or a folder of event files, stored in a dataset
+      (``defaultset`` if no name is given);
+    * a UFO model folder (particles and parameters are imported, not in RECO mode);
+    * a SampleAnalyzer job folder created by ``submit`` (the configuration is restored
+      from ``history.ma5`` and the reports are regenerated).
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Register the ``import`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         CmdBase.CmdBase.__init__(self,main,"import")
 
 
-    def do(self,args,myinterpreter,history):
+    def do(self,args: list[str],myinterpreter: Interpreter,history: History) -> None:
+        """Execute the ``import`` command.
+
+        Args:
+            args (``list[str]``): arguments of the command (``<path>`` or ``<path> as <name>``).
+            myinterpreter (``Interpreter``): interpreter (used to restore a job).
+            history (``History``): command history (written in the regenerated reports).
+        """
 
         # Checking argument number
         if len(args)!=3 and len(args)!=1 :
@@ -94,7 +124,16 @@ class CmdImport(CmdBase.CmdBase):
             return
             
 
-    def ImportUFO(self,filename):
+    def ImportUFO(self,filename: str) -> bool | None:
+        """Import the particles of a UFO model (the multiparticles are kept).
+
+        Args:
+            filename (``str``): path to the UFO folder.
+
+        Returns:
+            ``bool | None``:
+            ``False`` on error, ``None`` otherwise.
+        """
         self.logger.info("UFO model folder is detected")
 
         # UFO mode is forbidden in RECO level
@@ -133,7 +172,22 @@ class CmdImport(CmdBase.CmdBase):
         
 
 
-    def ImportJob(self,filename,myinterpreter,history):
+    def ImportJob(self,filename: str,myinterpreter: Interpreter,history: History) -> bool | None:
+        """Restore a SampleAnalyzer job folder and regenerate its reports.
+
+        The session is reset (after confirmation unless in forced mode), the commands of
+        ``history.ma5`` are reloaded, the output files are read and the HTML/LaTeX reports
+        are rebuilt.
+
+        Args:
+            filename (``str``): path to the job folder.
+            myinterpreter (``Interpreter``): interpreter whose history is reset.
+            history (``History``): command history (written in the reports).
+
+        Returns:
+            ``bool | None``:
+            ``False`` if the user refuses, ``None`` otherwise.
+        """
         self.logger.info("SampleAnalyzer job folder is detected")
         self.logger.info("Restore MadAnalysis configuration used for this job ...")
 
@@ -170,9 +224,13 @@ class CmdImport(CmdBase.CmdBase):
         inpt.Load()
 
         # Reset history
+        # FIXME: replaces the History object by a plain list: History.Add (called by precmd)
+        # and the 'history' command then fail.
         myinterpreter.history=[] 
 
         # Load script
+        # FIXME: InterpreterBase.load takes a 'verbose' flag, not a file name: history.ma5 is not
+        # read here (the stacked scripts are executed instead).
         myinterpreter.load(filename+'/history.ma5')
 
         # Saving job name as global variable
@@ -194,12 +252,15 @@ class CmdImport(CmdBase.CmdBase):
         layout.Initialize()
 
         # Cleaning the directories
+        # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
         if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/HTML',False):
             return
         if self.main.session_info.has_pdflatex:
+            # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
             if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/PDF',False):
                 return
         if self.main.session_info.has_latex:
+            # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
             if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/DVI',False):
                 return 
 
@@ -208,7 +269,14 @@ class CmdImport(CmdBase.CmdBase):
 
 
     # Create reports
-    def CreateReports(self,args,history,layout):
+    def CreateReports(self,args: list[str],history: History,layout: Layout) -> None:
+        """Generate the HTML, PDF (pdflatex) and DVI (latex) reports of a job.
+
+        Args:
+            args (``list[str]``): list whose first element is the job folder.
+            history (``History``): command history (written in the reports).
+            layout (``Layout``): layout holding the extracted results.
+        """
 
         # Getting output filename for HTML report
         self.logger.info("   Generating the HMTL report ...")
@@ -265,6 +333,7 @@ class CmdImport(CmdBase.CmdBase):
 
             # Displaying message for opening DVI
             if self.main.session_info.has_dvipdf:
+                # NOTE: the message below refers to the DVI folder.
                 pdfpath = os.path.expanduser(args[0]+'/DVI')
                 if self.main.currentdir in pdfpath:
                     pdfpath = pdfpath[len(self.main.currentdir):]
@@ -279,7 +348,17 @@ class CmdImport(CmdBase.CmdBase):
 
 
 
-    def extract(self,dirname,layout):
+    def extract(self,dirname: str,layout: Layout) -> bool:
+        """Read the SampleAnalyzer output files of a job into the layout.
+
+        Args:
+            dirname (``str``): path to the job folder.
+            layout (``Layout``): layout to fill (cut-flows, merging plots, histograms).
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` if files are missing.
+        """
         self.logger.info("   Checking SampleAnalyzer output...")
         jobber = JobReader(dirname)
         if not jobber.CheckDir():
@@ -293,6 +372,7 @@ class CmdImport(CmdBase.CmdBase):
 
         self.logger.info("   Extracting data from the output files...")
         for i in range(0,len(self.main.datasets)):
+            # NOTE: merging plots are never extracted (see the trailing comment).
             jobber.Extract(self.main.datasets[i],\
                            layout.cutflow.detail[i],\
                            layout.merging.detail[i],\
@@ -301,7 +381,15 @@ class CmdImport(CmdBase.CmdBase):
         return True    
            
 
-    def ImportDataset(self,filename,name):
+    def ImportDataset(self,filename: str,name: str) -> None:
+        """Store event files in a dataset (created if needed).
+
+        A newly created dataset is removed if no file could be stored.
+
+        Args:
+            filename (``str``): path or glob pattern of the event files.
+            name (``str``): name of the dataset.
+        """
 
         # Dont allow usage of same identifier for jets and samples
         if name in self.main.jet_collection.GetNames():
@@ -323,7 +411,16 @@ class CmdImport(CmdBase.CmdBase):
             self.main.datasets.Remove(name)
 
 
-    def create(self,name):
+    def create(self,name: str) -> bool:
+        """Create an empty dataset after checking its name.
+
+        Args:
+            name (``str``): name of the dataset.
+
+        Returns:
+            ``bool``:
+            ``True`` if created, ``False`` if the name is invalid or already used.
+        """
         
         # Checking if the name is authorized
         if name in self.reserved_words:
@@ -347,7 +444,21 @@ class CmdImport(CmdBase.CmdBase):
         return True
 
         
-    def fill(self,name,filename):
+    def fill(self,name: str,filename: str) -> bool:
+        """Add the event files matching a pattern to a dataset.
+
+        Only regular files and named pipes with an allowed format (see
+        :meth:`~madanalysis.core.main.Main.GetSampleFormat`) are kept; paths are made
+        absolute.
+
+        Args:
+            name (``str``): name of the dataset.
+            filename (``str``): path or glob pattern.
+
+        Returns:
+            ``bool``:
+            ``True`` if at least one file has been stored, ``False`` otherwise.
+        """
 
         # Getting the dataset
         set = self.main.datasets.Get(name)
@@ -399,7 +510,8 @@ class CmdImport(CmdBase.CmdBase):
 
 
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``import`` command."""
         self.logger.info("   Syntax: import <Sample file> as <dataset name>")
         self.logger.info("   Stores one or several data file(s) in a given dataset.")
         self.logger.info("   The supported event file formats are: ")
@@ -411,7 +523,19 @@ class CmdImport(CmdBase.CmdBase):
 
 
 
-    def complete(self,text,line,begidx,endidx):
+    def complete(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``import`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Files, ``as`` or dataset names, or ``None``.
+        """
 
         #Getting back arguments
         if len(line)==0:

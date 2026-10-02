@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file MergingPlotType.cpp
+ * @brief Implementation of MA5::MergingPlotType.
+ */
+
 #include "SampleAnalyzer/Process/Plot/MergingPlotType.h"
 
 // STL headers

@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file ExceptionService.cpp
+ * @brief Implementation of MA5::ExceptionService.
+ */
+
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 using namespace MA5;
