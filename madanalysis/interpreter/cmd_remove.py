@@ -53,6 +53,21 @@ class CmdRemove(CmdBase.CmdBase):
                     logging.getLogger('MA5').error(" - "+self.main.selection[item].GetStringDisplay())
                 logging.getLogger('MA5').error("Please remove these plots/cuts before removing the Particle/Multiparticle "+ name +".")
             return
+
+        # Region removal
+        if self.main.regions.Find(name):
+            for index in range(len(self.main.selection) - 1, -1, -1):
+                item = self.main.selection[index]
+                if name not in item.regions:
+                    continue
+                item.regions = [
+                    region for region in item.regions if region != name
+                ]
+                if not item.regions:
+                    self.main.selection.Remove(index + 1)
+            self.main.regions.Remove(name)
+            return
+	
                 
         # No object found 
         logging.getLogger('MA5').error("No object called '"+name+"' found.")
