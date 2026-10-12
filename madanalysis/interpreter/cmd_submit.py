@@ -101,7 +101,7 @@ class CmdSubmit(CmdBase):
 
         ReAnalyzeCmdList = ['plot','select','reject','set main.clustering',
                             'set main.merging', 'define', 'set main.recast',
-                            'import', 'set main.isolation']
+                            'import', 'set main.isolation', 'remove', 'swap']
 
         # Determining if we have to resubmit the job
         for cmd in newhistory:
