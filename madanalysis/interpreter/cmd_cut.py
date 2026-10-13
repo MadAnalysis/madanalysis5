@@ -195,7 +195,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
             self.main.selection.Add(cut)
         else:
             setofRegions = self.main.regions.GetClusteredRegions(self.main.selection)
-            if (setofRegions==[[]] and CutRegionNames==[]) or (list(set(CutRegionNames)) in setofRegions):
+            if any(set(CutRegionNames).issubset(regions) for regions in setofRegions):
                 cut = Cut(parts,condition,self.cut_type,regions=CutRegionNames)
                 # Setting options
                 if foundOptions:

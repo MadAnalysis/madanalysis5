@@ -113,6 +113,7 @@ class HistoLogX : public Histo
     sum_w_    = std::make_pair(0.,0.);
     sum_ww_   = std::make_pair(0.,0.);
     sum_xw_   = std::make_pair(0.,0.);
+    sum_xxw_  = std::make_pair(0.,0.);
   }
 
   /// Destructor
@@ -140,6 +141,7 @@ class HistoLogX : public Histo
       sum_w_.first  +=weight;
       sum_ww_.first +=weight*weight;
       sum_xw_.first +=value*weight;
+      sum_xxw_.first +=value*value*weight;
       if (value < xmin_) underflow_.first+=weight;
       else if (value >= xmax_) overflow_.first+=weight;
       else
@@ -156,6 +158,7 @@ class HistoLogX : public Histo
       sum_w_.second  += weight;
       sum_ww_.second += weight*weight;
       sum_xw_.second += value*weight;
+      sum_xxw_.second += value*value*weight;
       if (value < xmin_) underflow_.second+=weight;
       else if (value >= xmax_) overflow_.second+=weight;
       else
