@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,21 +22,49 @@
 ################################################################################
 
 
+"""Histogram with a linear binning read from the SampleAnalyzer output."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.dataset.dataset import Dataset
 from madanalysis.layout.histogram_core import HistogramCore
 import logging
 from six.moves import range
 
 
 class Histogram:
+    """Histogram with a linear binning filled separately for positive and negative event weights.
 
-    def __init__(self):
+    Attributes:
+        name (``str``): name of the histogram.
+        nbins (``int``): number of bins.
+        xmin (``float``): lower bound of the x axis.
+        xmax (``float``): upper bound of the x axis.
+        ymin (``list[float]``): lower bound(s) of the y axis (empty if automatic).
+        ymax (``list[float]``): upper bound(s) of the y axis (empty if automatic).
+        scale (``float``): normalisation factor.
+        positive (``HistogramCore``): content for positive weights.
+        negative (``HistogramCore``): content for negative weights.
+        summary (``HistogramCore``): net content.
+        warnings (``list[str]``): warnings raised while reading.
+        regions (``list[str]``): regions of the histogram.
+        myhisto (``Any``): ROOT histogram (unused, ``0``).
+    """
+
+    def __init__(self) -> None:
+        """Initialise an empty histogram (see :meth:`Reset`)."""
         self.Reset()
 
 
-    def Print(self):
+    def Print(self) -> None:
+        """Log the definition and the statistics of the histogram."""
 
         # General info
+        # NOTE: a space is missing between nbins and xmin in the message.
         inform = self.name + ' ' + str(self.nbins) + str(self.xmin) + ' ' + str(self.xmax)
         if self.ymin!=[] or self.ymax!=[]:
            inform = inform + ' ' + str(self.ymin) + ' ' + str(self.ymax)
@@ -48,7 +76,16 @@ class Histogram:
         self.summary.Print()
 
 
-    def FinalizeReading(self,main,dataset):
+    def FinalizeReading(self,main: Main,dataset: Dataset) -> None:
+        """Build the summary (positive minus negative weights) after reading the SAF file.
+
+        Negative bin contents (and statistics) are set to zero, with a warning stored in
+        :attr:`warnings`.
+
+        Args:
+            main (``Main``): session state (unused).
+            dataset (``Dataset``): dataset (used in the warnings).
+        """
 
         # Statistics
         self.summary.nevents   = self.positive.nevents   + self.negative.nevents
@@ -100,12 +137,14 @@ class Histogram:
         self.negative.ComputeIntegral()
         self.summary.ComputeIntegral()
 
-    def CreateHistogram(self):
+    def CreateHistogram(self) -> None:
+        """Do nothing (kept for interface compatibility)."""
         pass
 
 
 
-    def Reset(self):
+    def Reset(self) -> None:
+        """Reset the definition and the content of the histogram."""
 
         # General info
         self.name  = ""
@@ -130,10 +169,25 @@ class Histogram:
         # regions
         self.regions = []
 
-    def GetRegions(self):
+    def GetRegions(self) -> list[str]:
+        """Get the regions of the histogram.
+
+        Returns:
+            ``list[str]``:
+            Region names.
+        """
         return self.regions
 
-    def GetBinLowEdge(self,bin):
+    def GetBinLowEdge(self,bin: int) -> float:
+        """Get the lower edge of a bin (linear binning).
+
+        Args:
+            bin (``int``): 0-based bin index.
+
+        Returns:
+            ``float``:
+            The lower edge (clamped to ``xmin``/``xmax`` outside the range).
+        """
 
         # Special case
         if bin<=0:
@@ -149,9 +203,19 @@ class Histogram:
         return self.xmin+bin*step
 
 
-    def GetBinUpperEdge(self,bin):
+    def GetBinUpperEdge(self,bin: int) -> float:
+        """Get the upper edge of a bin (linear binning).
+
+        Args:
+            bin (``int``): 0-based bin index.
+
+        Returns:
+            ``float``:
+            The upper edge (clamped to ``xmin``/``xmax`` outside the range).
+        """
 
         # Special case
+        # FIXME: returns xmin for the first bin instead of its upper edge (xmin + step).
         if bin<=0:
             return self.xmin
 
@@ -165,7 +229,16 @@ class Histogram:
         return self.xmin+(bin+1)*step
 
 
-    def GetBinMean(self,bin):
+    def GetBinMean(self,bin: int) -> float:
+        """Get the centre of a bin (linear binning).
+
+        Args:
+            bin (``int``): 0-based bin index.
+
+        Returns:
+            ``float``:
+            The centre (clamped to ``xmin``/``xmax`` outside the range).
+        """
 
         # Special case
         if bin<0:

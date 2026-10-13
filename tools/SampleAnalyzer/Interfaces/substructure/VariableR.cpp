@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyser headers
+/**
+ * @file VariableR.cpp
+ * @brief Implementation of MA5::Substructure::VariableR.
+ */
+
 #include "SampleAnalyzer/Interfaces/substructure/VariableR.h"
 
 // FastJet headers

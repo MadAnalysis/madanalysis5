@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,23 @@
 ################################################################################
 
 
+"""Writer of the C++ code of the candidate (object) cuts.
+
+For each candidate of the container, the conditions are evaluated; the rejected
+candidates are collected in ``toRemove`` and removed from all the containers sharing
+particles with the candidate (same status code and overlapping regions). The
+PT-ranked containers are then rebuilt from the updated ordered containers.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.multiparticle.particle_combination import ParticleCombination
+    from madanalysis.selection.condition_sequence import ConditionSequence
+    from madanalysis.selection.condition_type import ConditionType
 from madanalysis.selection.histogram          import Histogram
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.observable_type  import ObservableType
@@ -36,7 +52,13 @@ import logging
 import copy
 from six.moves import range
 
-def GetConditions(current,table):
+def GetConditions(current: ConditionSequence,table: list[ConditionType]) -> None:
+    """Flatten (recursively) the conditions of a sequence.
+
+    Args:
+        current (``ConditionSequence``): sequence of conditions.
+        table (``list[ConditionType]``): list to extend (in place).
+    """
 
     i=0
     while i<len(current.sequence):
@@ -47,7 +69,18 @@ def GetConditions(current,table):
         i+=1
 
 
-def GetFinalCondition(current,index,tagName):
+def GetFinalCondition(current: ConditionSequence,index: int,tagName: str) -> tuple[str, int]:
+    """Build the C++ logical expression of a sequence of conditions.
+
+    Args:
+        current (``ConditionSequence``): sequence of conditions.
+        index (``int``): index of the first condition of the sequence.
+        tagName (``str``): name of the C++ vector of condition results.
+
+    Returns:
+        ``tuple[str, int]``:
+        The expression and the index following the last condition.
+    """
 
     msg='('
     i=0
@@ -66,7 +99,19 @@ def GetFinalCondition(current,index,tagName):
     
 
 
-def WriteCandidateCut(file,main,iabs,part_list):
+def WriteCandidateCut(file: TextIO,main: Main,iabs: int,part_list: list[list[Any]]) -> None:
+    """Write the code of a candidate cut.
+
+    Cuts on combinations of particles are not supported (a warning is issued and the
+    cut is disabled).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the cut in the selection.
+        part_list (``list[list[Any]]``): particle containers (see
+            :func:`~madanalysis.job.job_particle.GetParticles`).
+    """
 
     # Opening bracket for the current histo
     file.write('  {\n')
@@ -149,6 +194,7 @@ def WriteCandidateCut(file,main,iabs,part_list):
 
             # Is this container concerned by the cut ?
             concerned=False
+            # NOTE: 'other' is unused: the same test is repeated for each element of other_part.
             for other in other_part:
                 if other_part[0].particle.IsThereCommonPart(combination.particle):
                     if other_part[2]!=main.selection[iabs].statuscode:
@@ -213,6 +259,7 @@ def WriteCandidateCut(file,main,iabs,part_list):
 
             # Is this container concerned by the cut ?
             concerned=False
+            # NOTE: 'other' is unused: the same test is repeated for each element of other_part.
             for other in other_part:
                 if refpart.particle.IsThereCommonPart(combination.particle):
                     if other_part[2] != main.selection[iabs].statuscode:
@@ -251,8 +298,20 @@ def WriteCandidateCut(file,main,iabs,part_list):
     return
 
 
-def WriteFactorizedConditions(file,main,iabs,container,\
-                              tagName,tagIndex,condition):
+def WriteFactorizedConditions(file: TextIO,main: Main,iabs: int,container: str,\
+                              tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the evaluation of a condition for the current candidate.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the cut in the selection.
+        container (``str``): C++ name of the container of the candidates (the current
+            candidate is ``container[muf]``).
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
     if len(condition.parts)==0:
         WriteFactorizedCutWith0Arg(file,main,iabs,container,\
                                    tagName,tagIndex,condition)
@@ -264,7 +323,19 @@ def WriteFactorizedConditions(file,main,iabs,container,\
                       "not managed by MadAnalysis 5")
 
 
-def WriteFactorizedCutWith0Arg(file,main,iabs,container,tagName,tagIndex,condition):
+def WriteFactorizedCutWith0Arg(file: TextIO,main: Main,iabs: int,container: str,tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the test of an observable of the candidate itself.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the cut in the selection.
+        container (``str``): C++ name of the container of the candidates (the current
+            candidate is ``container[muf]``).
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
     file.write('        if (')
     file.write(container+'[muf]->' +\
                condition.observable.code(main.mode) +\
@@ -273,7 +344,19 @@ def WriteFactorizedCutWith0Arg(file,main,iabs,container,tagName,tagIndex,conditi
                ') '+tagName+'['+str(tagIndex)+']=true;\n')
 
 
-def WriteFactorizedCutWith1Arg(file,main,iabs,container,tagName,tagIndex,condition):
+def WriteFactorizedCutWith1Arg(file: TextIO,main: Main,iabs: int,container: str,tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the test of an observable relating the candidate to other particles.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        iabs (``int``): index of the cut in the selection.
+        container (``str``): C++ name of the container of the candidates (the current
+            candidate is ``container[muf]``).
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
 
     for item in condition.parts[0]:
         file.write('      {\n')
@@ -282,7 +365,20 @@ def WriteFactorizedCutWith1Arg(file,main,iabs,container,tagName,tagIndex,conditi
         file.write('      }\n')
 
 
-def WriteJobExecuteNbody(file,iabs,combi1,main,container,tagName,tagIndex,condition):
+def WriteJobExecuteNbody(file: TextIO,iabs: int,combi1: ParticleCombination,main: Main,container: str,tagName: str,tagIndex: int,condition: ConditionType) -> None:
+    """Write the loops and the test of an observable between the candidate and a
+    combination of particles (e.g. ``DELTAR``).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the cut in the selection.
+        combi1 (``ParticleCombination``): combination of the other particles.
+        main (``Main``): session state.
+        container (``str``): C++ name of the container of the candidates.
+        tagName (``str``): name of the C++ vector of condition results.
+        tagIndex (``int``): index of the condition in this vector.
+        condition (``ConditionType``): condition.
+    """
 
     obs = condition.observable
     cut = main.selection[iabs]
@@ -303,6 +399,8 @@ def WriteJobExecuteNbody(file,iabs,combi1,main,container,tagName,tagIndex,condit
                 if i==j:
                     continue
                 if combi1[i].particle.IsThereCommonPart(combi1[j].particle):
+                    # FIXME: sets 'redundancies' instead of 'redundancies1': the redundancy treatment is never
+                    # activated.
                     redundancies = True
 
     # FOR loop for first combi
@@ -386,7 +484,17 @@ def WriteJobExecuteNbody(file,iabs,combi1,main,container,tagName,tagIndex,condit
         file.write('    }\n')
 
 
-def WriteJobLoop(file,iabs,combination,redundancies,main,iterator='ind'):
+def WriteJobLoop(file: TextIO,iabs: int,combination: ParticleCombination,redundancies: bool,main: Main,iterator: str = 'ind') -> None:
+    """Open the nested C++ loops over the containers of a combination.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the cut in the selection.
+        combination (``ParticleCombination``): combination of particles.
+        redundancies (``bool``): some particles can appear in several containers.
+        main (``Main``): session state.
+        iterator (``str``, default ``'ind'``): name of the C++ index (array).
+    """
 
     cut = main.selection[iabs]
 
@@ -424,7 +532,17 @@ def WriteJobLoop(file,iabs,combination,redundancies,main,iterator='ind'):
                 file.write(') continue;\n')     
 
 
-def WriteJobSameCombi(file,iabs,combination,redundancies,main,iterator='ind'):
+def WriteJobSameCombi(file: TextIO,iabs: int,combination: ParticleCombination,redundancies: bool,main: Main,iterator: str = 'ind') -> None:
+    """Write the skipping of combinations already considered (in another order).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        iabs (``int``): index of the cut in the selection.
+        combination (``ParticleCombination``): combination of particles.
+        redundancies (``bool``): some particles can appear in several containers.
+        main (``Main``): session state.
+        iterator (``str``, default ``'ind'``): name of the C++ index (array).
+    """
     if len(combination)==1 or not redundancies:
         return
 
@@ -444,6 +562,8 @@ def WriteJobSameCombi(file,iabs,combination,redundancies,main,iterator='ind'):
     file.write('    for (MAuint32 i=0;i<'+str(len(combination))+';i++)\n')
     file.write('    {\n')
     for i in range(0,len(combination)):
+        # FIXME: the generated C++ loop inserts containers[k][iterator[i]] for every i and every k
+        # (the C++ index i is used for all containers): wrong combination set and possible out-of-range access.
         file.write('      mycombi.insert('+containers[i]+'['+iterator+'[i]]);\n')
     file.write('    }\n')
     file.write('    MAbool matched=false;\n')

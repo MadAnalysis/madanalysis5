@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file RecLeptonFormat.h
+ * @brief Reconstructed electron or muon.
+ */
 
 #ifndef RecLeptonFormat_h
 #define RecLeptonFormat_h
@@ -47,6 +52,7 @@ class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
 class DelphesMemoryInterface;
 
+/** @brief Reconstructed charged lepton (electron or muon). */
 class RecLeptonFormat : public RecParticleFormat
 {
 
@@ -61,14 +67,20 @@ class RecLeptonFormat : public RecParticleFormat
   // -------------------------------------------------------------             
  protected:
 
+  /** @brief Electric charge (false: -1, true: +1). */
   MAbool charge_;       /// charge of the particle 0 = -1, 1 = +1
+  /** @brief Sum of the transverse energies in the isolation cone (LHCO/old Delphes). */
   MAfloat32 sumET_isol_;  /// sumET in an isolation cone
+  /** @brief Sum of the transverse momenta in the isolation cone (LHCO/old Delphes). */
   MAfloat32 sumPT_isol_;  /// sumPT in an isolation cone
+  /** @brief Isolation cones of various radii. */
   std::vector<IsolationConeType> isolCones_; // isolation cones
+  /** @brief Reference to the Monte Carlo particle (Delphes). */
   MAuint64 refmc_;
+  /** @brief PDG code (11 electron, 13 muon). */
   MAuint32   pdg_;
 
-  // Old class members that are kept for backwards compatibility
+  /** @brief Members kept for backward compatibility (closest point and impact-parameter uncertainties). */
   MALorentzVector closest_point_;
   MAfloat32  d0error_;
   MAfloat32  dzerror_;
@@ -79,11 +91,16 @@ class RecLeptonFormat : public RecParticleFormat
   // -------------------------------------------------------------             
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor (members reset). */
   RecLeptonFormat()
   { Reset(); }
 
-  /// Constructor with one argument
+  /**
+   * @brief Constructor from a reconstructed particle (kinematics, energy ratio and Monte Carlo match).
+   *
+   * @param part particle.
+   */
+  // NOTE: refmc_ is left uninitialised by this constructor.
   RecLeptonFormat(const RecParticleFormat& part)
   { 
     Reset();
@@ -92,7 +109,11 @@ class RecLeptonFormat : public RecParticleFormat
     momentum_ = part.momentum_;
   }
 
-  /// Constructor with one argument
+  /**
+   * @brief Constructor from a reconstructed particle (kinematics, energy ratio and Monte Carlo match).
+   *
+   * @param part particle.
+   */
   RecLeptonFormat(const RecParticleFormat* part)
   { 
     Reset();
@@ -102,11 +123,11 @@ class RecLeptonFormat : public RecParticleFormat
     refmc_    = 0;
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~RecLeptonFormat()
   {}
 
-  /// Dump information
+  /** @brief Print the lepton properties. */
   void Print() const
   {
     INFO << "charge ="   << /*set::setw(8)*/"" << std::left << charge_  << ", "  
@@ -116,8 +137,10 @@ class RecLeptonFormat : public RecParticleFormat
     RecParticleFormat::Print();
   }
 
-  /// Clear all information
+  /** @brief Reset the lepton-specific members. */
   virtual void Reset()
+  // NOTE: the members of RecParticleFormat (momentum, mc_, HEoverEE_, ntracks_) and refmc_ are not reset
+  //   here.
   {
     charge_=false;
     sumET_isol_=0.;
@@ -130,38 +153,72 @@ class RecLeptonFormat : public RecParticleFormat
     vertex_prod_.Reset();
   }
 
-  /// Accessor to the electric charge 
+  /**
+   * @brief Accessor to the electric charge.
+   *
+   * @return +1 or -1.
+   */
   virtual const MAint32 charge() const
   { if (charge_) return +1; else return -1; }
 
-  /// Mutator related to the electric charge
+  /**
+   * @brief Set the electric charge.
+   *
+   * @param charge charge (> 0: positive, otherwise negative).
+   */
   virtual void SetCharge(MAint32 charge)
   { if (charge>0) charge_=true; else charge_=false; }
 
-  /// Accessor to sumET_isol
+  /**
+   * @brief Accessor to the sum of the transverse energies in the isolation cone.
+   *
+   * @return the sum.
+   */
   const MAfloat32 sumET_isol() const
   { return sumET_isol_; }
 
-  /// Accessor to sumPT_isol
+  /**
+   * @brief Accessor to the sum of the transverse momenta in the isolation cone.
+   *
+   * @return the sum.
+   */
   const MAfloat32 sumPT_isol() const
   { return sumPT_isol_; }
 
-  /// Accessor to ET_PT
+  /**
+   * @brief Accessor to the ratio sumET/sumPT in the isolation cone.
+   *
+   * @return the ratio (0 if sumPT vanishes).
+   */
   const MAfloat32 ET_PT_isol() const
   { if (sumPT_isol_!=0) return sumET_isol_/sumPT_isol_;
     else return 0; }
 
-  /// get the collection of isolation cones
+  /**
+   * @brief Accessor to the isolation cones.
+   *
+   * @return the cones.
+   */
   const std::vector<IsolationConeType>& isolCones() const
   { return isolCones_; }
 
-  /// giving a new isolation cone entry
+  /**
+   * @brief Append a new isolation cone.
+   *
+   * @return a pointer to the new cone.
+   */
   IsolationConeType* GetNewIsolCone()
   {
     isolCones_.push_back(IsolationConeType());
     return &isolCones_.back();
   }
 
+  /**
+   * @brief Get the isolation cone of a given radius (created if needed).
+   *
+   * @param radius radius of the cone.
+   * @return a pointer to the cone.
+   */
   IsolationConeType* GetIsolCone(MAfloat32 radius)
   {
     for (MAuint32 i=0; i<isolCones_.size(); i++)
@@ -172,25 +229,42 @@ class RecLeptonFormat : public RecParticleFormat
     return &isolCones_.back();
   }
 
-  /// giving a new isolation cone entry
+  /**
+   * @brief Set the isolation cones.
+   *
+   * @param cones cones.
+   */
   void setIsolCones(const std::vector<IsolationConeType>& cones)
   { isolCones_ = cones; }
 
+  /**
+   * @brief Accessor to the reference to the Monte Carlo particle.
+   *
+   * @return the reference.
+   */
   const MAuint64& refmc() const {return refmc_;}
 
-  /// is it an electron?
+  /**
+   * @brief Is the lepton an electron?
+   *
+   * @return true for an electron.
+   */
   MAbool isElectron() const
   { return (pdg_==11); }
 
-  /// is it a muon?
+  /**
+   * @brief Is the lepton a muon?
+   *
+   * @return true for a muon.
+   */
   MAbool isMuon() const
   { return (pdg_==13); }
 
-  /// is it an electron?
+  /** @brief Identify the lepton as an electron. */
   void setElectronId()
   { pdg_=11; }
 
-  /// is it a muon?
+  /** @brief Identify the lepton as a muon. */
   void setMuonId()
   { pdg_=13; }
 
@@ -198,16 +272,43 @@ class RecLeptonFormat : public RecParticleFormat
   // older methods for backwards compatibility
   //   --------------------------------------    //
 
-  // d0/dz error
+  /**
+   * @brief Accessor to the uncertainty on d0 (backward compatibility).
+   *
+   * @return the uncertainty.
+   */
   MAfloat32 d0error() const { return d0error_; }
+  /**
+   * @brief Accessor to the uncertainty on dz (backward compatibility).
+   *
+   * @return the uncertainty.
+   */
   MAfloat32 dzerror() const { return dzerror_; }
 
-  // vertex prod
+  /**
+   * @brief Accessor to the closest point (backward compatibility).
+   *
+   * @return the point.
+   */
   const MALorentzVector& closestPoint() const { return closest_point_; }
+  /**
+   * @brief Set the closest point (backward compatibility).
+   *
+   * @param v point.
+   */
   void setClosestPoint(const MALorentzVector& v) { closest_point_= v; }
 
-  // Production vertex
+  /**
+   * @brief Accessor to the production vertex (backward compatibility).
+   *
+   * @return the vertex.
+   */
   const MALorentzVector& vertexProd()        const { return vertex_prod_; }
+  /**
+   * @brief Set the production vertex (backward compatibility).
+   *
+   * @param v vertex.
+   */
   void setVertexPoint(const MALorentzVector& v)      { vertex_prod_=v; }
 
 };

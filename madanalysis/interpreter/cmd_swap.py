@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,18 +22,36 @@
 ################################################################################
 
 
+"""Interpreter command ``swap``: swap two items of the selection (plots/cuts)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.interpreter.cmd_base import CmdBase
 import logging
 from six.moves import range
 
 class CmdSwap(CmdBase):
-    """Command SWAP"""
+    """Command ``swap selection[X] selection[Y]``."""
 
-    def __init__(self,main):
+    def __init__(self,main: Main) -> None:
+        """Register the ``swap`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         CmdBase.__init__(self,main,"swap")
 
-    def do(self,args):
+    def do(self,args: list[str]) -> None:
+        """Swap two items of the selection (1-based indices).
+
+        Args:
+            args (``list[str]``): arguments of the command (split by
+                :meth:`~madanalysis.interpreter.interpreter_base.InterpreterBase.split_arg`).
+        """
 
         # Checking argument number
         if len(args) != 8:
@@ -58,11 +76,24 @@ class CmdSwap(CmdBase):
 
 
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``swap`` command."""
         logging.getLogger('MA5').info("   Syntax: swap selection[X] selection[Y]")
         logging.getLogger('MA5').info("   Swaping the Xth plot/cut with the Yth plot/cut.")
 
-    def complete(self,text,line,begidx,endidx):
+    def complete(self,text: str,line: str,begidx: int,endidx: int) -> list[str]:
+        """Tab completion of the ``swap`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str]``:
+            ``selection[i]`` items.
+        """
         # swap  selection[i] selection[j]
         # 0     1            2  
         args = line.split()

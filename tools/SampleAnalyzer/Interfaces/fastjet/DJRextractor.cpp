@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file DJRextractor.cpp
+ * @brief Implementation of MA5::DJRextractor.
+ */
+
 #include "SampleAnalyzer/Interfaces/fastjet/DJRextractor.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
@@ -68,6 +73,7 @@ MAbool DJRextractor::Execute(SampleFormat& mySample, const EventFormat& myEvent,
 void DJRextractor::Finalize()
 {
   // Free memory allocation
+  // FIXME: inverted test ('== 0'): the jet definition is never deleted.
   if (JetDefinition_==0) delete JetDefinition_;
 }
 
@@ -160,6 +166,7 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
     {
       const MCParticleFormat* myMum = myPart->mothers()[0];
        
+      // NOTE: assumes at least 6 particles in the event.
       if (myMum==&(myEvent->particles()[0]) || myMum==&(myEvent->particles()[1]))
       { test=false; break;}
       else if (myMum==&(myEvent->particles()[2]) || myMum==&(myEvent->particles()[3]) ||

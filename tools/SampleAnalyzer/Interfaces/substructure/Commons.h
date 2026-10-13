@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file Commons.h
+ * @brief Common definitions of the jet-substructure interface.
+ */
+
 #ifndef MADANALYSIS5_COMMONS_H
 #define MADANALYSIS5_COMMONS_H
 
@@ -31,7 +36,7 @@
 namespace MA5{
     namespace Substructure {
 
-        // Accessor for jet clustering algorithms
+        /** @brief Jet clustering algorithms accepted by the substructure tools (several aliases per algorithm). */
         enum Algorithm {
             antikt = 0, akt = 0, AKT = 0, ANTIKT = 0, cambridge = 1, ca = 1, CA = 1, CAMBRIDGE = 1, kt = 2, KT = 2
         };

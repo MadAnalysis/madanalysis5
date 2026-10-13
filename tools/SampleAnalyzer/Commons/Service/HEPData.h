@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file HEPData.h
+ * @brief One-dimensional efficiency maps read from HEPData CSV files.
+ */
+
 #ifndef HEPDATA_H
 #define HEPDATA_H
 
@@ -30,29 +35,53 @@
 
 namespace MA5
 {
+  /** @brief One-dimensional binned efficiency read from a HEPData CSV file. */
   class Efficiency1D
   {
     private:
+      /** @brief Has the map been read? */
       bool init_;
+      /** @brief Lower bin edges (DBL_MAX is appended as last edge). */
       std::vector<double> bin_edges_;
+      /** @brief Efficiency of each bin. */
       std::vector<double> efficiencies_;
 
     public:
 
-      // Constructor without argument
+      /** @brief Constructor (empty map). */
       Efficiency1D() { init_=false;}
 
-      // Constructor with CSV filename
+      /**
+       * @brief Constructor reading a CSV file.
+       *
+       * @param filename path of the CSV file.
+       */
       Efficiency1D(std::string filename) { init_=false; ReadCSV(filename); }
 
-      // Destructor
+      /** @brief Destructor. */
       ~Efficiency1D() { bin_edges_.clear(); efficiencies_.clear(); }
 
-      // Accessors
+      /**
+       * @brief Has the map been read?
+       *
+       * @return true if initialised.
+       */
       bool Initialised() { return init_; }
 
-      // Methods
+      /**
+       * @brief Read a HEPData CSV file (columns: x, x_low, x_high, efficiency, ...).
+       *
+       * Empty lines, comments (#) and lines starting with a letter are skipped.
+       *
+       * @param filename path of the CSV file.
+       */
       void ReadCSV(std::string filename);
+      /**
+       * @brief Efficiency for a given value.
+       *
+       * @param x value.
+       * @return the efficiency of the bin containing x (0 below the first edge or if not initialised).
+       */
       double Get(const double x);
   };
 }

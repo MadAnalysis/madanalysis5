@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,18 @@
 ################################################################################
 
 
+"""Writer of the environment setup scripts (``setup.sh`` and ``setup.csh``).
+
+The scripts export ``MA5_BASE`` and prepend the paths of the MadAnalysis 5 and
+external libraries/binaries to ``PATH``, ``LD_LIBRARY_PATH`` and (on macOS)
+``DYLD_LIBRARY_PATH``. They are written in ``tools/SampleAnalyzer/`` when the libraries
+are built, and in the ``Build/`` folder of every job; they must be sourced before
+compiling or running a job by hand.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 from pathlib import Path
 from string_tools import StringTools  # pylint: disable=import-error
@@ -32,8 +43,24 @@ log = logging.getLogger("MA5")
 
 
 class SetupWriter:
+    """Static helpers writing the environment setup scripts."""
     @staticmethod
-    def OrderPath(paths1, middle, paths2, ma5dir):
+    def OrderPath(paths1: list[str], middle: str, paths2: list[str], ma5dir: str) -> tuple[list[str], list[str], list[str]]:
+        """Build the ordered list of paths of an environment variable.
+
+        The MadAnalysis 5 folder is replaced by ``$MA5_BASE`` in all paths.
+
+        Args:
+            paths1 (``list[str]``): paths to prepend.
+            middle (``str``): previous value of the variable (e.g. ``"$PATH"``).
+            paths2 (``list[str]``): paths to append.
+            ma5dir (``str``): MadAnalysis 5 installation folder.
+
+        Returns:
+            ``tuple[list[str], list[str], list[str]]``:
+            The paths without the previous value, the paths for ``sh`` (previous value
+            inserted) and the paths for ``csh`` (previous value quoted).
+        """
         all = []
         allsh = []
         allcsh = []
@@ -52,7 +79,21 @@ class SetupWriter:
         return all, allsh, allcsh
 
     @staticmethod
-    def WriteSetupFile(bash, path, archi_info):
+    def WriteSetupFile(bash: bool, path: str, archi_info: Any) -> bool:
+        """Write ``setup.sh`` or ``setup.csh`` in a folder.
+
+        Besides the paths, the scripts export ``ROOT_INCLUDE_PATH`` (Delphes headers) and
+        ``FASTJET_FLAG`` when these packages are available.
+
+        Args:
+            bash (``bool``): ``True`` for ``setup.sh``, ``False`` for ``setup.csh``.
+            path (``str``): destination folder.
+            archi_info (``ArchitectureInfo``): detected configuration (paths, packages).
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` if the file cannot be written or closed.
+        """
 
         # Variable to check at the end
         toCheck = []
@@ -72,6 +113,7 @@ class SetupWriter:
 
         # Calling the good shell
         if bash:
+            # NOTE: the generated script uses bash-only syntax ('[[ ]]', 'echo -e') despite '#!/bin/sh'.
             file.write("#!/bin/sh\n")
         else:
             file.write("#!/bin/csh -f\n")
@@ -82,7 +124,7 @@ class SetupWriter:
 
         delphes_inc_pths = []
         if len(archi_info.delphes_inc_paths) != 0:
-            delphes_inc_pths = archi_info.delphes_inc_paths
+            delphes_inc_pths = list(archi_info.delphes_inc_paths)
             delphes_inc_pths.append(
                 next((p for p in delphes_inc_pths if Path(p).stem == "delphes"), "")
                 + "/modules"
@@ -147,6 +189,8 @@ class SetupWriter:
         if len(toPATH) != 0:
             file.write("# Configuring PATH environment variable\n")
             if bash:
+                # FIXME: '$PATH' is not quoted in the generated test: if PATH contains spaces the test fails
+                # and the else-branch overwrites PATH (same for LD_LIBRARY_PATH and DYLD_LIBRARY_PATH below).
                 file.write("if [ $PATH ]; then\n")
                 file.write("    export PATH=" + (":".join(toPATHsh)) + "\n")
                 file.write("else\n")
@@ -263,6 +307,7 @@ class SetupWriter:
         try:
             file.close()
         except:
+            # FIXME: 'filename' is a Path: concatenation with str raises a TypeError.
             log.error('Impossible to close the file "' + filename + '"')
             return False
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file gz_streambase.cpp
+ * @brief Implementation of MA5::gz_streambuf.
+ */
+
 #include "SampleAnalyzer/Interfaces/zlib/gz_streambase.h"
 #include "SampleAnalyzer/Interfaces/zlib/gz_file.h"
 
@@ -134,6 +139,7 @@ MAint32 gz_streambuf::underflow()
   MAint32 n_putback = gptr() - eback();
   if ( n_putback > 4)
     n_putback = 4;
+  // NOTE: overlapping source and destination: memmove would be the safe call.
   memcpy( buffer + (4 - n_putback), gptr() - n_putback, n_putback);
 
   MAint32 num = gzread( file->get(), buffer+4, bufferSize-4);

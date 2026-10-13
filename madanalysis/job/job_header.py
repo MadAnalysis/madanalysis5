@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,12 +22,26 @@
 ################################################################################
 
 
+"""Writer of the header ``user.h`` of the generated analysis."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.multiparticle.extraparticle import ExtraParticle
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from six.moves import range
 
-def WriteHeader(file,main):
+def WriteHeader(file: TextIO,main: Main) -> None:
+    """Write the includes and the beginning of the ``user`` class declaration.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+    """
     # Preprocessor commands
     file.write('#ifndef analysis_user_h\n')
     file.write('#define analysis_user_h\n')
@@ -58,7 +72,15 @@ def WriteHeader(file,main):
     file.write('\n    private : \n')
 
 
-def WriteCore(file,main,part_list):
+def WriteCore(file: TextIO,main: Main,part_list: list[list[Any]]) -> None:
+    """Declare the particle containers (and their identification functions).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        part_list (``list[list[Any]]``): output of
+            :func:`~madanalysis.job.job_particle.GetParticles`.
+    """
     # Write particle function
     file.write('  // Declaring particle containers\n')
     for ind in range(len(part_list)):
@@ -70,7 +92,20 @@ def WriteCore(file,main,part_list):
                       level   = main.mode)
 
 
-def WriteParticle(file,part,rank,status,regions,level):
+def WriteParticle(file: TextIO,part: ExtraParticle,rank: str,status: str,regions: list[str],level: int) -> None:
+    """Declare one particle container (skipped if already declared).
+
+    At parton/hadron level, the identification function is also written for
+    unranked particles (see :func:`WriteParticle2`).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        part (``ExtraParticle``): particle.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code (``'finalstate'``, ``'initialstate'``, ...).
+        regions (``list[str]``): regions of the item.
+        level (``int``): :class:`~madanalysis.enumeration.ma5_running_type.MA5RunningType` value.
+    """
     # Skipping if already defined
     if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
@@ -95,7 +130,18 @@ def WriteParticle(file,part,rank,status,regions,level):
                    newname + ";\n")
 
 
-def WriteParticle2(file,part,rank,status):
+def WriteParticle2(file: TextIO,part: ExtraParticle,rank: str,status: str) -> None:
+    """Write the function ``isP_<name>`` identifying a Monte Carlo particle.
+
+    The function checks the status, the PDG identifier and, recursively, the mother
+    (``<``: direct mother, ``<<``: any ancestor following the first mothers).
+
+    Args:
+        file (``TextIO``): output C++ file.
+        part (``ExtraParticle``): particle.
+        rank (``str``): ranking option.
+        status (``str``): status code.
+    """
 
     # Skipping if already defined
     if InstanceName.Find(part.name+rank+status):
@@ -153,11 +199,18 @@ def WriteParticle2(file,part,rank,status):
             file.write('     }\n')
             file.write('     if (!success) return false;\n')
 
+    # NOTE: the PT rank is not handled in the identification function.
     # PT rank
 
     # return
     file.write('     return true; }\n')
 
 
-def WriteFoot(file,main):
+def WriteFoot(file: TextIO,main: Main) -> None:
+    """Close the class declaration and the include guard.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+    """
     file.write('};\n}\n\n#endif')

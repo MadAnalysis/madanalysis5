@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Collection of the additional jet definitions of the session."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.jet_clustering.jet_configuration import JetConfiguration as _JetConfiguration
 from madanalysis.jet_clustering.jet_configuration import JetConfiguration
 from collections import OrderedDict
 from six.moves import range
@@ -32,91 +39,51 @@ from typing import Sequence, Text
 
 
 class JetCollection:
-    """
-    Holds a collection of jets. This module is separate from the original jet clustering
-    interface shipped with MadAnalysis5. This module can be activated using following command
+    """Collection of the jet definitions created with ``define jet_algorithm``.
 
-    .. code-block::
+    This module is independent of the original (primary) jet clustering of MadAnalysis 5,
+    defined through ``set main.fastsim.*``. Additional jets are defined as::
 
         ma5> define jet_algorithm my_jet antikt radius=0.5
 
-    where `my_jet` is a user-defined jet identifier, `antikt` is the algorithm to be used which
-    can be choosen from `antikt`, `cambridge`, `genkt`, `kt`, `gridjet`, `cdfjetclu`, `cdfmidpoint`,
-    and `siscone`. The rest of the arguments are optional. In this case, default parameters are
-    choosen. Each algorithm has its own unique set of parameters:
+    where ``my_jet`` is a user-defined identifier and ``antikt`` the algorithm. The
+    remaining keyword arguments are optional; each algorithm has its own parameters
+    (default values in parentheses):
 
-    |       Algorithm       | Parameters & Default values                                                        |
-    |:---------------------:|------------------------------------------------------------------------------------|
-    | `antikt`, `cambridge` | `radius=0.4`, `ptmin=5.`                                                           |
-    |        `genkt`        | `radius=0.4`, `ptmin=5.`, `exclusive=False`, `p=-1`                                |
-    |         `kt`          | `radius=0.4`, `ptmin=5.`, `exclusive=False`                                        |
-    |       `gridjet`       | `ymax=3.`, `ptmin=5.`                                                              |
-    |      `cdfjetclu`      | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`                    |
-    |     `cdfmidpoint`     | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`, `areafraction=1.` |
-    |       `siscone`       | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `input_ptmin=5.`, `npassmax=1.`           |
-    |      `VariableR`      | `rho=2000`, `minR=0`, `maxR=2`, `ptmin=20` `exclusive=False` `clustertype=CALIKE` `strategy=Best` |
+    * ``antikt``, ``cambridge``: ``radius`` (0.4), ``ptmin`` (5);
+    * ``genkt``: ``radius`` (0.4), ``ptmin`` (5), ``exclusive`` (False), ``p`` (-1);
+    * ``kt``: ``radius`` (0.4), ``ptmin`` (5), ``exclusive`` (False);
+    * ``gridjet``: ``ymax`` (3), ``ptmin`` (5);
+    * ``cdfjetclu``: ``radius`` (0.4), ``ptmin`` (5), ``overlap`` (0.5), ``seed`` (1),
+      ``iratch`` (0);
+    * ``cdfmidpoint``: same as ``cdfjetclu`` plus ``areafraction`` (1);
+    * ``siscone``: ``radius`` (0.4), ``ptmin`` (5), ``overlap`` (0.5), ``input_ptmin`` (5),
+      ``npassmax`` (1);
+    * ``VariableR``: ``rho`` (2000), ``minR`` (0), ``maxR`` (2), ``ptmin`` (20),
+      ``exclusive`` (False), ``clustertype`` (``AKTLIKE``), ``strategy`` (``Best``).
 
-    It is also possible to modify the entry after defining it
+    The definitions can be modified afterwards::
 
-    .. code-block::
-
-        ma5> define jet_algorithm my_jet cambridge
         ma5> set my_jet.ptmin = 200.
         ma5> set my_jet.radius = 0.8
 
-    Note that as soon as a `jet_algorithm` is defined, MadAnalysis5 automatically switches the SFS module
-    to its constituent-smearing mode (see the [SFS manual](https://arxiv.org/abs/2006.09387) for more infomation).
-    The command `set my_jet.+tab` will display all options available for that particular algorithm.
+    As soon as a jet algorithm is defined, the SFS module switches to its
+    constituent-smearing mode (see arXiv:2006.09387). ``display jet_algorithm`` lists the
+    primary and additional jet definitions, and ``remove my_jet`` deletes a definition.
 
-    It is possible to display all jets defined in the current session by typing the command `display jet_algorithm`:
-
-    .. code-block::
-
-        $ ./bin/ma5 -R
-        ma5>set main.fastsim.package = fastjet
-        ma5>define jet_algorithm my_jet cdfmidpoint
-        ma5>display jet_algorithm
-        MA5: * Primary Jet Definition :
-        MA5:  fast-simulation package : fastjet
-        MA5:  clustering algorithm : antikt
-        MA5:   + Jet ID : Ma5Jet
-        MA5:   + cone radius = 0.4
-        MA5:   + PT min (GeV) for produced jets = 5.0
-        MA5:   + exclusive identification = true
-        MA5:   + b-jet identification:
-        MA5:     + DeltaR matching = 0.5
-        MA5:     + exclusive algo = true
-        MA5:     + id efficiency = 1.0
-        MA5:     + mis-id efficiency (c-quark)      = 0.0
-        MA5:     + mis-id efficiency (light quarks) = 0.0
-        MA5:   + hadronic-tau identification:
-        MA5:     + id efficiency = 1.0
-        MA5:     + mis-id efficiency (light quarks) = 0.0
-        MA5:    --------------------
-        MA5: * Other Jet Definitions:
-        MA5:    1. Jet ID = my_jet
-        MA5:       - algorithm       : cdfmidpoint
-        MA5:       - radius          : 0.4
-        MA5:       - ptmin           : 5.0
-        MA5:       - overlap         : 0.5
-        MA5:       - seed            : 1.0
-        MA5:       - iratch          : 0.0
-        MA5:       - areafraction    : 1.0
-
-    What is called the primary jet definition is that defined through the original syntax of MadAnalysis5.
-    As nothing was specified, the default `antikt` configuration is used. For more info on how to define
-    this primary jet, we refer to [arXiv:2006.09387](https://arxiv.org/abs/2006.09387). The block with the
-    other jet definitions include all those jets defined via a usage of the `jet_algorithm` keyword.
-
-    To remove a `jet_algorithm` definition one can use `remove my_jet` command.
+    Attributes:
+        collection (``OrderedDict[str, JetConfiguration]``): jet definitions by identifier.
+        algorithms (``list[str]``): supported algorithms.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Create an empty collection."""
         self.logger = logging.getLogger("MA5")
         self.collection = OrderedDict()
         self.algorithms = JetConfiguration().GetJetAlgorithms()
 
-    def help(self):
+    def help(self) -> None:
+        """Log the syntax of ``define jet_algorithm`` (at error level)."""
         self.logger.error("   * define jet_algorithm <name> <algorithm> <keyword args>")
         self.logger.error("      - <name>         : Name to be assigned to the jet.")
         self.logger.error(
@@ -131,24 +98,18 @@ class JetCollection:
         )
 
     def define(self, args: Sequence[Text], dataset_names: Sequence = None) -> bool:
-        """
-        Definition of a new jet
+        """Define a new jet collection.
 
-        Parameters
-        ----------
-        args : Sequence[Text]
-            input arguments:
-            args[0]  -> jet_algorithm
-            args[1]  -> JetID
-            args[2]  -> jet algorithm
-            args[3:] -> options: no need to cherry pick them only the relevant ones will be used.
-        dataset_names : Sequence
-            names for the datasets and primary jet to avoid overlaps
+        Args:
+            args (``Sequence[Text]``): command arguments: ``args[0]`` is ``jet_algorithm``,
+                ``args[1]`` the jet identifier, ``args[2]`` the algorithm and ``args[3:]`` the
+                options as ``key = value`` triplets (commas are ignored).
+            dataset_names (``Sequence``, default ``None``): names that cannot be used as jet
+                identifier (datasets, primary jet).
 
-        Returns
-        -------
-        bool:
-            if true new jet has been successfully created, if false not.
+        Returns:
+            ``bool``:
+            ``True`` if the jet collection has been created, ``False`` otherwise.
         """
 
         if dataset_names is None:
@@ -207,6 +168,8 @@ class JetCollection:
                     if item[2] in strategy:
                         options[item[0]] = item[2]
                     else:
+                        # NOTE: an invalid strategy/cluster type is only logged; the jet is still created with the
+                        # default value. The cluster type is case-sensitive here, but not in JetConfiguration.user_SetParameter.
                         self.logger.error(f"Invalid strategy: {item[2]}")
                         self.logger.error("Available types are: " + ", ".join(strategy))
                 elif item[0] == "clustertype" and algorithm == "VariableR":
@@ -234,29 +197,66 @@ class JetCollection:
         )
         return True
 
-    def Set(self, obj, value):
+    def Set(self, obj: list[str], value: str) -> None:
+        """Set a parameter of a jet definition (``set <JetID>.<parameter> = <value>``).
+
+        Args:
+            obj (``list[str]``): ``[JetID, parameter]``.
+            value (``str``): value typed by the user.
+        """
         if len(obj) == 2:
+            # NOTE: KeyError if obj[0] is not a defined jet.
             self.collection[obj[0]].user_SetParameter(obj[1], value)
         else:
             self.logger.error("Invalid syntax!")
         return
 
-    def Delete(self, JetID):
+    def Delete(self, JetID: str) -> None:
+        """Remove a jet definition.
+
+        Args:
+            JetID (``str``): identifier of the jet collection.
+        """
         if JetID in self.collection.keys():
             self.collection.pop(JetID)
         else:
             self.logger.error(JetID + " does not exist.")
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log all additional jet definitions."""
         for ix, (key, item) in enumerate(self.collection.items()):
             self.logger.info("   " + str(ix + 1) + ". Jet ID = " + key)
             item.Display()
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Get the number of additional jet definitions.
+
+        Returns:
+            ``int``:
+            Number of definitions.
+        """
         return len(self.collection.keys())
 
-    def GetNames(self):
+    def GetNames(self) -> list[str]:
+        """Get the identifiers of the jet definitions.
+
+        Returns:
+            ``list[str]``:
+            Jet identifiers in definition order.
+        """
         return list(self.collection.keys())
 
-    def Get(self, JetID):
+    def Get(self, JetID: str) -> _JetConfiguration:
+        """Get a jet definition.
+
+        Args:
+            JetID (``str``): identifier of the jet collection.
+
+        Raises:
+            ``KeyError``: if the identifier does not exist.
+
+        Returns:
+            ``JetConfiguration``:
+            The jet definition.
+        """
         return self.collection[JetID]

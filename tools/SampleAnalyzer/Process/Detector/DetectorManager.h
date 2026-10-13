@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file DetectorManager.h
+ * @brief Registry of the detector simulations.
+ */
+
 #ifndef DETECTOR_MANAGER_h
 #define DETECTOR_MANAGER_h
 
@@ -34,6 +39,7 @@
 namespace MA5
 {
 
+/** @brief Registry of the detector simulations. */
 class DetectorManager : public ManagerBase<DetectorBase>
 {
   // -------------------------------------------------------------
@@ -41,18 +47,22 @@ class DetectorManager : public ManagerBase<DetectorBase>
   // -------------------------------------------------------------
   public :
 
-   /// Constructor without argument
+   /** @brief Constructor. */
    DetectorManager() : ManagerBase<DetectorBase>()
    { }
 
-   /// Destructor
+   /** @brief Destructor. */
    ~DetectorManager()
    { }
 
-   /// Build the table
+  /** @brief Register the available detector simulations (Delphes and Delphes-MA5tune, when compiled with DELPHES_USE/DELPHESMA5TUNE_USE). */
   void BuildTable(); 
 
-  /// Print the list of items in the collection
+  /**
+   * @brief Print the registered detector simulations.
+   *
+   * @param os logger.
+   */
   void Print(LogStream& os=INFO) const
   { ManagerBase<DetectorBase>::Print(Objects_, Names_, os); }
 

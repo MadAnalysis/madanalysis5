@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file Recluster.h
+ * @brief Reclustering of jets (FastJet contrib Recluster).
+ */
+
 #ifndef MADANALYSIS5_RECLUSTER_H
 #define MADANALYSIS5_RECLUSTER_H
 
@@ -31,6 +36,7 @@ using namespace std;
 
 namespace MA5 {
     namespace Substructure {
+        /** @brief Recluster jets with another algorithm or radius (FastJet contrib Recluster). */
         class Recluster : public ClusterBase{
 
             // -------------------------------------------------------------
@@ -38,10 +44,10 @@ namespace MA5 {
             // -------------------------------------------------------------
             public:
 
-                /// Constructor without argument
+                /** @brief Constructor without argument (call Initialize() before use). */
                 Recluster() {}
 
-                /// Destructor
+                /** @brief Destructor. */
                 ~Recluster() {}
 
                 //============================//
@@ -51,27 +57,67 @@ namespace MA5 {
                 // Hence it would be optimum execution to initialize the algorithm during the initialisation
                 // of the analysis
 
-                // Constructor with arguments
+                /**
+                 * @brief Constructor with arguments (calls Initialize()).
+                 *
+                 * @param algorithm reclustering algorithm.
+                 * @param radius jet radius.
+                 */
                 Recluster(Algorithm algorithm, MAfloat32 radius) { Initialize(algorithm, radius); }
 
+                /**
+                 * @brief Set the jet definition used for the reclustering.
+                 *
+                 * @param algorithm reclustering algorithm.
+                 * @param radius jet radius.
+                 */
                 void Initialize(Algorithm algorithm, MAfloat32 radius) { SetJetDef(algorithm, radius); }
 
                 //=======================//
                 //        Execution      //
                 //=======================//
 
-                // Method to recluster a given jet. Returns only the hardest reclustered jet.
+                /**
+                 * @brief Recluster a jet and return the hardest reclustered jet.
+                 *
+                 * The returned jets are allocated on the heap and are owned by the caller.
+                 *
+                 * @param jet jet to process (its constituents are used).
+                 * @return the reclustered jet.
+                 */
+                // NOTE: this hides ClusterBase::Execute(const RecJetFormat*), which returns all the reclustered jets.
                 const RecJetFormat* Execute(const RecJetFormat *jet);
 
-                // Method to recluster each jet in a given vector
+                /**
+                 * @brief Recluster each jet of a collection individually.
+                 *
+                 * The returned jets are allocated on the heap and are owned by the caller.
+                 *
+                 * @param jets jets to process.
+                 * @return the reclustered jets, pT-ordered.
+                 */
                 std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets) override;
 
                 //=============================//
                 //        NOT IMPLEMENTED      //
                 //=============================//
 
+                /**
+                 * @brief Not implemented (logs an error).
+                 *
+                 * @param event event.
+                 * @param JetID jet collection identifier.
+                 */
                 void Execute(const EventFormat& event, std::string JetID) override;
 
+                /**
+                 * @brief Not implemented (logs an error).
+                 *
+                 * @tparam Func filter type.
+                 * @param jet jet to process (its constituents are used).
+                 * @param func filter.
+                 * @return an empty vector.
+                 */
                 template<class Func>
                 std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func);
         };

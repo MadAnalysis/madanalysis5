@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,14 +22,37 @@
 ################################################################################
 
 
+"""Stacking methods of the histograms (``set main.stacking_method``)."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
-        def __getattr__(self, name):
+        """Metaclass turning the class attribute access ``StackingMethodType.NAME`` into an integer code.
+
+        Accessing ``StackingMethodType.NAME`` returns the index of ``NAME`` in ``StackingMethodType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
+        def __getattr__(self, name: str) -> int:
+                """Get the integer code of an enumeration entry.
+
+                Args:
+                    name (``str``): name of the entry (e.g. ``StackingMethodType.STACK``).
+
+                Raises:
+                    ``ValueError``: if ``name`` is not a key of ``values``.
+
+                Returns:
+                    ``int``:
+                    Index of the entry in ``values``.
+                """
                 return self.values.index(name)
 
 @six.add_metaclass(metaclass)
 class StackingMethodType(object):
+        """Stacking methods: ``AUTO``, ``STACK``, ``SUPERIMPOSE`` and ``NORMALIZE2ONE``.
+        """
         values = ['AUTO','STACK','SUPERIMPOSE','NORMALIZE2ONE']
 
 

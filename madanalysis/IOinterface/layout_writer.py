@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Writer of ``layout.ma5``, the summary of the layout settings of a job."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.IOinterface.folder_writer    import FolderWriter
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
@@ -32,19 +39,32 @@ import shutil
 import os
 
 class LayoutWriter():
+    """Writer of the ``layout.ma5`` file of a job.
 
-    def __init__(self,main,jobdir):
+    The file lists (in an XML-like format) the normalisation, the datasets, the regions,
+    the histograms/cuts and, if needed, the multiparticles.
+    """
+
+    def __init__(self,main: Main,jobdir: str) -> None:
+        """Create the writer.
+
+        Args:
+            main (``Main``): session state.
+            jobdir (``str``): job directory.
+        """
         self.main   = main
         self.jobdir = jobdir
 
     
-    def WriteLayoutConfig(self):
+    def WriteLayoutConfig(self) -> None:
+        """Write ``<jobdir>/layout.ma5``."""
         
         # open the file in write-only mode 
         filename = os.path.normpath(self.jobdir+"/layout.ma5")
         try:
             file = open(filename,"w")
         except:
+            # FIXME: no return after this error: 'file' is undefined below (NameError).
             logging.getLogger('MA5').error("impossible to create the file '"+filename+"'")
 
         # Writing header

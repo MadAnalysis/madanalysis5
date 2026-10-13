@@ -22,6 +22,11 @@
 //////////////////////////////////////////////////////
 
 // FastJet headers
+/**
+ * @file SoftDrop.cpp
+ * @brief Implementation of MA5::Substructure::SoftDrop.
+ */
+
 #include "fastjet/contrib/SoftDrop.hh"
 
 // SampleAnalyser headers

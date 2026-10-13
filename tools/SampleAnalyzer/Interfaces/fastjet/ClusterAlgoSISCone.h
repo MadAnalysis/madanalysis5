@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ClusterAlgoSISCone.h
+ * @brief SISCone algorithm (FastJet).
+ */
+
 #ifndef JETCLUSTERINGSISCONE_H
 #define JETCLUSTERINGSISCONE_H
 
@@ -32,6 +37,7 @@
 namespace MA5
 {
 
+/** @brief Jet clustering with the SISCone algorithm. */
 class ClusterAlgoSISCone: public ClusterAlgoPlugin
 {
 //---------------------------------------------------------------------------------
@@ -39,16 +45,16 @@ class ClusterAlgoSISCone: public ClusterAlgoPlugin
 //---------------------------------------------------------------------------------
   private :
 
-    /// Cone Radius
+    /** @brief Cone radius. */
     MAfloat64 R_;
 
-    /// Overlap Threshold
+    /** @brief Overlap threshold of the split-merge step. */
     MAfloat64 OverlapThreshold_;
 
-    /// Max number of passes
+    /** @brief Maximum number of passes (0: no limit). */
     MAint32 NPassMax_;
 
-    /// Minimal Pt for protojet
+    /** @brief Minimum pT of the protojets. */
     MAfloat64 Protojet_ptmin_;
 
 //---------------------------------------------------------------------------------
@@ -56,25 +62,43 @@ class ClusterAlgoSISCone: public ClusterAlgoPlugin
 //---------------------------------------------------------------------------------
   public :
 
-    /// Constructor without argument
+    /** @brief Constructor (default parameters). */
     ClusterAlgoSISCone() {R_=0.5; OverlapThreshold_=0.75; NPassMax_=0; Protojet_ptmin_=0.0;}
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~ClusterAlgoSISCone () {}
 
-    /// Initialization
+    /**
+     * @brief Create the FastJet jet definition.
+     *
+     * @return true.
+     */
     virtual MAbool Initialize();
 
-    /// Set parameter
+    /**
+     * @brief Set a parameter (`r`, `ptmin`, `overlapthreshold`, `npassmax` and `protojet_ptmin`).
+     *
+     * @param key parameter name (lower case).
+     * @param value value.
+     * @return false for an unknown parameter.
+     */
     virtual MAbool SetParameter(const std::string& key, const std::string& value);
 
-    /// Print parameters
+    /** @brief Print the parameters. */
     virtual void PrintParam();
 
-    /// Accessor to the jet clusterer name
+    /**
+     * @brief Accessor to the name of the algorithm.
+     *
+     * @return the name.
+     */
     virtual std::string GetName();
 
-    /// Accessor to the jet clusterer parameters
+    /**
+     * @brief Accessor to the parameters.
+     *
+     * @return a printable summary.
+     */
     virtual std::string GetParameters();
 
 };

@@ -1,0 +1,73 @@
+#TITLE NLO histogram options: status, ordering, combinations and setters
+#MODE PARTON
+# Signed NLO sample; compare nominal outputs with the non-multiweight branch.
+import samples/ttbar_nlo.lhe.gz as testset
+set testset.weighted_events = true
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu- ta+ ta-
+define heavy = t t~
+
+# Particle status: finalstate
+plot N(heavy) 8 0 8 [finalstate]
+plot E(heavy) 30 0 2000 [finalstate]
+plot PZ(j) 30 -2000 2000 [finalstate]
+# Particle status: initialstate
+plot N(heavy) 8 0 8 [initialstate]
+plot E(heavy) 30 0 2000 [initialstate]
+plot PZ(j) 30 -2000 2000 [initialstate]
+# Particle status: interstate
+plot N(heavy) 8 0 8 [interstate]
+plot E(heavy) 30 0 2000 [interstate]
+plot PZ(j) 30 -2000 2000 [interstate]
+# Particle status: allstate
+plot N(heavy) 8 0 8 [allstate]
+plot E(heavy) 30 0 2000 [allstate]
+plot PZ(j) 30 -2000 2000 [allstate]
+# Positive and negative ranks with Eordering
+plot PT(j[1]) 30 0 600 [Eordering]
+plot PT(j[-1]) 30 0 600 [Eordering]
+# Positive and negative ranks with ETordering
+plot PT(j[1]) 30 0 600 [ETordering]
+plot PT(j[-1]) 30 0 600 [ETordering]
+# Positive and negative ranks with Pordering
+plot PT(j[1]) 30 0 600 [Pordering]
+plot PT(j[-1]) 30 0 600 [Pordering]
+# Positive and negative ranks with PTordering
+plot PT(j[1]) 30 0 600 [PTordering]
+plot PT(j[-1]) 30 0 600 [PTordering]
+# Positive and negative ranks with PXordering
+plot PT(j[1]) 30 0 600 [PXordering]
+plot PT(j[-1]) 30 0 600 [PXordering]
+# Positive and negative ranks with PYordering
+plot PT(j[1]) 30 0 600 [PYordering]
+plot PT(j[-1]) 30 0 600 [PYordering]
+# Positive and negative ranks with PZordering
+plot PT(j[1]) 30 0 600 [PZordering]
+plot PT(j[-1]) 30 0 600 [PZordering]
+# Positive and negative ranks with ETAordering
+plot PT(j[1]) 30 0 600 [ETAordering]
+plot PT(j[-1]) 30 0 600 [ETAordering]
+# Scalar/vector sums, scalar/vector differences and ratios.
+plot sPT(b[1] b[2]) 40 0 1500
+plot vPT(b[1] b[2]) 40 0 1500
+plot dsPT(b[1] b[2]) 40 -1000 1000
+plot dPT(b[1] b[2]) 40 0 1500
+plot rPT(b[1] b[2]) 40 -2 10
+# Generator vertices: expected zero here, still exercise supported observables.
+plot D0(b) 20 -1 1
+plot DZ(b) 20 -1 1
+plot D0APPROX(b) 20 -1 1
+plot DZAPPROX(b) 20 -1 1
+# Setters applied to the first histogram (N(heavy)).
+set selection[1].nbins = 10
+set selection[1].xmin = 0
+set selection[1].xmax = 10
+set selection[1].statuscode = allstate
+set selection[1].rank = PTordering
+# Rendering options are exercised, but SAF comparison does not validate their appearance.
+plot PT(b[1]) 30 1 600 [logX logY normalize2one]
+plot PT(b[1]) 30 0 600 [stack]
+plot PT(b[1]) 30 0 600 [superimpose]
+display selection
+submit

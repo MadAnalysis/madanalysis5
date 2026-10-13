@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MergingPlotType.h
+ * @brief Set of histograms of one differential jet rate.
+ */
+
 #ifndef MERGING_PLOT_TYPE_H
 #define MERGING_PLOT_TYPE_H
 
@@ -38,6 +43,7 @@
 namespace MA5
 {
 
+/** @brief Histograms of one DJR: one per number of extra jets and the total. */
 class MergingPlotType
 {
 //---------------------------------------------------------------------------------
@@ -45,10 +51,12 @@ class MergingPlotType
 //---------------------------------------------------------------------------------
  public:
 
+  /** @brief Number of contributions (numbers of extra jets). */
   MAuint32 n_contribs;
 //  std::vector<Histo*> contribution;
 //  Histo* total;
 
+  /** @brief Binning of the DJR histograms (log10 of the DJR value). */
   static const MAuint32   nbins;
   static const MAfloat64 xmin;
   static const MAfloat64 xmax;
@@ -58,14 +66,24 @@ class MergingPlotType
 //                                method members
 //---------------------------------------------------------------------------------
  public:
+  /** @brief Constructor. */
   MergingPlotType()
   {}
 
+  /** @brief Destructor. */
   ~MergingPlotType()
   {}
 
+  /**
+   * @brief Declare the histograms in a region manager.
+   *
+   * @param ncontrib number of contributions.
+   * @param name base name (e.g. DJR1).
+   * @param manager region manager.
+   */
   void Initialize(unsigned int, const std::string&, RegionSelectionManager*);
 
+  /** @brief Finalise (nothing to do). */
   void Finalize() { };
 
 };

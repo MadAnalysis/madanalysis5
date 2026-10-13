@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Installation of Delphes or Delphes-MA5tune (``install delphes|delphesMA5tune``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.install.install_service    import InstallService
 from madanalysis.system.user_info           import UserInfo
 from madanalysis.system.config_checker      import ConfigChecker
@@ -37,8 +44,23 @@ import glob
 import shutil
 
 class InstallDelphes:
+    """Installer of Delphes or Delphes-MA5tune (``install delphes|delphesMA5tune``).
 
-    def __init__(self,main,package):
+    The methods are called by
+    :meth:`madanalysis.install.install_manager.InstallManager.Execute` in the following
+    order (only when defined): ``Detect``/``Remove``, ``GetNcores``,
+    ``CreatePackageFolder``, ``CreateTmpFolder``, ``Download``, ``Unpack``, ``Configure``,
+    ``Build``, ``PreCheck``, ``Clean``, ``Install``, ``Check`` and ``NeedToRestart``.
+    """
+
+    def __init__(self,main: Main,package: str) -> None:
+        """Prepare the installation of Delphes (``tools/delphes``) or Delphes-MA5tune
+        (``tools/delphesMA5tune``).
+
+        Args:
+            main (``Main``): session state.
+            package (``str``): ``"delphes"`` or ``"delphesma5tune"``.
+        """
         self.main        = main
         self.package     = 'delphes'
         if package == 'delphesma5tune':
@@ -49,14 +71,17 @@ class InstallDelphes:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.join(self.tmpdir, 'MA5_'+self.package)
         self.ncores      = 1
-        if package == 'delphesma5tune':
-            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes3.5.0.tar.gz"}
-        else:
-            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes3.5.0.tar.gz"}
+        self.files = {package+".tar.gz" : "https://github.com/delphes/delphes/archive/refs/tags/3.5.2pre02.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
 
-    def Detect(self):
+    def Detect(self) -> bool:
+        """Check whether Delphes or Delphes-MA5tune is already installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the installation folder exists.
+        """
         if not os.path.isdir(self.toolsdir):
             self.logger.debug("The folder '"+self.toolsdir+"' is not found")
             return False
@@ -66,17 +91,35 @@ class InstallDelphes:
         return True
 
 
-    def Remove(self,question=True):
+    def Remove(self,question: bool = True) -> tuple[bool, bool]:
+        """Remove the previous installation of Delphes or Delphes-MA5tune.
+
+        Args:
+            question (``bool``, default ``True``): ask the user for confirmation.
+
+        Returns:
+            ``tuple[bool, bool]``:
+            Result of :meth:`~madanalysis.IOinterface.folder_writer.FolderWriter.RemoveDirectory`:
+            whether the operation succeeded and whether the folder was removed/kept on the
+            user's request.
+        """
         from madanalysis.IOinterface.folder_writer import FolderWriter
         return FolderWriter.RemoveDirectory(self.installdir,question)
 
 
-    def GetNcores(self):
+    def GetNcores(self) -> None:
+        """Ask the number of cores used for the compilation (all cores in forced mode)."""
         self.ncores = InstallService.get_ncores(self.main.archi_info.ncores,\
                                                 self.main.forced)
 
 
-    def CreatePackageFolder(self):
+    def CreatePackageFolder(self) -> bool:
+        """Create the installation folder of Delphes or Delphes-MA5tune.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if not InstallService.create_tools_folder(self.toolsdir):
             return False
         if not InstallService.create_package_folder(self.toolsdir,self.package):
@@ -84,14 +127,26 @@ class InstallDelphes:
         return True
 
 
-    def CreateTmpFolder(self):
+    def CreateTmpFolder(self) -> bool:
+        """Create (clean) the temporary unpacking folder and the download folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ok = InstallService.prepare_tmp(self.untardir, self.downloaddir)
         if ok:
             self.tmpdir=self.untardir
         return ok
 
 
-    def Download(self):
+    def Download(self) -> bool:
+        """Download the source files of Delphes or Delphes-MA5tune.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
             return False
@@ -103,7 +158,13 @@ class InstallDelphes:
         return True
 
 
-    def Unpack(self):
+    def Unpack(self) -> bool:
+        """Unpack the downloaded files of Delphes or Delphes-MA5tune.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
 
@@ -117,7 +178,7 @@ class InstallDelphes:
         if self.package == 'delphesMA5tune':
             # Copying the patch
             self.logger.debug('Copying the patch ...')
-            input=self.toolsdir+'/SampleAnalyzer/Interfaces/delphesMA5tune/patch_delphesMA5tune_v35.tgz'
+            input=self.toolsdir+'/SampleAnalyzer/Interfaces/delphesMA5tune/patch_delphesMA5tune_v532pre02.tgz'
             output=packagedir+'/patch_delphesMA5tune.tgz'
             try:
                 shutil.copy(input,output)
@@ -165,28 +226,11 @@ class InstallDelphes:
                     self.logger.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
                     return False
 
-
-# No need with the last release of ROOT
-#        if self.package=='delphes':
-#            # Updating DelphesFormula
-#            filename = self.installdir+'/classes/DelphesFormula.cc'
-#            self.logger.debug('Updating files '+filename+ ': adding d0\n')
-#            self.AddD0(filename)
-
-        # Updating Makefile
+        # Updating the genMakefile
         filename = self.installdir+'/doc/genMakefile.tcl'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
-
-        # Updating ExRootTask
-        filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
-        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[64,65,66],'//')
-
-        # Updating ExRootTask
-        filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
-        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[177,178,179,180],'//')
+        if not self.ProtectBundledFastJet(filename): return False
 
         # Adding files
         if self.package=='delphes':
@@ -202,7 +246,13 @@ class InstallDelphes:
         return True
 
 
-    def Configure(self):
+    def Configure(self) -> bool:
+        """Configure Delphes or Delphes-MA5tune before compilation.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Known delphes issues: generate issues because it uses tcslsh command
         # Input
         theCommands=['./configure']
@@ -210,6 +260,16 @@ class InstallDelphes:
         # Execute
         self.logger.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,logname,self.installdir,silent=False)
+        if not ok:
+            self.logger.error('impossible to configure the project. For more details, see the log file:')
+            self.logger.error(logname)
+            return False
+
+        filename = os.path.join(self.installdir, 'Makefile')
+        self.SwitchOffCMSSW(filename)
+        return self.ProtectBundledFastJet(filename)
+
+
 
         # Updating the Makefile
         self.logger.debug('Updating the Makefiles: no CMSSW\n')
@@ -222,7 +282,13 @@ class InstallDelphes:
         return ok
 
 
-    def Build(self):
+    def Build(self) -> bool:
+        """Compile Delphes or Delphes-MA5tune.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # Input
         theCommands=['make', '-j'+str(self.ncores)]
@@ -237,7 +303,13 @@ class InstallDelphes:
         return ok
 
 
-    def Clean(self):
+    def Clean(self) -> bool:
+        """Clean the build products of Delphes or Delphes-MA5tune.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Input
         theCommands=['make','clean']
         logname=os.path.normpath(self.installdir+'/clean.log')
@@ -253,7 +325,13 @@ class InstallDelphes:
 
 
 
-    def Check(self):
+    def Check(self) -> bool:
+        """Check that Delphes or Delphes-MA5tune has been properly installed.
+
+        Returns:
+            ``bool``:
+            ``True`` if the expected files are present.
+        """
         # Check folders
         dirs = [self.installdir+"/modules", self.installdir+"/classes"]
         for dir in dirs:
@@ -282,7 +360,8 @@ class InstallDelphes:
 
         return True
 
-    def display_log(self):
+    def display_log(self) -> None:
+        """Log the paths of the installation log files."""
         self.logger.error("More details can be found into the log files:")
         self.logger.error(" - "+os.path.normpath(self.installdir+"/wget.log"))
         self.logger.error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
@@ -290,11 +369,28 @@ class InstallDelphes:
         self.logger.error(" - "+os.path.normpath(self.installdir+"/compilation.log"))
         self.logger.error(" - "+os.path.normpath(self.installdir+"/clean.log"))
 
-    def NeedToRestart(self):
+    def NeedToRestart(self) -> bool:
+        """Tell whether MadAnalysis 5 must be restarted after the installation.
+
+        Returns:
+            ``bool``:
+            ``True`` if a restart (new configuration check and library build) is needed.
+        """
         return True
 
 
-    def CommentLines(self,filename,thelines,charac='//'):
+    def CommentLines(self,filename: str,thelines: list[int],charac: str = '//') -> bool:
+        """Comment out some lines of a file (in place).
+
+        Args:
+            filename (``str``): file to modify.
+            thelines (``list[int]``): 1-based numbers of the lines to comment.
+            charac (``str``, default ``'//'``): comment marker.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # open input file
         try:
             input = open(filename)
@@ -331,7 +427,16 @@ class InstallDelphes:
         return True
 
 
-    def SwitchOffCMSSW(self,filename):
+    def SwitchOffCMSSW(self,filename: str) -> bool:
+        """Replace ``HAS_CMSSW = true`` by ``HAS_CMSSW = false`` in a Delphes build file.
+
+        Args:
+            filename (``str``): file to modify.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # open input file
         try:
             input = open(filename)
@@ -363,7 +468,54 @@ class InstallDelphes:
         return True
 
 
-    def AddD0(self,filename):
+
+    def ProtectBundledFastJet(self, filename: "str") -> bool:
+        """Prevent the symbols of the FastJet copy bundled with Delphes from being interposed.
+
+        On Linux, ``-Wl,-Bsymbolic`` is added to ``DELPHES_LIBS`` in the given Makefile.
+
+        Args:
+            filename (``str``): Makefile (or Makefile generator) to modify.
+
+        Returns:
+            ``bool``:
+            ``True`` on success (and always on non-Linux systems).
+        """
+        if not sys.platform.startswith('linux'): return True
+
+        # Delphes embeds FastJet installation, while MA5 may load a different one
+        # the same process. We need to bind both functions and data symbols locally.
+        linker_flag = 'DELPHES_LIBS += -Wl,-Bsymbolic\n'
+        with open(filename, 'r') as input_file: lines = input_file.readlines()
+        if linker_flag in lines: return True
+
+        insertion_point = None
+        for index, line in enumerate(lines):
+            if line.startswith('DELPHES_LIBS ='):
+                insertion_point = index + 1
+                break
+        if insertion_point is None:
+            self.logger.error('unable to protect bundled FastJet symbols in ' + filename)
+            return False
+
+        lines.insert(insertion_point, linker_flag)
+        with open(filename, 'w') as output_file:
+           output_file.writelines(lines)
+
+        # Exit
+        return True
+
+
+    def AddD0(self,filename: str) -> bool:
+        """Legacy hook to patch the Delphes card reader (the file is rewritten unchanged).
+
+        Args:
+            filename (``str``): file to process.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # open input file
         try:
             input = open(filename)
@@ -402,7 +554,17 @@ class InstallDelphes:
         return True
 
 
-    def AddD0(self,filename):
+    # NOTE: duplicate definition of AddD0 (identical to the one above).
+    def AddD0(self,filename: str) -> bool:
+        """Duplicate definition of :meth:`AddD0` (this one overrides the first one).
+
+        Args:
+            filename (``str``): file to process.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # open input file
         try:
             input = open(filename)
@@ -445,7 +607,17 @@ class InstallDelphes:
 
 
 
-    def CopyFiles(self,filesToAdd):
+    def CopyFiles(self,filesToAdd: list[str]) -> bool:
+        """Copy the MadAnalysis 5 Delphes modules (e.g. ``MA5GenParticleFilter``) into ``modules/``.
+
+        Args:
+            filesToAdd (``list[str]``): module names (``<name>.cc.install``/``.h.install`` in
+                ``tools/SampleAnalyzer/Interfaces/delphes``).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         for file in filesToAdd:
             logging.debug("Add module *"+file+"* ...")
@@ -474,7 +646,16 @@ class InstallDelphes:
         return True
 
 
-    def UpdateDictionnary(self,filesToAdd):
+    def UpdateDictionnary(self,filesToAdd: list[str]) -> bool:
+        """Register the added modules in the ROOT dictionary (``modules/ModulesLinkDef.h``).
+
+        Args:
+            filesToAdd (``list[str]``): module names.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         inputname = self.installdir+'/modules/ModulesLinkDef.h'
         self.logger.debug("Updating the Delphes dictionnary '"+inputname+'" ...')
@@ -520,7 +701,16 @@ class InstallDelphes:
 
         return True
 
-    def Deactivate(self):
+    def Deactivate(self) -> bool:
+        """Deactivate the installation by renaming its folder ``tools/DEACT_<package>``.
+
+        Only one of Delphes and Delphes-MA5tune can be active at a time. The corresponding
+        SampleAnalyzer interface library, Makefile and architecture information are removed.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ## INIT
         if self.package=='delphes':
             libpaths  = self.main.archi_info.delphes_lib_paths
@@ -541,6 +731,7 @@ class InstallDelphes:
 
         # Removing the symbolic links
         for to_remove in [x for x in originals if (os.path.exists(x) and 'ExternalSymLink' in x)]:
+            # FIXME: 'x' is not defined in this scope (NameError in Python 3); 'to_remove' was intended.
             os.remove(x)
 
         # Updating the architecture
@@ -551,6 +742,7 @@ class InstallDelphes:
 
         # If the deactivated directory already exists -> suppression
         if os.path.isdir(deac_path):
+            # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
             if not FolderWriter.RemoveDirectory(os.path.normpath(deac_path),True):
                     return False
 
@@ -589,7 +781,15 @@ class InstallDelphes:
     # output =  1: activation successfull.
     #           0: nothing is done.
     #          -1: error
-    def Activate(self):
+    def Activate(self) -> int:
+        """Reactivate a deactivated installation and rebuild the relevant SampleAnalyzer
+        libraries (interface, ROOT and process).
+
+        Returns:
+            ``int``:
+            ``1`` after a successful reactivation (but also when the package is not found,
+            see FIXME), ``0`` if it is already active, ``-1`` on error.
+        """
         ## init
         self.logger.debug('Starting the activation of ' + self.package)
         user_info = UserInfo()
@@ -607,56 +807,43 @@ class InstallDelphes:
 
         ## Nothing to activate
         if not has_delphes:
+            # FIXME: the same value (1) is returned for 'not found' and for a successful activation;
+            # DetectorManager only tests for -1.
             return 1
 
         # Paths and architecture update
-        def activate(onelib):
+        def activate(onelib: str) -> str:
+            """Remove the ``DEACT_`` prefix from a path.
+
+            Args:
+                onelib (``str``): path.
+
+            Returns:
+                ``str``:
+                The activated path.
+            """
             return onelib.replace("DEACT_","")
-        def libclean(onelib):
-            if len(onelib)>2:
-                del onelib[-1]
-                del onelib[-1]
-            return onelib
-        if self.package=='delphes':
-            # shortcuts
-            delphes_path = self.main.archi_info.delphes_lib_paths[0]
-            originals    = self.main.archi_info.delphes_original_libs
-            # architecture
-            self.main.archi_info.delphes_lib           = activate(self.main.archi_info.delphes_lib)
-            self.main.archi_info.delphes_original_libs = [activate(x) for x in originals]
-            self.main.archi_info.delphes_inc_paths     = libclean(
-                [activate(x) for x in self.main.archi_info.delphes_inc_paths ])
-            self.main.archi_info.delphes_lib_paths     = libclean(
-                [activate(x) for x in self.main.archi_info.delphes_lib_paths ])
-            # Updating shortcuts
-            originals    = self.main.archi_info.delphes_original_libs
-        elif self.package=='delphesMA5tune':
-            # shortcuts
-            delphes_path = self.main.archi_info.delphesMA5tune_lib_paths[0]
-            originals    = self.main.archi_info.delphesMA5tune_original_libs
-            # architecture
-            self.main.archi_info.delphesMA5tune_lib           = activate(self.main.archi_info.delphesMA5tune_lib)
-            self.main.archi_info.delphesMA5tune_original_libs = [activate(x) for x in originals]
-            self.main.archi_info.delphesMA5tune_inc_paths     = libclean(
-                [ activate(x) for x in self.main.archi_info.delphesMA5tune_inc_paths ])
-            self.main.archi_info.delphesMA5tune_lib_paths     = libclean(
-                [ activate(x) for x in self.main.archi_info.delphesMA5tune_lib_paths ])
-            # Updating shortcuts
-            originals    = self.main.archi_info.delphesMA5tune_original_libs
-        activated_path = activate(delphes_path)
+        delphes_path = getattr(self.main.archi_info, self.package + "_lib_paths")[0]
 
-        # do we have to activate delphes?
-        if not 'DEACT' in delphes_path:
-            return 0
+        # Already activated
+        if not 'DEACT' in delphes_path: return 0
+
+        # We have to activate delphes -> renaming the directory
         self.logger.warning(self.package + " is deactivated. Activating it.")
-
-        # renaming the directory
+        setattr(self.main.archi_info, self.package+"_lib", activate(getattr(self.main.archi_info, self.package+"_lib")))
+        for suffix in ("_original_libs", "_inc_paths", "_lib_paths"):
+            attribute = self.package + suffix
+            setattr(self.main.archi_info, attribute, [activate(path) for path in getattr(self.main.archi_info, attribute)])
+        originals = getattr(self.main.archi_info, self.package+"_original_libs")
+        activated_path = activate(delphes_path)
         shutil.move(delphes_path,activated_path)
 
         # creating the virtual links
         checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
         for link in [x.split('/')[-1] for x in originals]:
             dest = os.path.join(self.main.archi_info.ma5dir,'tools','SampleAnalyzer', 'ExternalSymLink', link)
+            # FIXME: the link target is only the file name (not the full path) and the link is created in
+            # ExternalSymLink/ instead of ExternalSymLink/Lib: the symbolic links are broken.
             if not checkup.CreateSymLink(link,dest):
                 return -1
 
@@ -680,6 +867,7 @@ class InstallDelphes:
             antikey = 'delphes'
 
         install_path = os.path.join(self.main.archi_info.ma5dir,'tools',self.package)
+        # NOTE: the '.so' extension is hard-coded (macOS libraries may be '.dylib').
         mylib = os.path.join(install_path,'lib' + key + '.so')
         self.main.archi_info.libraries[key] = mylib + ":" + str(os.stat(mylib).st_mtime)
         self.main.archi_info.toLDPATH1 = [x for x in self.main.archi_info.toLDPATH1 if not antikey in x]
@@ -735,6 +923,7 @@ class InstallDelphes:
 
         # Paths
         lev=self.logger.getEffectiveLevel()
+        # FIXME: the logger level is not restored when returning -1 below.
         self.logger.setLevel(100)
         checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
         if not checkup.SetFolder():

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,18 +23,31 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file MCEventFormat.cpp
+ * @brief Printing helpers of MA5::MCEventFormat.
+ */
+
 #include "SampleAnalyzer/Commons/DataFormat/MCEventFormat.h"
 #include <set>
 
 
 using namespace MA5;
 
+/** @brief Decay vertex: incoming and outgoing particles. */
 struct VertexInfo
 {
   std::vector<const MCParticleFormat*> in;
   std::vector<const MCParticleFormat*> out;
 };
 
+/**
+ * @brief Compare two sets of particles (order-independent).
+ *
+ * @param a first list.
+ * @param b second list.
+ * @return true if both lists contain the same particles.
+ */
 MAbool CompareMothers(const std::vector<const MCParticleFormat*>& a, const std::vector<const MCParticleFormat*>& b)
 {
   std::set<const MCParticleFormat*> aa;
@@ -44,6 +57,13 @@ MAbool CompareMothers(const std::vector<const MCParticleFormat*>& a, const std::
   if (aa==bb) return true; else return false;
 }
 
+/**
+ * @brief Compare two sets of particles (order-independent).
+ *
+ * @param a first list.
+ * @param b second list.
+ * @return true if both lists contain the same particles.
+ */
 MAbool CompareMothers(const std::vector<const MCParticleFormat*>& a, const std::vector<MCParticleFormat*>& b)
 {
   std::set<const MCParticleFormat*> aa;
@@ -127,6 +147,7 @@ void MCEventFormat::PrintDaughters() const
   for (MAuint32 i=0;i<particles_.size();i++)
   {
     std::cout << "- ";
+    // NOTE: '<-' is printed although the daughters are listed.
     std::cout << std::setw(6) << particles_[i].pdgid() << "]  <-  ";
     for (MAuint32 j=0;j<particles_[i].daughters().size();j++)
     {

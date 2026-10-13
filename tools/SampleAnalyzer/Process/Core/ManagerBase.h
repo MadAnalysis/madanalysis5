@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ManagerBase.h
+ * @brief Registry of named objects (readers, writers, analyses, ...).
+ */
+
 #ifndef MANAGER_BASE_h
 #define MANAGER_BASE_h
 
@@ -42,6 +47,11 @@
 namespace MA5
 {
 
+/**
+ * @brief Registry mapping (case-insensitive) names to objects.
+ *
+ * @tparam T type of the registered objects.
+ */
 template <typename T>
 class ManagerBase
 {
@@ -51,13 +61,13 @@ class ManagerBase
   // -------------------------------------------------------------
  protected:
 
-  /// List of objects
+  /** @brief Registered objects (not owned). */
   std::vector<T*> Objects_;
 
-  /// Mapping between names (lower case) and objects
+  /** @brief Index of the object associated with each (lower-case) name. */
   std::map<std::string, MAuint32> Names_;
 
-  /// List of forbidden name + the motivation
+  /** @brief Forbidden names and the reason why. */
   std::map<std::string, std::string> ForbiddenNames_;
 
 
@@ -66,32 +76,61 @@ class ManagerBase
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   ManagerBase()
   {}
 
-  /// Destructor
+  /** @brief Destructor (the objects are not deleted). */
   ~ManagerBase()
   { 
     //    for (MAuint32 i=0;i<Objects_.size();i++)
     //      if (Objects_[i]!=0) delete Objects_[i];
   }
 
-  /// Find an object(non-const) for a given name
+  /**
+   * @brief Get the object registered under a name.
+   *
+   * @param name name (case-insensitive).
+   * @return the object, or 0 if not found.
+   */
   T* Get(std::string name);
 
-  /// Add an object in the collection
+  /**
+   * @brief Register an object under a name (an object can have several names).
+   *
+   * @param name name (case-insensitive).
+   * @param object object.
+   * @return false if the name is already used.
+   */
   MAbool Add(std::string name, T* object);
 
-  /// Add an object in the collection
+  /**
+   * @brief Forbid a name.
+   *
+   * @param name name (case-insensitive).
+   * @param motivation reason displayed to the user.
+   * @return false if the name is already forbidden.
+   */
   MAbool AddForbidden(std::string name, std::string motivation);
 
-  /// Display the content of the Manager
+  /**
+   * @brief Print the content of a registry.
+   *
+   * @param Objects objects.
+   * @param Names names.
+   * @param os logger (unused: INFO is always used).
+   */
   void Print(const std::vector<T*>& Objects, 
              const std::map<std::string, MAuint32>& Names,
              LogStream& os=INFO) const;
 
-  /// Is it a forbidden name? motivation=output
+  /**
+   * @brief Is a name forbidden?
+   *
+   * @param name name (case-insensitive).
+   * @param motivation output: the reason (empty if not forbidden).
+   * @return true if forbidden.
+   */
   MAbool IsItForbidden(std::string name, std::string& motivation);
 
 };
@@ -220,6 +259,7 @@ void ManagerBase<T>::Print(const std::vector<T*>& Objects,
     INFO.width(20); 
     INFO << it->first;
     INFO << " : ";
+    // NOTE: typeid of a pointer: the static type name is printed, not the dynamic one.
     INFO << typeid(Objects[it->second]).name();
     INFO << " @ " ;
     INFO << Objects[it->second];

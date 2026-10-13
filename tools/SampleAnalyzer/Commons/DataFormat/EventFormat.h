@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file EventFormat.h
+ * @brief Container of an event: Monte Carlo record and/or reconstructed objects.
+ */
 
 #ifndef EventFormat_h
 #define EventFormat_h
@@ -46,6 +51,12 @@ class LHCOReader;
 class HEPMCReader;
 class ROOTReader;
 
+/**
+ * @brief Event, made of the Monte Carlo record (mc()) and/or the reconstructed objects (rec()).
+ *
+ * Either pointer can be null depending on the input format: e.g. LHCO files only
+ * provide reconstructed objects, while LHE files only provide Monte Carlo particles.
+ */
 class EventFormat
 {
   friend class LHEReader;
@@ -58,10 +69,10 @@ class EventFormat
   // -------------------------------------------------------------
  private : 
 
-  /// pointer to reconstructed objects (by a detector simulation)
+  /** @brief Reconstructed objects (null if not available). */
   RecEventFormat * rec_;
 
-  /// pointer to generated particles
+  /** @brief Monte Carlo record (null if not available). */
   MCEventFormat  * mc_;
 
   // -------------------------------------------------------------
@@ -69,31 +80,47 @@ class EventFormat
   // -------------------------------------------------------------
  public :
 
-  /// Constructor withtout arguments
+  /** @brief Constructor (both pointers are null). */
   EventFormat()
   { 
     rec_=0;
     mc_=0; 
   }
 
-  /// Destructor
+  /** @brief Destructor (the pointers are not freed: see Delete()). */
   ~EventFormat()
   { 
   }
 
-  /// Accessor to generated particles (read-only mode)
+  /**
+   * @brief Accessor to the Monte Carlo record (read-only).
+   *
+   * @return the record, or 0 if not available.
+   */
   const MCEventFormat  * mc()   const {return mc_; }
 
-  /// Accessor to reconstructed objects (read-only mode)
+  /**
+   * @brief Accessor to the reconstructed objects (read-only).
+   *
+   * @return the objects, or 0 if not available.
+   */
   const RecEventFormat * rec()  const {return rec_;}
 
-  /// Accessor to generated particles
+  /**
+   * @brief Accessor to the Monte Carlo record.
+   *
+   * @return the record, or 0 if not available.
+   */
   MCEventFormat  * mc()   {return mc_; }
 
-  /// Accessor to reconstructed objects
+  /**
+   * @brief Accessor to the reconstructed objects.
+   *
+   * @return the objects, or 0 if not available.
+   */
   RecEventFormat * rec()  {return rec_;}
 
-  /// Initializing the pointer to generated particles
+  /** @brief Create (or reset) the Monte Carlo record. */
   void InitializeMC()
   {
     if (mc_!=0) 
@@ -103,7 +130,7 @@ class EventFormat
     else mc_=new MCEventFormat();
   }
 
-  /// Initializing the pointer to reconstructed objects
+  /** @brief Create (or reset) the container of reconstructed objects. */
   void InitializeRec()
   {
     if (rec_!=0) 
@@ -113,9 +140,10 @@ class EventFormat
     else rec_=new RecEventFormat();
   }
 
-  /// Free allocated memory
+  /** @brief Free the Monte Carlo record and the reconstructed objects. */
   void Delete()
   {
+    // NOTE: the pointers are not reset to 0: calling Delete() twice would free them twice.
     if (rec_!=0) delete rec_;
     if (mc_!=0)  delete mc_;
   }

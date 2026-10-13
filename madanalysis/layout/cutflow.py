@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Cut-flow charts of all datasets, and summed signal and background cut-flows."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.layout.cutflow_for_dataset   import CutFlowForDataset
 from madanalysis.layout.measure               import Measure
 from madanalysis.layout.fom_calculation       import FomCalculation
@@ -30,8 +37,24 @@ from math                                     import sqrt
 from six.moves import range
 
 class CutFlow:
+    """Cut-flows of the job.
 
-    def __init__(self,main):
+    Attributes:
+        main (``Main``): session state.
+        detail (``list[CutFlowForDataset]``): cut-flow of each dataset.
+        isSignal (``bool``): at least one signal dataset exists.
+        isBackground (``bool``): at least one background dataset exists.
+        background (``CutFlowForDataset``): summed background cut-flow.
+        signal (``CutFlowForDataset``): summed signal cut-flow.
+        fom (``FomCalculation``): figure-of-merit calculator.
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Create one cut-flow per dataset.
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main         = main
         self.detail       = []
         self.isSignal     = False
@@ -47,7 +70,9 @@ class CutFlow:
         self.fom        = FomCalculation(self.main)
 
 
-    def Initialize(self):
+    def Initialize(self) -> None:
+        """Compute the efficiencies of each dataset and the signal/background summaries.
+        """
 
         # Initialize cut list for each dataset
         for item in self.detail:
@@ -59,11 +84,33 @@ class CutFlow:
         self.CalculateSummary(self.background,background=True)
 
 
-    def calculateBSratio(self,B,eB,S,eS):
+    def calculateBSratio(self,B: float,eB: float,S: float,eS: float) -> Measure:
+        """Compute the figure of merit.
+
+        Args:
+            B (``float``): number of background events.
+            eB (``float``): uncertainty on ``B``.
+            S (``float``): number of signal events.
+            eS (``float``): uncertainty on ``S``.
+
+        Returns:
+            ``Measure``:
+            The figure of merit and its uncertainty.
+        """
         return self.fom.Compute(S,eS,B,eB)
 
 
-    def CalculateSummary(self,summary,background=True):
+    def CalculateSummary(self,summary: CutFlowForDataset,background: bool = True) -> None:
+        """Sum the cut-flows of the signal or background datasets.
+
+        Numbers of events are summed and their uncertainties added in quadrature; the
+        efficiencies are recomputed with binomial uncertainties.
+
+        Args:
+            summary (``CutFlowForDataset``): cut-flow to fill.
+            background (``bool``, default ``True``): sum the background (``True``) or signal
+                (``False``) datasets.
+        """
 
         # Ntotal
         summary.Ntotal=Measure()

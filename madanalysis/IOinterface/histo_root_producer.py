@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Compilation and execution of the ROOT macros producing the histograms of the reports.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 from string_tools                             import StringTools
 from shell_command                            import ShellCommand
 import logging
@@ -30,15 +34,33 @@ import shutil
 import os
 
 class HistoRootProducer():
+    """Compile and run the ROOT macros written by the layout (one ``.C`` file per histogram).
 
-    def __init__(self,histo_path,filenames):
+    Attributes:
+        filenames (``list[str]``): ROOT macros (``<name>.C``).
+        histo_path (``str``): folder of the macros.
+    """
+
+    def __init__(self,histo_path: str,filenames: list[str]) -> None:
+        """Create the producer.
+
+        Args:
+            histo_path (``str``): folder of the macros.
+            filenames (``list[str]``): macro names without the ``.C`` extension.
+        """
         self.filenames  = []
         for filename in filenames:
             self.filenames.append((filename)+'.C')
         self.histo_path = histo_path
 
 
-    def Execute(self):
+    def Execute(self) -> bool:
+        """Write ``all.C``, compile it and run it.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if not self.WriteMainFile():
             return False
 #       if not self.LaunchInteractiveRoot():
@@ -47,7 +69,13 @@ class HistoRootProducer():
         return True
         
 
-    def LaunchInteractiveRoot(self):
+    def LaunchInteractiveRoot(self) -> bool:
+        """Legacy: run the macros with the ROOT interpreter (``root -l -q -b``).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Commands
         theCommands=['root','-l','-q','-b']
         theCommands.extend(self.filenames)
@@ -68,7 +96,16 @@ class HistoRootProducer():
         return ok
 
 
-    def LaunchCompileRoot(self):
+    def LaunchCompileRoot(self) -> bool:
+        """Compile ``all.C`` into the ``goROOT`` executable and run it.
+
+        The logs are ``compile_root.log`` and ``launch_root.log``; the run is successful if both
+        stamps printed by ``all.C`` are found.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         import os
         import stat
 
@@ -141,12 +178,19 @@ class HistoRootProducer():
         if not (ok1 and ok2):
             logging.getLogger('MA5').error('wrong behaviour of the ROOT execution. For more details, see the log file:')
             logging.getLogger('MA5').error(logname)
+            # FIXME: 'ok' is True here: the missing stamps are logged as an error but success is returned.
             return ok
         
         return ok
 
 
-    def WriteMainFile(self):
+    def WriteMainFile(self) -> bool:
+        """Write ``all.C`` including every macro and calling every histogram function.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         output = open(self.histo_path+'/all.C','w')
         output.write('// STL headers\n')
         output.write('#include <iostream>\n')

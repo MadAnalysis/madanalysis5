@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file EnergyCorrelator.h
+ * @brief Energy correlation functions (FastJet contrib EnergyCorrelator).
+ */
+
 #ifndef MADANALYSIS5_ENERGYCORRELATOR_H
 #define MADANALYSIS5_ENERGYCORRELATOR_H
 
@@ -42,15 +47,18 @@ namespace fastjet {
 
 namespace MA5 {
     namespace Substructure {
+        /** @brief N-point energy correlation function ECF(N, beta) (Larkoski, Salam and Thaler, arXiv:1305.0007). */
         class EnergyCorrelator {
 
         //---------------------------------------------------------------------------------
         //                                 data members
         //---------------------------------------------------------------------------------
         protected:
+            /** @brief FastJet energy correlator (owned). */
             fastjet::contrib::EnergyCorrelator * _EC;
 
         public:
+            /** @brief Energy and angular measures. */
             enum Measure {
                 pt_R,     ///< use transverse momenta and boost-invariant angles,
                 ///< eg \f$\mathrm{ECF}(2,\beta) = \sum_{i<j} p_{ti} p_{tj} \Delta R_{ij}^{\beta} \f$
@@ -61,6 +69,7 @@ namespace MA5 {
                 /// (\frac{2 p_{i} \cdot p_{j}}{E_{i} E_{j}})^{\beta/2} \f$
             };
 
+            /** @brief Computational strategies. */
             enum Strategy {
                 slow,          ///< interparticle angles are not cached.
                 ///< For N>=3 this leads to many expensive recomputations,
@@ -69,15 +78,24 @@ namespace MA5 {
                 /// improvement for N>=3, but has a memory requirement of (4n^2) bytes.
             };
 
-            /// Constructor without argument
+            /** @brief Constructor without argument (call Initialize() before use). */
+            // FIXME: the default constructor leaves the pointer(s) uninitialised, but the destructor deletes them
+            //   (undefined behaviour if Initialize() is never called).
             EnergyCorrelator() {}
 
-            /// Destructor
+            /** @brief Destructor (deletes the correlator). */
             ~EnergyCorrelator();
 
-            /// constructs an N-point correlator with angular exponent beta,
-            /// using the specified choice of energy and angular measure as well
-            /// one of two possible underlying computational Strategy
+            /**
+             * @brief Constructor with arguments (calls Initialize()).
+             *
+             * Constructs an N-point correlator with angular exponent beta.
+             *
+             * @param N number of points.
+             * @param beta angular exponent.
+             * @param measure energy and angular measure.
+             * @param strategy computational strategy.
+             */
             EnergyCorrelator(
                     MAuint32 N,
                     MAfloat32 beta,
@@ -85,6 +103,14 @@ namespace MA5 {
                     EnergyCorrelator::Strategy strategy = EnergyCorrelator::Strategy::storage_array
             ) { Initialize(N, beta, measure, strategy); }
 
+            /**
+             * @brief Create the FastJet energy correlator.
+             *
+             * @param N number of points.
+             * @param beta angular exponent.
+             * @param measure energy and angular measure.
+             * @param strategy computational strategy.
+             */
             void Initialize(
                     MAuint32 N,
                     MAfloat32 beta,
@@ -92,7 +118,12 @@ namespace MA5 {
                     EnergyCorrelator::Strategy strategy = EnergyCorrelator::Strategy::storage_array
             );
 
-            // Method to execute with a single jet
+            /**
+             * @brief Compute the correlation function for a jet.
+             *
+             * @param jet jet to process (its constituents are used).
+             * @return ECF(N, beta).
+             */
             MAdouble64 Execute(const RecJetFormat* jet) const;
         };
     }

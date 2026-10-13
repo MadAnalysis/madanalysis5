@@ -1,0 +1,41 @@
+#TITLE Shared cuts and independent region survival
+#MODE PARTON
+
+import samples/ttbar_sl_1.lhe.gz as testset
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu-
+define_region inclusive high low overlap empty
+
+# A subset of equivalent regions, listed in a different order.
+# No distinguishable-regions warning is expected with the subset fix.
+plot MET 40 0 200 {overlap inclusive}
+select (lep) PT > 10 {overlap inclusive}
+
+# Common event cut, including regions with different object definitions.
+select N(lep) >= 1
+
+# high/low partition the common sample; overlap shares events with both.
+select MET >= 60 {high}
+select MET < 60 {low}
+select MET >= 30 {overlap}
+select MET < 0 {empty}
+
+# A shared cut must not reject events from low or inclusive.
+select N(j) >= 2 {high overlap}
+
+# Explicit individual histograms and an automatic split across regions
+# distinguished by earlier cuts. The split warning here is expected.
+plot MET 40 0 200 {inclusive}
+plot MET 40 0 200 {high}
+plot MET 40 0 200 {low}
+plot MET 40 0 200 {overlap}
+plot MET 40 0 200 {empty}
+plot N(j) 10 0 10
+
+# A later common cut must leave the already-rejected empty region dead.
+select MET >= 0
+plot MET 40 0 200 {empty}
+display_regions
+
+submit

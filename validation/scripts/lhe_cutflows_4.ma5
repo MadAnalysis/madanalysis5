@@ -1,0 +1,28 @@
+#TITLE Signed NLO event cuts and complete rejection
+#MODE PARTON
+# Signed NLO sample; compare nominal outputs with the non-multiweight branch.
+import samples/ttbar_nlo.lhe.gz as testset
+set testset.weighted_events = true
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu- ta+ ta-
+define heavy = t t~
+
+# Positive and negative contributions exist before and after each selection.
+plot WEIGHTS 60 -1500 1500
+plot N(lep) 6 0 6
+select N(b) >= 2
+select N(lep) >= 1
+reject N(lep) > 2
+select PT(b[1]) > 30 and ABSETA(b[1]) < 4
+select MET > 20 or THT > 150
+reject PT(b[2]) <= 10
+select M(b[1] b[2]) != 0
+plot M(b[1] b[2]) 40 0 1000
+plot MET 30 0 300
+# Identity cut followed by an impossible cut, with empty downstream output.
+select N(b) >= 0
+select N(b) < 0
+plot PT(b) 30 0 300
+select MET >= 0
+submit

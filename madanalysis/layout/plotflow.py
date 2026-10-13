@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,16 @@
 ################################################################################
 
 
+"""Generation of the ROOT macros and Matplotlib scripts drawing the histograms of the selection.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.selection.histogram import Histogram
 from madanalysis.enumeration.uncertainty_type     import UncertaintyType
 from madanalysis.enumeration.normalize_type       import NormalizeType
 from madanalysis.enumeration.report_format_type   import ReportFormatType
@@ -38,19 +47,39 @@ from six.moves import range
 
 
 class PlotFlow:
+    """Histograms of all datasets and their drawing scripts.
+
+    Attributes:
+        diconicetitle (``dict[str, str]``): replacements turning MA5 titles into ROOT
+            LaTeX.
+        counter (``int``): class-level counter giving unique ROOT object names.
+        main (``Main``): session state.
+        detail (``list[PlotFlowForDataset]``): histograms of each dataset.
+        color (``int``): next automatic colour (more than 10 datasets).
+    """
 
     diconicetitle = {' ^ {':'^{', ' _ {':'_{', '\\\\':'#'}
 
     counter=0
 
-    def __init__(self,main):
+    def __init__(self,main: Main) -> None:
+        """Create one histogram collection per dataset.
+
+        Args:
+            main (``Main``): session state.
+        """
         self.main               = main
         self.detail             = []
         for i in range(0,len(main.datasets)):
             self.detail.append(PlotFlowForDataset(main,main.datasets[i]))
 
 
-    def Initialize(self):
+    def Initialize(self) -> None:
+        """Prepare the histograms for drawing.
+
+        The labels of the frequency histograms are harmonised between datasets, then the
+        reading is finalised and the normalisation factors are computed.
+        """
 
         # Initializing NPID
         if len(self.detail)>0:
@@ -65,7 +94,12 @@ class PlotFlow:
             self.detail[i].CreateHistogram()
 
 
-    def InitializeHistoFrequency(self,ihisto):
+    def InitializeHistoFrequency(self,ihisto: int) -> None:
+        """Give the same (sorted) set of labels to a frequency histogram in all datasets.
+
+        Args:
+            ihisto (``int``): index of the histogram.
+        """
 
         # New collection of labels
         newlabels=[]
@@ -121,21 +155,55 @@ class PlotFlow:
 
 
     @staticmethod
-    def NiceTitle(text):
+    def NiceTitle(text: str) -> str:
+        """Convert a title to the ROOT LaTeX syntax.
+
+        Args:
+            text (``str``): title.
+
+        Returns:
+            ``str``:
+            Converted title.
+        """
         newtext=text 
         for i,j in six.iteritems(PlotFlow.diconicetitle):
            newtext = newtext.replace(i,j)
         return newtext
 
     @staticmethod
-    def NiceTitleMatplotlib(text):
+    def NiceTitleMatplotlib(text: str) -> str:
+        """Convert a title to the Matplotlib (mathtext) syntax.
+
+        Args:
+            text (``str``): title.
+
+        Returns:
+            ``str``:
+            Converted title, enclosed in ``$...$``.
+        """
         text=PlotFlow.NiceTitle(text)
         text=text.replace('#DeltaR','#Delta R')
         text='$'+text.replace('#','\\\\')+'$'
         return text
 
 
-    def DrawAll(self,histo_path,modes,output_paths,ListROOTplots):
+    def DrawAll(self,histo_path: str,modes: list[int],output_paths: list[str],ListROOTplots: list[str]) -> bool:
+        """Write the ROOT and Matplotlib scripts of every histogram.
+
+        The scripts are named ``selection_<i>.C``/``.py``.
+
+        Args:
+            histo_path (``str``): folder of the scripts.
+            modes (``list[int]``): report formats
+                (:class:`~madanalysis.enumeration.report_format_type.ReportFormatType`).
+            output_paths (``list[str]``): report folders (one per format).
+            ListROOTplots (``list[str]``): list extended (in place) with the script names
+                (without extension).
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         # Loop on each histo type
         irelhisto=0
         for iabshisto in range(0,len(self.main.selection)):
@@ -182,7 +250,25 @@ class PlotFlow:
         return True
 
 
-    def DrawROOT(self,histos,scales,ref,irelhisto,filenameC,outputnames):
+    def DrawROOT(self,histos: list[Any],scales: list[float],ref: Histogram,irelhisto: int,filenameC: str,outputnames: list[str]) -> bool:
+        """Write the ROOT macro of one plot.
+
+        Each dataset is drawn with the automatic colours/styles or with the user settings of
+        the dataset; histograms are stacked or superimposed according to the stacking
+        method, and the y-axis title reflects the normalisation.
+
+        Args:
+            histos (``list[Any]``): histogram of each dataset.
+            scales (``list[float]``): normalisation factor of each dataset.
+            ref (``Histogram``): definition of the plot in the selection (titles, options).
+            irelhisto (``int``): index of the plot among the histograms.
+            filenameC (``str``): path of the script to write.
+            outputnames (``list[str]``): images to produce when the script runs.
+
+        Returns:
+            ``bool``:
+            ``False`` if the file cannot be written, ``True`` otherwise.
+        """
 
         # Is there any legend?
         legendmode = False
@@ -259,6 +345,8 @@ class PlotFlow:
         if logxhisto:
             outputC.write('  // Histo binning\n')
             outputC.write('  Double_t xBinning['+str(xnbin+1)+'] = {')
+            # FIXME: the loop starts at bin 1 and GetBinLowEdge clamps to xmax: xmin is missing and xmax
+            # appears twice in the generated bin edges.
             for bin in range(1,xnbin+2):
                 if bin!=1:
                     outputC.write(',')
@@ -529,6 +617,7 @@ class PlotFlow:
         try:
             outputC.close()
         except:
+            # FIXME: concatenating the file object raises a TypeError (filenameC was meant).
             logging.getLogger('MA5').error('Impossible to close the file: '+outputC)
             return False
 
@@ -537,7 +626,25 @@ class PlotFlow:
 
 
 
-    def DrawMATPLOTLIB(self,histos,scales,ref,irelhisto,filenamePy,outputnames):
+    def DrawMATPLOTLIB(self,histos: list[Any],scales: list[float],ref: Histogram,irelhisto: int,filenamePy: str,outputnames: list[str]) -> bool:
+        """Write the Matplotlib script of one plot.
+
+        Each dataset is drawn with the automatic colours/styles or with the user settings of
+        the dataset; histograms are stacked or superimposed according to the stacking
+        method, and the y-axis title reflects the normalisation.
+
+        Args:
+            histos (``list[Any]``): histogram of each dataset.
+            scales (``list[float]``): normalisation factor of each dataset.
+            ref (``Histogram``): definition of the plot in the selection (titles, options).
+            irelhisto (``int``): index of the plot among the histograms.
+            filenamePy (``str``): path of the script to write.
+            outputnames (``list[str]``): images to produce when the script runs.
+
+        Returns:
+            ``bool``:
+            ``False`` if the file cannot be written, ``True`` otherwise.
+        """
 
         # Is there any legend?
         legendmode = False
@@ -600,6 +707,8 @@ class PlotFlow:
         outputPy.write('    # Histo binning\n')
         if logxhisto:
             outputPy.write('    xBinning = [')
+            # FIXME: the loop starts at bin 1 and GetBinLowEdge clamps to xmax: xmin is missing and xmax
+            # appears twice in the generated bin edges.
             for bin in range(1,xnbin+2):
                 if bin!=1:
                     outputPy.write(',')
@@ -663,6 +772,7 @@ class PlotFlow:
         for ind in range(len(histos)-1,-1,-1):
             myweight = 'y'+histos[ind].name+'_'+str(ind)+'_weights'
             mytitle  = '"'+PlotFlow.NiceTitleMatplotlib(self.main.datasets[ind].title)+'"'
+            # NOTE: '\_' is an invalid escape sequence (SyntaxWarning in recent Python versions).
             mytitle  = mytitle.replace('_','\_')
 
             if not stackmode:
@@ -802,6 +912,7 @@ class PlotFlow:
 
             try:
                 import matplotlib.pyplot as plt
+                # NOTE: probes the Matplotlib API ('normed' was removed in Matplotlib 3.1) at generation time.
                 plt.hist([0],normed=True)
                 outputPy.write(    'rwidth='+str(rWidth)+',\\\n'+\
                                    '             color='+mybackcolor+', '+\
@@ -1007,6 +1118,7 @@ class PlotFlow:
         try:
             outputPy.close()
         except:
+            # FIXME: concatenating the file object raises a TypeError (filenamePy was meant).
             logging.getLogger('MA5').error('Impossible to close the file: '+outputPy)
             return False
 

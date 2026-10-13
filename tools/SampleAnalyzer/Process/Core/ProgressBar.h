@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ProgressBar.h
+ * @brief Progress bar of the event reading.
+ */
+
 #ifndef ProgressBar_h
 #define ProgressBar_h
 
@@ -42,6 +47,12 @@ namespace MA5
 {
 
 
+  /**
+   * @brief Progress bar displayed while reading a file.
+   *
+   * std::cout, std::cerr and std::clog are redirected through spy buffers so that any
+   * message printed during the reading starts on a new line.
+   */
   class ProgressBar
   {
 
@@ -50,11 +61,16 @@ namespace MA5
   // -------------------------------------------------------------
   protected:
 
+    /** @brief Stream buffer inserting a new line before the first character written after the progress bar. */
     class SpyStreamBuffer : public std::streambuf 
     {
     public:
 
-      /// Constructor
+      /**
+       * @brief Constructor.
+       *
+       * @param buf underlying stream buffer.
+       */
       SpyStreamBuffer(std::streambuf* buf) : buf_(buf)
       {
         add_endl_=false;
@@ -62,15 +78,28 @@ namespace MA5
         setp(0, 0);
       }
 
-      /// Set ProgressBar mode
+      /**
+       * @brief Enable/disable the insertion of a new line.
+       *
+       * @param status true when the progress bar has just been drawn.
+       */
       void SetProgressBarMode(MAbool status=true)
       { add_endl_=status; }
 
-      /// Accessor to ProgressBar mode status
+      /**
+       * @brief Is the insertion of a new line enabled?
+       *
+       * @return the status.
+       */
       MAbool GetProgressBarMode() const
       { return add_endl_; }
 
-      /// Overflow method
+      /**
+       * @brief Forward a character (after a new line if needed).
+       *
+       * @param c character.
+       * @return the character.
+       */
       virtual int_type overflow(int_type c)
       {
         if (add_endl_) 
@@ -83,6 +112,7 @@ namespace MA5
       }
     private:
 
+      /** @brief Underlying buffer and new-line flag. */
       std::streambuf* buf_;
       MAbool add_endl_;
     };
@@ -92,40 +122,41 @@ namespace MA5
   // -------------------------------------------------------------
   protected:
 
-    /// Start point of the progress bar
+    /** @brief Start value (e.g. first byte of the file). */
     MAint64 MinValue_;
 
-    /// End point of the progress bar
+    /** @brief End value (e.g. last byte of the file). */
     MAint64 MaxValue_;
 
-    /// Number of steps
+    /** @brief Number of steps of the bar. */
     MAuint32 Nstep_;
 
-    /// Progress indicator
+    /** @brief Current step. */
     MAuint32 Indicator_;
 
-    /// Mute if bad initialization
+    /** @brief Muted after an invalid initialisation. */
     MAbool MuteInit_;
 
-    /// Mute if the progress bar reachs the end bound
+    /** @brief Muted once the end is reached. */
     MAbool MuteEnd_;
 
-    /// First time
+    /** @brief Is the bar drawn for the first time? */
     MAbool FirstTime_;
 
-    /// Thresholds
+    /** @brief Values corresponding to each step. */
     std::vector<MAint64> Thresholds_;
 
-    /// Pointer to the new stream buffer
+    /** @brief Spy buffers of std::cout, std::cerr and std::clog. */
     SpyStreamBuffer* newstreambuf_cout_;
     SpyStreamBuffer* newstreambuf_cerr_;
     SpyStreamBuffer* newstreambuf_clog_;
 
-    /// Pointer to the old stream buffer
+    /** @brief Original buffers of std::cout, std::cerr and std::clog. */
     std::streambuf* oldstreambuf_cout_;
     std::streambuf* oldstreambuf_cerr_;
     std::streambuf* oldstreambuf_clog_;
 
+    /** @brief Text displayed before the bar. */
     static const std::string header;
 
   // -------------------------------------------------------------
@@ -133,7 +164,7 @@ namespace MA5
   // -------------------------------------------------------------
  public:
 
-    /// Constructor without argument
+    /** @brief Constructor. */
     ProgressBar()
     {
       newstreambuf_cout_=0;
@@ -145,15 +176,16 @@ namespace MA5
       Reset(); 
     }
 
-    /// Destructor 
+    /** @brief Destructor (deletes the spy buffers). */
     ~ProgressBar() 
     { 
+      // NOTE: Finalize() deletes the buffers without resetting the pointers: they are deleted twice here.
       if (newstreambuf_cout_!=0) delete newstreambuf_cout_;  
       if (newstreambuf_cerr_!=0) delete newstreambuf_cerr_; 
       if (newstreambuf_clog_!=0) delete newstreambuf_clog_; 
    }
 
-    /// Reset
+    /** @brief Reset the internal state. */
     void Reset()
     {
       MinValue_=0; MaxValue_=0; Nstep_=0; Indicator_=0; 
@@ -161,17 +193,31 @@ namespace MA5
       Thresholds_.clear();
     }
 
-    /// Initializing the progress bar
+    /**
+     * @brief Initialise the bar and redirect the standard streams.
+     *
+     * @param Nstep number of steps.
+     * @param MinValue start value.
+     * @param MaxValue end value.
+     */
     void Initialize(MAuint32 Nstep, 
                     MAint64 MinValue, MAint64 MaxValue);
 
-    /// Updating the display of the progress bar
+    /**
+     * @brief Update the bar.
+     *
+     * @param value current value.
+     */
     void Update(MAint64 value);
 
-    /// Finalizing the progress bar
+    /** @brief Draw the complete bar and restore the standard streams. */
     void Finalize();
 
-    /// Displaying the progress bar
+    /**
+     * @brief Draw the bar.
+     *
+     * @param ind current step.
+     */
     void Display(MAuint32 ind);
   };
 }

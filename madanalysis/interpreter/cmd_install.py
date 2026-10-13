@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Interpreter command ``install``: download and install optional components."""
+
 from __future__                             import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.interpreter.cmd_base       import CmdBase
 from madanalysis.install.install_manager    import InstallManager
 from six.moves import input
@@ -30,14 +37,35 @@ import logging, os, sys
 
 
 class CmdInstall(CmdBase):
-    """Command INSTALL"""
+    """Command ``install <component>``."""
 
-    def __init__(self,main):
+    def __init__(self,main: Main) -> None:
+        """Register the ``install`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         CmdBase.__init__(self,main,"install")
         self.logger = logging.getLogger('MA5')
 
 
-    def do(self,args):
+    def do(self,args: list[str]) -> bool | str:
+        """Install a component through :class:`~madanalysis.install.install_manager.InstallManager`.
+
+        Supported components: ``samples``, ``zlib``, ``fastjet`` (with fjcontrib),
+        ``HEPTopTagger``, ``gnuplot``, ``root``, ``delphes``, ``delphesMA5tune``, ``PAD``,
+        ``PADForMA5tune``, ``PADForSFS`` and ``likelihood_simplifier``. ``matplotlib`` and
+        ``numpy`` are deprecated (pip must be used).
+
+        Args:
+            args (``list[str]``): arguments of the command (split by
+                :meth:`~madanalysis.interpreter.interpreter_base.InterpreterBase.split_arg`).
+
+        Returns:
+            ``bool | str``:
+            ``'restart'`` if the session must be restarted, otherwise the success flag
+            (``True`` is also returned after a syntax error).
+        """
 
         # Checking argument number
         if len(args)!=1:
@@ -46,7 +74,20 @@ class CmdInstall(CmdBase):
             return True
 
         # delphes preinstallation
-        def inst_delphes(main,installer,release,pad=False):
+        def inst_delphes(main: Main,installer: InstallManager,release: str,pad: bool = False) -> bool | str:
+            """Install/activate one Delphes flavour and deactivate the other one.
+
+            Args:
+                main (``Main``): session state.
+                installer (``InstallManager``): installation manager.
+                release (``str``): ``'delphes'`` or ``'delphesMA5tune'``.
+                pad (``bool``, default ``False``): called before a PAD installation (no warning
+                    for an existing installation).
+
+            Returns:
+                ``bool | str``:
+                ``'restart'`` if the session must be restarted, otherwise the success flag.
+            """
             ## INIT
             if release=='delphes':
                 to_activate   = 'Delphes'
@@ -56,7 +97,14 @@ class CmdInstall(CmdBase):
                 to_deactivate = 'Delphes'
 
             ## to update all the paths
-            def UpdatePaths():
+            def UpdatePaths() -> bool | None:
+                """Register the freshly installed Delphes library in :attr:`Main.archi_info`.
+
+                Returns:
+                    ``bool | None``:
+                    ``True`` if the library file is not found (nothing registered), ``None``
+                    otherwise.
+                """
                 if release=='delphes':
                     main.archi_info.has_delphes             = True
                     main.archi_info.delphes_priority        = True
@@ -102,14 +150,17 @@ class CmdInstall(CmdBase):
             elif ResuActi == 1 and not has_release:
                 self.logger.warning(to_activate + " is not installed: installing it...")
                 resu = installer.Execute(release)
+                if resu == 'restart':
+                    return resu
                 if resu:
+                    # NOTE: the result of UpdatePaths is ignored.
                     UpdatePaths()
                     if not main.CheckConfig():
                         return False
                 return resu
             elif ResuActi == 0 and has_release and not pad:
                 self.logger.warning("A previous " + release +' installation has been found. Skipping...')
-                self.logger.warning('To update ;' + release + ', please remove first the tools/' + release + 'delphes directory')
+                self.logger.warning('To update ' + release + ', please remove first the tools/' + release + ' directory')
             return True
 
         # Calling selection method
@@ -138,42 +189,12 @@ class CmdInstall(CmdBase):
             self.logger.warning("This command has been deprecated.")
             self.logger.warning(f"Please use '{sys.executable} -m pip install -r requirements.txt' instead.")
             return True
-        elif args[0]=='PADForMA5tune':
-            if inst_delphes(self.main,installer,'delphesMA5tune',True):
-                return installer.Execute('PADForMA5tune')
+        elif args[0] in ['PAD', 'PADForMA5tune']:
+            release = 'delphes' if args[0] == 'PAD' else 'delphesMA5tune'
+            if inst_delphes(self.main, installer, release, pad=True):
+                return installer.Execute(args[0])
             else:
-                self.logger.warning('DelphesMA5tune is not installed... please exit the program and install the pad')
-                return True
-        elif args[0]=='PAD':
-            pad_install_check, padsfs_install_check = False, False
-            # First check if PAD4SFS is installed
-            if not self.main.session_info.has_padsfs:
-                # check if FastJet is installed
-                if not self.main.archi_info.has_fastjet:
-                    answer = "y"
-                    if not self.main.forced:
-                        self.logger.warning("PADForSFS requires FastJet to be installed.")
-                        self.logger.info("Would you like to install FastJet? [Y/N]")
-                        while True:
-                            answer = input("Answer : ")
-                            if answer.lower() in ['y','n','yes','no', "yeap", "nope"]:
-                                break
-                    if answer.lower() in ['y','yes',"yeap"]:
-                        for package in ["fastjet", "fastjet-contrib", "PADForSFS"]:
-                            if not installer.Execute(package):
-                                return False
-                        padsfs_install_check = 'restart'
-                else:
-                    padsfs_install_check = installer.Execute('PADForSFS')
-
-            if inst_delphes(self.main,installer,'delphes',True):
-                pad_install_check = installer.Execute('PAD')
-            else:
-                self.logger.warning('Delphes is not installed (and will be installed). '+
-                                    'Then please exit MA5 and re-install the PAD')
-            if 'restart' in [pad_install_check, padsfs_install_check]:
-                return 'restart'
-            return any([pad_install_check, padsfs_install_check])
+                return False
         elif args[0]=='PADForSFS':
             padsfs_install_check = False
             if self.main.archi_info.has_fastjet:
@@ -197,6 +218,7 @@ class CmdInstall(CmdBase):
             if self.main.session_info.has_spey:
                 return installer.Execute('simplify')
             else:
+                # FIXME: the message mentions pyhf while the test is on Spey.
                 self.logger.error("The `simplify` module requires pyhf, please retry"+ \
                                   "after installing pyhf.")
                 return True
@@ -205,14 +227,30 @@ class CmdInstall(CmdBase):
             self.help()
             return True
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``install`` command."""
         self.logger.info("   Syntax: install <component>")
         self.logger.info("   Download and install a MadAnalysis component from the official site.")
+        # NOTE: the list below is incomplete (HEPTopTagger, root, gnuplot, likelihood_simplifier).
         self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune PAD PADForMA5tune PADForSFS")
 
 
-    def complete(self,text,args,begidx,endidx):
+    def complete(self,text: str,args: str,begidx: int,endidx: int) -> list[str]:
+        """Tab completion of the ``install`` command.
 
+        Args:
+            text (``str``): word being completed.
+            args (``str``): full input line.
+            begidx (``int``): start index of ``text`` in the line.
+            endidx (``int``): end index of ``text`` in the line.
+
+        Returns:
+            ``list[str]``:
+            Names of the installable components.
+        """
+
+        # FIXME: 'args' is the input line (a string): len() counts characters, so the completion
+        # is almost always empty.
         nargs = len(args)
         if not text:
             nargs +=1

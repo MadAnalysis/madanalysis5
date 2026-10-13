@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,15 +22,29 @@
 ################################################################################
 
 
+"""Reader of the default multiparticle labels (``madanalysis/input``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.core.main                    import Main
 import logging
 import os
 
 class MultiparticleReader():
+    """Reader of the default multiparticle definitions from ``multiparticles_default.txt``, ``multiparticles_hadron_default.txt`` or ``multiparticles_reco_default.txt``.
+    """
 
-    def __init__(self,path,cmd_define,level=MA5RunningType.PARTON,forced=False):
+    def __init__(self,path: str,cmd_define: Any,level: int = MA5RunningType.PARTON,forced: bool = False) -> None:
+        """Create the reader.
+
+        Args:
+            path (``str``): MadAnalysis 5 installation folder.
+            cmd_define (``CmdDefine``): ``define`` command used to register the labels.
+            level (``int``, default ``MA5RunningType.PARTON``): running mode.
+            forced (``bool``, default ``False``): overwrite existing labels without asking.
+        """
         self.cmd_define = cmd_define
         self.npart      = 0
         self.path       = path
@@ -39,7 +53,13 @@ class MultiparticleReader():
         self.forced     = forced
         self.logger = logging.getLogger('MA5')
 
-    def Load(self):
+    def Load(self) -> bool | None:
+        """Read the default multiparticle labels of the running mode.
+
+        Returns:
+            ``bool | None``:
+            ``False`` if a file cannot be opened, ``None`` otherwise.
+        """
         if self.level==MA5RunningType.PARTON:
             if not self.OpenPartonLevel():
                 return False
@@ -58,9 +78,16 @@ class MultiparticleReader():
             self.Read()
             self.Close()
             self.AddSpecialMultiparticles()
+            # NOTE: Close() is called twice in reco mode: the summary is logged twice.
             self.Close()
          
-    def OpenPartonLevel(self):        
+    def OpenPartonLevel(self) -> bool:        
+        """Open the parton-level file (in ``input/`` or ``madanalysis/input/``).
+
+        Returns:
+            ``bool``:
+            ``True`` if the file has been opened.
+        """
 
         filename   = "input/multiparticles_default.txt"
 
@@ -81,6 +108,8 @@ class MultiparticleReader():
 
         # Open
         if os.path.isfile(name):
+            # FIXME: 'isopen' is never set to True, so Close() never closes the file (same in the
+            # other Open* methods).
             self.file = open (name, "r")
         else:
             self.logger.error("File not found")
@@ -90,7 +119,13 @@ class MultiparticleReader():
         return True    
 
 
-    def OpenHadronLevel(self):        
+    def OpenHadronLevel(self) -> bool:        
+        """Open the hadron-level file.
+
+        Returns:
+            ``bool``:
+            ``True`` if the file has been opened.
+        """
 
         filename   = "input/multiparticles_hadron_default.txt"
 
@@ -111,7 +146,13 @@ class MultiparticleReader():
         return True    
 
 
-    def OpenRecoLevel(self):        
+    def OpenRecoLevel(self) -> bool:        
+        """Open the reco-level file.
+
+        Returns:
+            ``bool``:
+            ``True`` if the file has been opened.
+        """
 
         filename   = "input/multiparticles_reco_default.txt"
 
@@ -132,7 +173,9 @@ class MultiparticleReader():
         return True    
 
 
-    def Read(self):
+    def Read(self) -> None:
+        """Read the open file and register each label (lines of the form ``<label> = <PDG-ids or labels>``; ``#`` starts a comment).
+        """
 
         counter = 0
         for line in self.file:
@@ -178,15 +221,25 @@ class MultiparticleReader():
 
 
     @staticmethod        
-    def DisplayErrorMessage(arg,counter):
+    def DisplayErrorMessage(arg: list[str],counter: int) -> None:
+            """Log a syntax error.
+
+            Args:
+                arg (``list[str]``): words of the faulty line.
+                counter (``int``): line number.
+            """
             text = "Syntax error at line "\
                    + str(counter) +  " : "
             for item in arg:
                 text += item + " "
+            # FIXME: 'self' is undefined in this static method (NameError).
             self.logger.error(text)    
 
 
-    def AddSpecialMultiparticles(self):
+    def AddSpecialMultiparticles(self) -> None:
+        """Define the ``invisible`` and ``hadronic`` labels if they do not exist (not in reco mode,
+        where they are read from the file).
+        """
         # Creating invisible and hadronic multiparticles (mandatory in parton and hadron level)
         if self.level==MA5RunningType.RECO:
             return
@@ -201,7 +254,8 @@ class MultiparticleReader():
             self.logger.info("  => Creation of the label 'hadronic' (-> jet energy).")
         
 
-    def Close(self):
+    def Close(self) -> None:
+        """Close the file and log the number of labels read."""
 
         if self.isopen:
            self.file.close() 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file LHCOReader.cpp
+ * @brief Implementation of MA5::LHCOReader.
+ */
+
 #include <sstream>
 #include <cmath>
 
@@ -289,6 +294,8 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
     str >> tmp;
     muon->sumPT_isol_=std::floor(tmp);
 
+    // FIXME: the decimal part (ET/pT ratio, e.g. .25) is turned into an integer (25) by the loop below and
+    // then multiplied by the muon pT: sumET_isol_ seems to be overestimated by a factor 10^n.
     MAfloat32 ET_PT=tmp-muon->sumPT_isol_;
     MAbool test=false;
     for (MAuint32 j=0;j<5;j++)
@@ -362,6 +369,7 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
     jet->ntracks_=static_cast<unsigned short>(tmp); 
 
     // 8th column : btag
+    // 8th column: b-tag (1 or 2: b-tagged)
     str >> tmp;
     if ( tmp == 1. || tmp ==2.) jet->loose_btag_=true;
     else jet->loose_btag_ =false;

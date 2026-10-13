@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file DetectorDelphes.cpp
+ * @brief Implementation of MA5::DetectorDelphes.
+ */
+
 #include <fstream>
 #include <algorithm>
 
@@ -38,7 +43,6 @@
 #include <TFile.h>
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
-#include <TFolder.h>
 
 // Delphes headers
 #include "external/ExRootAnalysis/ExRootConfReader.h"
@@ -155,13 +159,6 @@ MAbool DetectorDelphes::Initialize(const std::string& configFile, const std::map
 
   // Creating all Delphes modules
   modularDelphes_ = new Delphes("Delphes");
-  delphesFolder_ = dynamic_cast<TFolder*>(
-       gROOT->GetListOfBrowsables()->FindObject("Delphes"));
-  if (delphesFolder_==0)
-  {
-    ERROR << "Problem during initialization of Delphes" << endmsg;
-    return false;
-  }
 
   // Initializing Delphes modules
   modularDelphes_->SetConfReader(confReader_);
@@ -181,7 +178,7 @@ MAbool DetectorDelphes::Initialize(const std::string& configFile, const std::map
   modularDelphes_->Clear();
 
   // Initializing interface
-  interface_.Initialize(delphesFolder_,table_,MA5card_);
+  interface_.Initialize(modularDelphes_,table_,MA5card_);
 
   return true;
 }
@@ -233,9 +230,10 @@ void DetectorDelphes::Finalize()
   modularDelphes_->FinishTask();
   if (output_) treeWriter_->Write();
 
+  // NOTE: outputFile_ is neither closed nor deleted (tmp.root is left on disk when `output` is 0).
+  delete modularDelphes_; modularDelphes_=0;
   delete confReader_; confReader_=0;
   delete treeWriter_; treeWriter_=0;
-  delete modularDelphes_; modularDelphes_=0;
 }
 
 void DetectorDelphes::StoreEventHeader(SampleFormat& mySample, EventFormat& myEvent)
@@ -257,6 +255,9 @@ void DetectorDelphes::StoreEventHeader(SampleFormat& mySample, EventFormat& myEv
 
 void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent)
 {
+  // Safety -> clear
+  interface_.MCParticleIndices_.clear();
+
   // Create a table for generated particle
   std::map<const MCParticleFormat*,MAuint32> gentable; 
   std::map<const MCParticleFormat*,MAuint32>::iterator ret;
@@ -275,6 +276,7 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
 
     // Adding a new Delphes particle
     Candidate* candidate = factory_->NewCandidate();
+    interface_.MCParticleIndices_[candidate] = i;
 
     // Filling Delphes particle with obvious information
     candidate->PID = part->pdgid();
@@ -303,6 +305,8 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
     }
     else
     {
+      // FIXME: the candidate mass is only set for the particles unknown to TDatabasePDG (the other ones keep
+      //   the default mass), unlike in DetectorDelphesMA5tune.
       candidate->Charge = pdgParticle ? MAint32(pdgParticle->Charge()/3.0) : -999;
     }
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file DJRextractor.h
+ * @brief Computation of the differential jet rates (kT algorithm) for merging validation.
+ */
+
 #ifndef DJR_EXTRACTOR_H
 #define DJR_EXTRACTOR_H
 
@@ -37,6 +42,7 @@
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 
 
+/** @brief Forward declarations of FastJet classes. */
 namespace fastjet
 {
   class JetDefinition;
@@ -45,6 +51,7 @@ namespace fastjet
 
 namespace MA5
 {
+/** @brief Computation of the differential jet rates from the partons of the parton shower. */
 class DJRextractor
 {
 
@@ -53,10 +60,10 @@ class DJRextractor
 //---------------------------------------------------------------------------------
   private :
 
-  /// clustering algorithm [FastJet]
+  /** @brief kT jet definition with R = 1 (owned). */
   fastjet::JetDefinition* JetDefinition_;
 
-  /// User configuration
+  /** @brief Maximum number of extra jets, flavour of the matched quarks, no-single-radiation flag. */
   MAuint32  merging_njets_;
   MAuint8   merging_nqmatch_;
   MAbool    merging_nosingrad_;
@@ -67,7 +74,7 @@ class DJRextractor
 //---------------------------------------------------------------------------------
  public : 
 
-  /// Constructor
+  /** @brief Constructor. */
   DJRextractor() 
   {
     // Jet algo
@@ -77,27 +84,63 @@ class DJRextractor
     merging_nosingrad_=false;
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~DJRextractor() {}
 
-  /// Initialization
+  /**
+   * @brief Create the kT jet definition.
+   *
+   * @return true.
+   */
   MAbool Initialize();
 
-  /// Finalization
+  /** @brief Delete the jet definition (see the FIXME in the source). */
   void Finalize();
 
-  /// Execution
+  /**
+   * @brief Compute the DJR values of an event.
+   *
+   * @param sample sample.
+   * @param event event.
+   * @param DJR values to fill (the size gives the number of DJRs).
+   * @return false if the Monte Carlo information is missing.
+   */
   MAbool Execute(SampleFormat& sample, const EventFormat& event, std::vector<MAdouble64>& DJR);
 
-  /// Extracting the number of additionnal jets contained in the event 
+  /**
+   * @brief Number of additional jets of the event (declared but not defined).
+   *
+   * @param myEvent Monte Carlo event.
+   * @param mySample Monte Carlo sample.
+   * @return the number of jets.
+   */
+  // NOTE: this method has no definition.
   MAuint32 ExtractJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
 
-  /// Selecting particles
+  /**
+   * @brief Select the partons of the parton shower (no beam remnants, |y| < 5, no radiation duplicates).
+   *
+   * @param inputs FastJet inputs to fill.
+   * @param myEvent Monte Carlo event.
+   */
   void SelectParticles(std::vector<fastjet::PseudoJet>& inputs, const MCEventFormat* myEvent);
 
-  /// Extracting the DJR information
+  /**
+   * @brief Compute the DJR values (merging scales of the exclusive kT clustering).
+   *
+   * @param inputs FastJet inputs.
+   * @param DJRvalues values to fill.
+   */
   void ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std::vector<MAdouble64>& DJRvalues);
 
+  /**
+   * @brief Absolute rapidity-like variable used for the cut on the partons (capped).
+   *
+   * @param px px.
+   * @param py py.
+   * @param pz pz.
+   * @return the value.
+   */
   MAdouble64 rapidity(MAdouble64 px, MAdouble64 py, MAdouble64 pz);
 
 
