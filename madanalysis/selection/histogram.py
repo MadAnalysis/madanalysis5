@@ -202,15 +202,11 @@ class Histogram():
             except:
                 logging.getLogger('MA5').error("variable 'xmin' must be a float value")
                 return False
-            # FIXME: when xmax is already a float (always after construction), a valid xmin is checked
-            # but never stored: the else-branch below is only reached when xmax is not a float.
-            # Same issue for xmax, ymin and ymax below.
             if isinstance(self.xmax, float):
                 if tmp > self.xmax:
                     logging.getLogger('MA5').error("'xmin' value must be less than 'xmax' value")
                     return False
-            else:
-                self.xmin = tmp
+            self.xmin = tmp
         # xmax
         elif variable == "xmax":
             try:
@@ -222,8 +218,7 @@ class Histogram():
                 if tmp < self.xmin:
                     logging.getLogger('MA5').error("'xmax' value must be greater than 'xmin' value")
                     return False
-            else:
-                self.xmax = tmp
+            self.xmax = tmp
         # ymin
         elif variable == "ymin":
             try:
@@ -235,8 +230,7 @@ class Histogram():
                 if tmp > self.ymax:
                     logging.getLogger('MA5').error("'ymin' value must be less than 'ymax' value")
                     return False
-            else:
-                self.ymin = tmp
+            self.ymin = tmp
         # ymax
         elif variable == "ymax":
             try:
@@ -248,8 +242,7 @@ class Histogram():
                 if tmp < self.ymin:
                     logging.getLogger('MA5').error("'ymax' value must be greater than 'ymin' value")
                     return False
-            else:
-                self.ymax = tmp
+            self.ymax = tmp
         # logX
         elif variable == "logX":
             if value=="true":

@@ -1,0 +1,47 @@
+#TITLE Signed NLO editing, weighted_events changes and resubmission
+#MODE PARTON
+# Signed NLO sample; compare nominal outputs with the non-multiweight branch.
+import samples/ttbar_nlo.lhe.gz as testset
+set testset.weighted_events = true
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu- ta+ ta-
+define heavy = t t~
+
+define_region inclusive selected
+# Keep these indices stable until the explicit removal.
+plot WEIGHTS 60 -1500 1500
+# 1: initial histogram
+select N(b) >= 2
+# 2: first event cut
+select MET > 30
+# 3: second event cut
+plot PT(b[1]) 30 0 600
+# 4: histogram edited later
+select N(lep) >= 1 {selected}
+# 5: region-specific cut
+plot MET 30 0 300
+# 6: automatically split into equivalent-region clusters
+submit
+
+# Step 1: same final event selection, different intermediate cutflow.
+swap selection[2] selection[3]
+resubmit
+
+# Step 2: remove an event cut; both histogram and cutflow results must change.
+remove selection[3]
+resubmit
+
+# Step 3: histogram axis changes (the previous selection[4] is now [3]).
+set selection[3].nbins = 20
+set selection[3].xmin = 50
+set selection[3].xmax = 250
+resubmit
+
+# Step 4: all events contribute +1, including negative input-weight events.
+set testset.weighted_events = false
+resubmit
+
+# Step 5: restore signed weights; compare every intermediate step as well.
+set testset.weighted_events = true
+resubmit

@@ -5,9 +5,9 @@ to MadAnalysis 5 preserve the analysis results. For backward-compatibility
 checks, the scripts run template analyses on the current branch and inspect the
 output relative to references built from the `main` branch.
 
-Currently, only histogram, cutflow and region comparisons in the parton-level
-mode are available. Negative-weight validation will be added when corresponding
-samples become available. Other tests are deferred.
+Currently, histogram, cutflow and region comparisons are available in
+parton-level mode, including samples with positive and negative nominal weights.
+Other tests are deferred.
 
 ## Contents
 
@@ -27,6 +27,7 @@ validation/
   HistoChecks.py         Histogram comparison driver
   CutflowChecks.py       Cutflow (and histogram) comparison driver
   RegionChecks.py        Multiple-region and multiple-dataset comparison driver
+  SAFReader.py           Shared SAF parsing for the three comparison drivers
   scripts/
     lhe_histos_?.ma5
     lhe_cutflows_?.ma5
@@ -35,27 +36,39 @@ validation/
 ```
 
 Input event samples are located in `samples/` at the MA5 repository root, and can be
-downloaded by typing in the MadAnalysis5 CLI `install samples`.  Generated jobs
+downloaded by typing in the MadAnalysis 5 CLI `install samples`.  Generated jobs
 remain in their `ANALYSIS_X` directories; the checker does not delete them.
 
 ## Available validation scripts
 
+Use `HistoChecks.py` for `lhe_histos_*`, `CutflowChecks.py` for
+`lhe_cutflows_*`, and `RegionChecks.py` for `lhe_regions_*`. Pass the script
+name without `.ma5` to the checker.
+
 | Script | Required sample | Coverage |
 | --- | --- | --- |
-| [lhe_histos_0.ma5](scripts/lhe_histos_0.ma5) | `samples/ttbar_sl_1.lhe.gz` | Parton-level event observables, particle IDs and weights; electron, muon, b-parton and jet kinematics; leading/subleading objects; angular observables and same-species/mixed-object combinations. |
-| [lhe_histos_1.ma5](scripts/lhe_histos_1.ma5) | `samples/lljj.lhe.gz` | The same broad histogram coverage on another sample, with additional logarithmic-x histogram declarations. The input contains additional event weights, but the current checker only compares the first weight's bin contents. |
-| [lhe_cutflows_0.ma5](scripts/lhe_cutflows_0.ma5) | `samples/ttbar_sl_1.lhe.gz` | Event-level selection and rejection, ordered objects, compound conditions, and cuts preserving or rejecting all remaining events. |
-| [lhe_cutflows_1.ma5](scripts/lhe_cutflows_1.ma5) | `samples/ttbar_sl_1.lhe.gz` | Object filtering, before/after histograms, and event cuts on the resulting collections. |
-| [lhe_cutflows_2.ma5](scripts/lhe_cutflows_2.ma5) | `samples/lljj.lhe.gz` | Event-level cuts on a multiweight sample: multiplicities, ordered objects, dilepton mass, compound conditions, and complete rejection; no explicit regions. |
-| [lhe_cutflows_3.ma5](scripts/lhe_cutflows_3.ma5) | `samples/lljj.lhe.gz` | Object filtering on a multiweight sample, before/after histograms, and dilepton and jet event cuts; no explicit regions. |
-| [lhe_regions_0.ma5](scripts/lhe_regions_0.ma5) | `samples/ttbar_sl_1.lhe.gz` | Region subsets, common and region-specific cuts, independent survival, empty regions, and region-associated histograms. |
-| [lhe_regions_1.ma5](scripts/lhe_regions_1.ma5) | `samples/ttbar_sl_1.lhe.gz` | Region and selection removal, swapping cuts, and a separate resubmission after each edit. The initial submission and every resubmission are checked against separate references. |
-| [lhe_regions_2.ma5](scripts/lhe_regions_2.ma5) | `samples/lljj.lhe.gz` | The same events in two datasets, with weights enabled and disabled; common and region-specific cuts and histograms. |
-| [lhe_regions_3.ma5](scripts/lhe_regions_3.ma5) | `samples/lljj.lhe.gz` | Independent, overlapping and empty regions on a multiweight sample, using dilepton mass; shared cuts, subset associations and region-specific histograms. |
+| [lhe_histos_0.ma5](scripts/lhe_histos_0.ma5) | `ttbar_sl_1.lhe.gz` | Parton-level event observables, particle IDs and weights; electron, muon, b-parton and jet kinematics; leading/subleading objects; angular observables and same-species/mixed-object combinations. |
+| [lhe_histos_1.ma5](scripts/lhe_histos_1.ma5) | `lljj.lhe.gz` | The same broad histogram coverage on another sample, with additional logarithmic-x histogram declarations. The input contains additional event weights; only nominal results are compared. |
+| [lhe_histos_2.ma5](scripts/lhe_histos_2.ma5) | `ttbar_nlo.lhe.gz` | Broad existing histogram suite with signed weights: event observables, particle IDs, lepton/b/jet kinematics, ranked objects, angular and mixed-object combinations, linear/logarithmic bins, underflow and overflow. |
+| [lhe_histos_3.ma5](scripts/lhe_histos_3.ma5) | `ttbar_nlo.lhe.gz` | All eight ordering choices, positive/negative ranks, all four particle-status choices, scalar/vector sums and differences, ratios, impact-parameter observables, histogram setters and rendering shortcuts. |
+| [lhe_cutflows_0.ma5](scripts/lhe_cutflows_0.ma5) | `ttbar_sl_1.lhe.gz` | Event-level selection and rejection, ordered objects, compound conditions, and cuts preserving or rejecting all remaining events. |
+| [lhe_cutflows_1.ma5](scripts/lhe_cutflows_1.ma5) | `ttbar_sl_1.lhe.gz` | Object filtering, before/after histograms, and event cuts on the resulting collections. |
+| [lhe_cutflows_2.ma5](scripts/lhe_cutflows_2.ma5) | `lljj.lhe.gz` | Event-level cuts on a multiweight sample: multiplicities, ordered objects, dilepton mass, compound conditions, and complete rejection; no explicit regions. |
+| [lhe_cutflows_3.ma5](scripts/lhe_cutflows_3.ma5) | `lljj.lhe.gz` | Object filtering on a multiweight sample, before/after histograms, and dilepton and jet event cuts; no explicit regions. |
+| [lhe_cutflows_4.ma5](scripts/lhe_cutflows_4.ma5) | `ttbar_nlo.lhe.gz` | Event `select`/`reject`, comparisons, `and`/`or`, multiplicities, kinematic cuts, an identity cut, complete rejection and empty downstream histograms/counters. |
+| [lhe_cutflows_5.ma5](scripts/lhe_cutflows_5.ma5) | `ttbar_nlo.lhe.gz` | Object `select`/`reject`, compound object criteria, before/after multiplicities and spectra, subsequent event cuts. |
+| [lhe_regions_0.ma5](scripts/lhe_regions_0.ma5) | `ttbar_sl_1.lhe.gz` | Region subsets, common and region-specific cuts, independent survival, empty regions, and region-associated histograms. |
+| [lhe_regions_1.ma5](scripts/lhe_regions_1.ma5) | `ttbar_sl_1.lhe.gz` | Region and selection removal, swapping cuts, and a separate resubmission after each edit. The initial submission and every resubmission are checked against separate references. |
+| [lhe_regions_2.ma5](scripts/lhe_regions_2.ma5) | `lljj.lhe.gz` | The same events in two datasets, with weights enabled and disabled; common and region-specific cuts and histograms. |
+| [lhe_regions_3.ma5](scripts/lhe_regions_3.ma5) | `lljj.lhe.gz` | Independent, overlapping and empty regions on a multiweight sample, using dilepton mass; shared cuts, subset associations and region-specific histograms. |
+| [lhe_regions_4.ma5](scripts/lhe_regions_4.ma5) | `ttbar_nlo.lhe.gz` | Same sample with event weights enabled/disabled in signal/background datasets; positive/negative input-weight partitions; common and region-local cuts; object filtering; overlapping associations; automatic histogram splitting; empty regions. |
+| [lhe_regions_5.ma5](scripts/lhe_regions_5.ma5) | `ttbar_nlo.lhe.gz` | Six output steps: initial submission, swapped cuts, removed cut, edited histogram binning, disabled event weights, restored event weights. |
 
 All scripts use parton-level events, `main.normalize = none` and `main.lumi = 1.0`.
-The histogram-only scripts define no cuts or explicit regions. The current copies
-of both input samples have only positive nominal event weights.
+The histogram-only scripts define no cuts or explicit regions. The supplied
+`ttbar_sl_1.lhe.gz` and `lljj.lhe.gz` samples have only positive nominal weights.
+The supplied `ttbar_nlo.lhe.gz` sample contains 10,000 events (7,720 positive
+and 2,280 negative nominal weights) and 27 additional weights.
 
 ## Shared conventions
 
@@ -69,12 +82,23 @@ files only.
 
 The drivers run `./bin/ma5 -s validation/scripts/<name>.ma5` from the repository
 root and identify one newly created `ANALYSIS_X` directory. All drivers locate
-the MadAnalysis5 installation relative to their own files.
+the MadAnalysis 5 installation relative to their own files, so they can also be
+invoked from another directory using the path to the checker.
 
-Only nominal weights are compared. Floating-point tolerances are `ABS_TOL=1e-7`
-and `REL_TOL=1e-5`, and a numerical difference is considered significant when it
-exceeds both tolerances. Cutflow entry counts are however compared exactly.
-Moreover, display limits do not affect the pass/fail results.
+All three checkers share [SAFReader.py](SAFReader.py), independently of MA5's
+report reader. This helper reads SAF blocks and numeric weight pairs, preserves
+exact integer counts and raises errors for malformed input. Only nominal results
+are compared numerically, keeping positive and negative contributions separate.
+Additional weight variations and generated reports are not compared.
+
+Floating-point tolerances are `ABS_TOL=1e-7` and `REL_TOL=1e-5`, and a numerical
+difference is considered significant when it exceeds both tolerances. Histogram
+event/entry counts and cutflow entry counts are compared exactly. Display limits
+do not affect the pass/fail results.
+
+Undefined kinematic moments in old references (for example massless-particle
+`GAMMA`) are accepted only when the produced moment has the same NaN/infinity
+state. Nonfinite bins, counts, weight sums and squared-weight sums are rejected.
 
 | Exit code | Meaning |
 | --- | --- |
@@ -94,20 +118,21 @@ python3 HistoChecks.py run <name>
 dataset and one job submission. The region driver should be used for multiple
 datasets or scripts including job resubmissions.
 
-**Comparison.** Histogram number, names, order and data-row counts must match.
-The checker compares the sum of the first two columns in each bin, including
-underflow and overflow. These columns contain the positive- and negative-weight
-contributions for the nominal weight. Histogram types, axis metadata, statistics
-and region associations are not checked.
+**Comparison.** Histogram number, names, order, types, axes, region associations
+and frequency keys (PDG codes) must match within the applicable tolerances.
+Positive and negative nominal contributions are compared separately in ordinary
+and logarithmic bins, underflow/overflow and histogram statistics. Counts are
+exact; other numerical quantities use the shared tolerances. Histogram region
+association order does not matter.
 
-**Direct comparison.** Compare two histogram files generated by MadAnalyssi5:
+**Direct comparison.** Compare two histogram files generated by MadAnalysis 5:
 
 ```bash
 python3 HistoChecks.py compare <histo SAF file 1> <histo SAF file 2>
 ```
 
 **Options.** Both modes accept `--max-bins N` (default 12), limiting displayed
-bin differences per histogram.
+differences per histogram, including bins, statistics and definitions.
 
 ## Running the cutflow checks
 
@@ -135,7 +160,7 @@ python3 CutflowChecks.py compare <cutflow SAF file 1> <cutflow SAF file 2> \
 ```
 
 **Options.** Both modes accept `--max-differences N` (default 12), limiting
-printed cutflow differences and differing bins per histogram.
+printed cutflow differences and histogram differences per histogram.
 
 ## Running the region checks
 
@@ -155,18 +180,18 @@ allowed and all steps are compared.
 folder `outputs/`. For scripts containing `resubmit`, the references use the
 prefix `<name>_stepN`, starting at `step0` for the initial submission, with the
 step number matching the suffix of the `MadAnalysis5job_N` folder in the job
-output. For multiple datasets, the reference names append the original dataset
-and analyser directory names:
-`<prefix>_<dataset>_<analyser>_<suffix>.saf`.
+output. For multiple datasets, the reference names append the dataset directory
+name:
+`<prefix>_<dataset>_<suffix>.saf`.
+Here `<suffix>` is `regions`, `histos` or a region name.
 
 **Comparison.** Dataset/analyser names, region declarations and their order,
 and the matching cutflow files are checked. A single unlabelled flat reference
 matches exactly one dataset/analyser without checking its name. Every region's
 nominal cutflow is compared with `CutflowChecks.py`, including empty regions and
 counters after complete rejection. Histogram types, names, order and associated
-region sets are checked, and bins are compared with `HistoChecks.py`. Association
-order within a histogram does not matter. Extra weights, histogram statistics,
-axis metadata and generated reports are also not compared.
+region sets are checked. Histogram bins, axes and statistics are compared with
+`HistoChecks.py`. Association order within a histogram does not matter.
 
 Each step and dataset is compared independently. A difference in an intermediate
 step fails the test even if the final step agrees. Missing or extra submission
@@ -179,16 +204,18 @@ MadAnalysis 5 output folders:
 python3 RegionChecks.py compare <analysis 1> <analysis 2>
 ```
 
-**Options.** Both modes accept `--max-differences N` (default 12), limiting printed
-differences per check and differing bins per histogram.
+**Options.** Both modes accept `--max-differences N` (default 12), limiting
+printed differences per check and histogram differences per histogram. The run
+mode also accepts `--reference PATH`, selecting a flat reference prefix, an
+existing job directory or a SAF tree.
+
 
 ## Planned extensions
 
-- Add histogram and cutflow tests using a sample with negative nominal weights.
-- Add a mixed signal/background analysis using the two LHE samples as separate
-  datasets. Check their individual histograms and cutflows together with the
-  combined report; compare nominal results against `main` and additional weights
-  where supported.
+- Extend multiple-dataset validation to two different LHE samples, to detect
+  accidental mixing of dataset results. Separately add checks of combined-report
+  quantities and additional weight variations, which the current SAF comparisons
+  do not cover.
 - Add HepMC-based validation covering event reading, weight handling, reconstruction
   with FastJet, Delphes and DelphesMA5tune, and recasting with the corresponding
   PAD collections. Compare reconstructed observables, histograms, cutflows and

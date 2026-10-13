@@ -133,37 +133,38 @@ dmypy.json
 # VScode type checker
 .vscode/
 
- .github_meta.log
-*/*.pyc
-*/*/*.pyc
-*/*/*/*.pyc
-*/*/*/*.log
-tools/SampleAnalyzer/Interfaces/Makefile_*
-tools/SampleAnalyzer/Test/Makefile_*
-*/*/*.aux
-*/*/*.bbl
-*/*/*.blg
-*/*/*.toc
-*/*/*.out
-*/*/*.log
+
+# MacOS
+.DS_Store
+
+# Internal tools
+Makefile
+PortabilityTags.h
+Makefile
+Makefile_*
+ExternalSymLink
+setup*
+Bin
+*delphes*
+architecture.ma5
+PAD*
+fastjet
+HEPTopTagger
+zlib
+
+# docs
+doc/*/*.aux
+doc/*/*.bbl
+doc/*/*.blg
+doc/*/*.toc
+doc/*/*.out
+doc/*/*.log
+doc/*/*.pdf
 doc/??????_mode.log
 doc/??????_mode.pdf
+
+# MA5 generated files
+samples
 .ma5history
-architecture.ma5
-setup.sh
-setup.csh
-tools/SampleAnalyzer/Commons/Makefile
-tools/SampleAnalyzer/Configuration/Makefile
-tools/SampleAnalyzer/Process/Makefile
-PortabilityTags.h
-.DS_Store
 ANALYSIS_*
-samples/*
-tools/fastjet
-tools/HEPTopTagger
-tools/zlib
-fastjet-config
-tools/SampleAnalyzer/Bin
-tools/PAD
-tools/PADForSFS
-validation/outputs/*.saf
+*.saf

@@ -175,6 +175,22 @@ class CmdSubmit(CmdBase):
                     ToReAnalyze = True
                     break
 
+            # Settings that change the event analysis require a new run.
+            if cmd2.startswith("set "):
+                # Allow spaces around brackets, dots and the equals sign.
+                target = "".join(cmd2[4:].split("=", 1)[0].split())
+                obj, _, parameter = target.rpartition(".")
+
+                # Selection settings used by the generated C++ analysis.
+                if obj.startswith("selection[") and obj.endswith("]"):
+                    if parameter in ("nbins", "xmin", "xmax", "logX", "rank", "statuscode", "regions", "threshold"):
+                        ToReAnalyze = True
+
+                # Event weights are applied while processing the dataset.
+                elif self.main.datasets.Find(obj):
+                    if parameter == "weighted_events":
+                        ToReAnalyze = True
+
             # Found?
             if ToReAnalyze:
                 break

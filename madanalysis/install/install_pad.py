@@ -188,7 +188,7 @@ class InstallPad:
         except:
             pass
 
-        # delphes card and pileip directory
+        # delphes card and pileup directory
         for mydir in [ self.delphesdir ] + (self.padname != 'PADForSFS') * [ self.pileupdir ]:
             TheCommand = ['mkdir', mydir]
             ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')

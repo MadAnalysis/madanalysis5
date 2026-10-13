@@ -605,10 +605,7 @@ void LHEReader::FillWeightNames(const std::string &line, SampleFormat &mySample)
     if (mySample.mc()->WeightNames().find(0) == mySample.mc()->WeightNames().end())
         mySample.mc()->SetWeightName(0, "nominal");
 
-    // NOTE: every weight definition is printed at the INFO level.
-    INFO << id << " : " << weight_name<< endmsg;
-
-    // Print the id and weight_name
+    // Register the weight_name
     try
     {
         mySample.mc()->SetWeightName(std::stoi(id), weight_name);
