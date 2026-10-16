@@ -323,7 +323,7 @@ class MergingPlots:
         outputC.write('  legend->SetFillColor(0);\n')
         outputC.write('  legend->SetTextSize(0.04);\n')
         outputC.write('  legend->SetTextFont(22);\n')
-        outputC.write('  legend->SetY1(TMath::Max(0.15,0.97-0.10*legend->GetListOfPrimitives()->GetSize()));\n')
+        outputC.write('  legend->SetY1(std::max(0.15,0.97-0.10*legend->GetListOfPrimitives()->GetSize()));\n')
         outputC.write('  legend->Draw();\n')
         outputC.write('\n')
 
