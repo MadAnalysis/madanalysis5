@@ -161,6 +161,8 @@ class HistoRootProducer():
         output.write('#include <TStyle.h>\n')
         output.write('#include <TSystem.h>\n')
         output.write('#include <TROOT.h>\n')
+        output.write('#include <TMath.h>\n')
+        output.write('#include <TLine.h>\n')
         output.write('\n')
         output.write('// Including histograms\n')
         for item in self.filenames:

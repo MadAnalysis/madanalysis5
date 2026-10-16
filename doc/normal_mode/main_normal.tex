@@ -242,6 +242,7 @@ Command & Description\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
 \section{\Large Properties of the main object}
+\label{sec:main}
 \end{shaded}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -284,6 +285,8 @@ Command & Description\\
   event weights), \verb?lumi_weight? (as \verb?lumi? but with the
   event weights).\\
 \color{ao} \verb?main.outputfile? & Name of the output file to write events onto.\\
+\color{ao} \verb?main.ratio_plot? & Switching the ratio subplot \verb?on? and \verb?off? (default \verb?off?).\\
+\color{ao} \verb?main.ratio_reference? & Dataset used as the ratio-panel reference (default: first imported dataset).\\
 \color{ao} \verb?main.recast? & Switching the recasting mode \verb?on? and \verb?off?.\\
 \color{ao} \verb?main.stacking_method? & Way in which the contributions of the different
   datasets to a histogram are displayed. The available choices are
@@ -443,6 +446,10 @@ Symbol& Description\\
 \hline
 \end{tabular}
 \end{center}
+
+\noindent When comparing several datasets (\emph{e.g.} with \verb?superimpose?), a ratio
+subplot can be added below the histogram via \verb?main.ratio_plot? and
+\verb?main.ratio_reference? (see Sec.~\ref{sec:main}).
 
 In order to manipulate the properties of a histogram, we can make use of the \texttt{set} command, to be applied on the respective selection. To see which selection corresponds to the desired histogram, it is sufficient to type \texttt{display selection} and choose the identifier of the plot to be modified. The properties of the given plot can hence be modified via
 {\color{ao} \begin{verbatim}
