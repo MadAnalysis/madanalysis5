@@ -281,7 +281,7 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
     // Filling Delphes particle with obvious information
     candidate->PID = part->pdgid();
     candidate->Status = part->statuscode();
-    candidate->Momentum.SetPxPyPzE(part->px(), part->py(), part->pz(), part->e());
+    candidate->Momentum.SetPxPyPzE(part->momentum().Px(), part->momentum().Py(), part->momentum().Pz(), part->momentum().E());
     candidate->Position.SetXYZT(part->decay_vertex().X(), 
                                 part->decay_vertex().Y(),
                                 part->decay_vertex().Z(),

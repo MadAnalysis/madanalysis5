@@ -261,7 +261,7 @@ void DetectorDelphesMA5tune::TranslateMA5toDELPHES(SampleFormat& mySample, Event
     MAuint32 pdgCode=std::abs(part->pdgid());
 
     candidate->Status = part->statuscode();
-    candidate->Momentum.SetPxPyPzE(part->px(), part->py(), part->pz(), part->e());
+    candidate->Momentum.SetPxPyPzE(part->momentum().Px(), part->momentum().Py(), part->momentum().Pz(), part->momentum().E());
     candidate->Position.SetXYZT(0., 0., 0., 0.);
 
     // Filling mother-daughter information
