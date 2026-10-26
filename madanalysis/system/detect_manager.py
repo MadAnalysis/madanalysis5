@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Dispatcher of the dependency detectors."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 import sys
 from string_tools import StringTools
@@ -30,11 +34,25 @@ from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectManager():
+    """Run the detection of a package and log its status.
+
+    Attributes:
+        hidden_packages (``list[str]``): packages whose status is only logged at debug level.
+    """
 
     # same as checker.name
     hidden_packages = ["likelihood simplifier"]
 
-    def __init__(self,archi_info,user_info,session_info,script,debug):
+    def __init__(self,archi_info: Any,user_info: Any,session_info: Any,script: bool,debug: bool) -> None:
+        """Create the manager.
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration (filled by the detectors).
+            user_info (``UserInfo``): user options.
+            session_info (``SessionInfo``): session information (filled by the detectors).
+            script (``bool``): script mode.
+            debug (``bool``): print detailed information.
+        """
         self.archi_info      = archi_info
         self.user_info       = user_info
         self.session_info    = session_info
@@ -44,7 +62,25 @@ class DetectManager():
         self.hidden_packages = [self.PrintPackageName(x) for x in self.hidden_packages]
 
 
-    def Execute(self, rawpackage):
+    def Execute(self, rawpackage: str) -> bool:
+        """Detect a package.
+
+        The detector class of the package is selected and its methods are called (when
+        defined) in the following order: ``Initialize``, ``IsItVetoed``,
+        ``AreDependenciesInstalled``, ``ManualDetection``, ``ToolsDetection`` (if the manual
+        detection did not find the package), ``AutoDetection`` (if still not found),
+        ``ExtractInfo``, ``SaveInfo`` and ``Finalize``. The status (``[OK]``, ``[DISABLED]``,
+        ``[FAILURE]``, ...) is logged.
+
+        Args:
+            rawpackage (``str``): name of the package (case-insensitive), e.g. ``zlib``,
+                ``fastjet``, ``root``, ``pad``, ``padsfs``, ``spey``, ``gpp``.
+
+        Returns:
+            ``bool``:
+            ``False`` if the package is unknown or if a mandatory package is missing,
+            ``True`` otherwise (including when an optional package is not found).
+        """
 
         self.logger.debug('------------------------------------------------------')
         package=rawpackage.lower()
@@ -73,6 +109,9 @@ class DetectManager():
             from madanalysis.system.detect_heptoptagger import DetectHEPTopTagger
             checker=DetectHEPTopTagger(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='delphes':
+            # FIXME: the modules detect_delphes, detect_delphesMA5tune, detect_pyroot and detect_numpy do
+            # not exist: requesting these packages raises an ImportError (Delphes is detected in
+            # config_checker.py instead).
             from madanalysis.system.detect_delphes import DetectDelphes
             checker=DetectDelphes(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='delphesma5tune':
@@ -84,6 +123,8 @@ class DetectManager():
         elif package=='matplotlib':
             from madanalysis.system.detect_matplotlib import DetectMatplotlib
             checker=DetectMatplotlib(self.archi_info, self.user_info, self.session_info, self.debug)
+        # NOTE: unreachable duplicate of the 'gnuplot' branch above (and it would build a
+        # DetectMatplotlib).
         elif package=='gnuplot':
             from madanalysis.system.detect_gnuplot import DetectGnuPlot
             checker=DetectMatplotlib(self.archi_info, self.user_info, self.session_info, self.debug)
@@ -330,7 +371,14 @@ class DetectManager():
         return True
 
 
-    def Print(self,status):
+    # FIXME: legacy method: the Print* methods are called without 'self' (NameError) and
+    # DetectStatusType has no DEACTIVATED member.
+    def Print(self,status: int) -> None:
+        """Log a detection status (legacy, see FIXME).
+
+        Args:
+            status (``int``): :class:`~madanalysis.enumeration.detect_status_type.DetectStatusType` code.
+        """
         if status==DetectStatusType.FOUND:
             PrintOK('')
         elif status==DetectStatusType.UNFOUND:
@@ -340,47 +388,88 @@ class DetectManager():
         elif status==DetectStatusType.ISSUE:
             PrintFAILURE('')
 
-    def PrintOK(self,text):
+    def PrintOK(self,text: str) -> None:
+        """Log ``<text>[OK]``.
+
+        Args:
+            text (``str``): formatted package name.
+        """
         if text not in self.hidden_packages:
             self.logger.info(text+'\x1b[32m'+'[OK]'+'\x1b[0m')
         else:
             self.logger.debug(text+'\x1b[32m'+'[OK]'+'\x1b[0m')
 
 
-    def PrintFAILURE(self,text):
+    def PrintFAILURE(self,text: str) -> None:
+        """Log ``<text>[FAILURE]``.
+
+        Args:
+            text (``str``): formatted package name.
+        """
         if text not in self.hidden_packages:
             self.logger.info(text + '\x1b[31m'+'[FAILURE]'+'\x1b[0m')
         else:
             self.logger.debug(text + '\x1b[31m'+'[FAILURE]'+'\x1b[0m')
 
 
-    def PrintDISABLED(self,text):
+    def PrintDISABLED(self,text: str) -> None:
+        """Log ``<text>[DISABLED]``.
+
+        Args:
+            text (``str``): formatted package name.
+        """
         if text not in self.hidden_packages:
             self.logger.info(text + '\x1b[35m'+'[DISABLED]'+'\x1b[0m')
         else:
             self.logger.debug(text + '\x1b[35m'+'[DISABLED]'+'\x1b[0m')
 
 
-    def PrintUSERDISABLED(self,text):
+    def PrintUSERDISABLED(self,text: str) -> None:
+        """Log ``<text>[DISABLED BY THE USER]``.
+
+        Args:
+            text (``str``): formatted package name.
+        """
         if text not in self.hidden_packages:
             self.logger.info(text+'\x1b[35m'+'[DISABLED BY THE USER]'+'\x1b[0m')
         else:
             self.logger.debug(text+'\x1b[35m'+'[DISABLED BY THE USER]'+'\x1b[0m')
 
-    def PrintDEACTIVATED(self,text):
+    def PrintDEACTIVATED(self,text: str) -> None:
+        """Log ``<text>[DEACTIVATED]``.
+
+        Args:
+            text (``str``): formatted package name.
+        """
         if text not in self.hidden_packages:
             self.logger.info(text+'\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m')
         else:
             self.logger.debug(text+'\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m')
 
-    def PrintWARNING(self,text):
+    def PrintWARNING(self,text: str) -> None:
+        """Log ``<text>[WARNING]``.
+
+        Args:
+            text (``str``): formatted package name.
+        """
         if text not in self.hidden_packages:
             self.logger.info(text+'\x1b[35m'+'[WARNING]'+'\x1b[0m')
         else:
             self.logger.debug(text+'\x1b[35m'+'[WARNING]'+'\x1b[0m')
 
 
-    def PrintPackageName(self,text,tab=5,width=25):
+    def PrintPackageName(self,text: str,tab: int = 5,width: int = 25) -> str:
+        """Format a package name for the status table.
+
+        Args:
+            text (``str``): package name.
+            tab (``int``, default ``5``): indentation.
+            width (``int``, default ``25``): width of the name column.
+
+        Returns:
+            ``str``:
+            E.g. ``"     - FastJet                  "``.
+        """
         # Displaying the package name without "\n"
         mytab = '%'+str(tab)+'s'
         mytab = mytab % ' '

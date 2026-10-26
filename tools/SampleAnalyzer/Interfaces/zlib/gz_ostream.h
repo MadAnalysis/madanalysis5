@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file gz_ostream.h
+ * @brief Output stream for gzip-compressed files.
+ */
+
 #ifndef GZ_OSTREAM_H
 #define GZ_OSTREAM_H
 
@@ -37,6 +42,7 @@ namespace MA5
 //                      CLASS GZ_OSTREAM
 // -------------------------------------------------------------
 
+/** @brief Output stream for gzip-compressed files. */
 class gz_ostream : public gz_streambase, public std::ostream
 {
   // -------------------------------------------------------------
@@ -49,20 +55,34 @@ class gz_ostream : public gz_streambase, public std::ostream
  public:
 
 
-  /// Constructor without arguments
+  /** @brief Constructor. */
   gz_ostream() : std::ostream(&buf)
   {}
 
-  /// Constructor with arguments
+  /**
+   * @brief Constructor opening a file.
+   *
+   * @param name file name.
+   * @param open_mode std::ios mode (std::ios::out by default).
+   */
   gz_ostream( const MAchar* name, MAint32 open_mode = std::ios::out)
       : gz_streambase( name, open_mode), std::ostream( &buf) 
   {}
   
-  /// Read buffer
+  /**
+   * @brief Accessor to the stream buffer.
+   *
+   * @return the buffer.
+   */
   gz_streambuf* rdbuf()
   { return gz_streambase::rdbuf(); }
 
-  /// open a gzip file
+  /**
+   * @brief Open a gzip file.
+   *
+   * @param name file name.
+   * @param open_mode std::ios mode.
+   */
   void open( const MAchar* name, MAint32 open_mode = std::ios::out)
   { gz_streambase::open( name, open_mode); }
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,11 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file TimeMeasureType.h
+ * @brief Statistics of the time measurements of one portion of code.
+ */
 
 #ifndef TIMER_MEASURE_TYPE_H
 #define TIMER_MEASURE_TYPE_H
@@ -43,12 +48,16 @@
 namespace MA5
 {
 
+/** @brief Statistics (min, max, average, deviation) of the CPU time spent in a portion of code. */
 class TimeMeasureType
 {
  private:
 
+  /** @brief Has the chronometer been started? */
   MAbool     StartFilled_;
+  /** @brief Clock value at the start. */
   MAuint32   StartCurrent_;
+  /** @brief Minimum, maximum, number of measurements, sum and sum of squares of the times [s]. */
   MAfloat32  Min_;
   MAfloat32  Max_;
   MAuint32   NIterations_;
@@ -57,16 +66,16 @@ class TimeMeasureType
 
  public:
 
-  // Constructor without argument 
+  /** @brief Constructor. */
   TimeMeasureType()
   { Reset(); }
   
-  // Destructor
+  /** @brief Destructor. */
   ~TimeMeasureType()
   {}
 
 
-  // Reset
+  /** @brief Reset the statistics. */
   void Reset()
   {
     StartFilled_=false; 
@@ -78,10 +87,29 @@ class TimeMeasureType
     Sum2_=0.;
   } 
   
-  // Accessors
+  /**
+   * @brief Accessor to the minimum time.
+   *
+   * @return the time [s].
+   */
   const MAfloat32& GetMin() const {return Min_;}
+  /**
+   * @brief Accessor to the maximum time.
+   *
+   * @return the time [s].
+   */
   const MAfloat32& GetMax() const {return Max_;}
+  /**
+   * @brief Accessor to the number of measurements.
+   *
+   * @return the number.
+   */
   const MAuint32& GetNIterations() const {return NIterations_;}
+  /**
+   * @brief Average time.
+   *
+   * @return the time [s] (0 with a warning if there is no measurement).
+   */
   const MAfloat32 GetAverage() const
   { 
     try
@@ -95,6 +123,11 @@ class TimeMeasureType
       return 0.;
     }    
   }
+  /**
+   * @brief Standard deviation of the time.
+   *
+   * @return the deviation [s] (0 with a warning or error if undefined).
+   */
   const MAfloat32 GetDeviation() const
   { 
     try
@@ -114,12 +147,22 @@ class TimeMeasureType
     }
   }
   
-  // Mutators
+  /**
+   * @brief Start a measurement.
+   *
+   * @param value clock value.
+   */
   void SetStart(const MAuint32& value)
   { StartCurrent_=value; StartFilled_=true; }
 
+  /**
+   * @brief Stop a measurement and update the statistics.
+   *
+   * @param StopCurrent clock value.
+   */
   void SetStop(const MAuint32& StopCurrent)
   {
+    // NOTE: unsigned subtraction: 'timing' can never be negative (a clock wrap-around gives a huge value).
     MAfloat32 timing = static_cast<MAfloat32>(StopCurrent-StartCurrent_)/CLOCKS_PER_SEC;
     if (timing<0) return;  
     if (!StartFilled_) return;
@@ -133,6 +176,11 @@ class TimeMeasureType
     StartCurrent_=0;
   }
 
+  /**
+   * @brief Print the column titles of Print().
+   *
+   * @param os logger.
+   */
   static void PrintHeader(LogStream& os = INFO)
   {
     os.width(10); os << std::left << "Min";
@@ -143,6 +191,11 @@ class TimeMeasureType
     os << endmsg;
   }
 
+  /**
+   * @brief Print the statistics.
+   *
+   * @param os logger.
+   */
   void Print(LogStream& os = INFO) const
   {
     TimeMeasureType::PrintHeader(os);    

@@ -1,0 +1,45 @@
+#TITLE Independent regions with multiple event weights
+#MODE PARTON
+# Exercise region bookkeeping for each weight, using dilepton kinematics.
+
+import samples/lljj.lhe.gz as testset
+set testset.weighted_events = true
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu-
+define_region inclusive high low overlap empty
+
+# A subset of equivalent regions, with a different order from the declaration.
+# Neither command should give a distinguishable-regions warning after the fix.
+plot N(lep) 6 0 6 {overlap inclusive}
+select (lep) PT > 10 {overlap inclusive}
+
+# Apply to every region, including those with different object definitions.
+select N(lep) >= 2
+
+# Before the later jet cuts, high and low partition their common preselection.
+# The overlap window includes events on both sides of the 90 GeV boundary.
+select M(lep[1] lep[2]) >= 90 {high}
+select M(lep[1] lep[2]) < 90 {low}
+select M(lep[1] lep[2]) >= 85 and M(lep[1] lep[2]) < 95 {overlap}
+select PT(lep[1]) < 0 {empty}
+
+# Shared cuts affect high and overlap only, leaving low/inclusive unchanged.
+select N(j) >= 2 {high overlap}
+select PT(j[1]) > 50 {high overlap}
+
+plot M(lep[1] lep[2]) 40 0 200 {inclusive}
+plot M(lep[1] lep[2]) 40 0 200 {high}
+plot M(lep[1] lep[2]) 40 0 200 {low}
+plot M(lep[1] lep[2]) 40 0 200 {overlap}
+plot M(lep[1] lep[2]) 40 0 200 {empty}
+
+# Automatic splitting across regions with different cut histories is expected.
+plot PT(lep[1]) 40 0 200
+
+# This common cut must not revive the empty region for any weight.
+select N(lep) >= 2
+plot M(lep[1] lep[2]) 40 0 200 {empty}
+display_regions
+
+submit

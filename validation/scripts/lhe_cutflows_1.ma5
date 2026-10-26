@@ -1,0 +1,35 @@
+#TITLE Object selection followed by event cuts
+#MODE PARTON
+
+import samples/ttbar_sl_1.lhe.gz as testset
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu-
+
+# Inspect the collections before and after object filtering.
+plot N(lep) 6 0 6
+plot PT(lep) 40 0 200
+plot N(j) 10 0 10
+plot PT(j) 40 0 200
+
+select (lep) PT > 20
+reject (lep) ABSETA > 2.5
+select (j) PT > 30
+reject (j) ABSETA > 2.5
+
+plot N(lep) 6 0 6
+plot PT(lep) 40 0 200
+plot N(j) 10 0 10
+plot PT(j) 40 0 200
+
+# Object cuts modify collections; these event cuts expose their effect
+# in the cutflow. Object cuts themselves are not event-cut counters.
+select N(lep) == 1
+select N(j) >= 2
+reject N(b) == 0
+select PT(j[1]) > 50
+plot MET 40 0 200
+plot PT(j[1]) 40 0 300
+plot M(j[1] j[2]) 40 0 500
+
+submit

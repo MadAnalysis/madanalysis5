@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,12 +23,21 @@
 
 
 // STL headers
+/**
+ * @file PortabilityCheckup.cpp
+ * @brief Program checking the sizes of the C++ fundamental types and writing
+ *        Commons/Base/PortabilityTags.h (INT_4BYTES, LONG_8BYTES).
+ *
+ * It is compiled and run by MadAnalysis 5 before building SampleAnalyzer.
+ */
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <cstdlib>
 
 
+/** @brief Sizes (in bytes) of the fundamental types. */
 struct datatypes
 {
   unsigned int bool_size;
@@ -48,9 +57,15 @@ struct datatypes
 };
 
 
+/**
+ * @brief Write the license header of the generated file.
+ *
+ * @param str output stream.
+ */
 void Header(std::ostream& str)
 {
   str << "////////////////////////////////////////////////////////////////////////////////" << std::endl;
+  // NOTE: the copyright years written in the generated file are outdated.
   str << "//" << std::endl;
   str << "//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks" << std::endl;
   str << "//  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>" << std::endl;
@@ -75,6 +90,13 @@ void Header(std::ostream& str)
   str << std::endl << std::endl;
 }
 
+/**
+ * @brief Print the sizes of the fundamental types.
+ *
+ * @param data sizes.
+ * @param str output stream.
+ * @param comment prefix each line with '//'.
+ */
 void Print(const datatypes& data, std::ostream& str, bool comment)
 {
   std::string header ="";
@@ -96,6 +118,11 @@ void Print(const datatypes& data, std::ostream& str, bool comment)
   str << header << "ldouble = " << data.ldouble_size << " bytes" << std::endl;
 }
 
+/**
+ * @brief Check the sizes of the types, select the portable typedefs and write PortabilityTags.h.
+ *
+ * @return 0 (also when a check fails: the result is only printed as 'FINAL TEST').
+ */
 int main()
 {
   std::cout << "------------------------------------" << std::endl;
@@ -270,6 +297,7 @@ int main()
   std::string ma5dir = std::getenv("MA5_BASE");
   ma5dir+="/tools/SampleAnalyzer/Commons/Base/";
   std::cout << "Writing the file called 'PortabilityTags.h' in '" << ma5dir << "' ..." << std::endl;
+  // FIXME: std::getenv returns a null pointer if MA5_BASE is not set (undefined behaviour).
   std::ofstream output((ma5dir+"PortabilityTags.h").c_str());
   if (output.bad() || !output.is_open())
   {

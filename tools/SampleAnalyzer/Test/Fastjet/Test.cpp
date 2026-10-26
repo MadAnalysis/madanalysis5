@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // SampleHeader headers
+/**
+ * @file Test.cpp
+ * @brief Smoke test of the FastJet interface (link test).
+ */
+
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 
@@ -44,6 +49,16 @@ using namespace MA5;
 // -----------------------------------------------------------------------
 // main program
 // -----------------------------------------------------------------------
+/**
+ * @brief Create and delete all the FastJet-based clustering algorithms.
+ *
+ * The markers BEGIN-SAMPLEANALYZER-TEST / END-SAMPLEANALYZER-TEST are checked by the
+ * Python front-end (LibraryWriter, madanalysis/IOinterface/library_writer.py) to validate the build.
+ *
+ * @param argc number of command-line arguments.
+ * @param argv command-line arguments.
+ * @return 0.
+ */
 MAint32 main(MAint32 argc, MAchar *argv[])
 {
   std::cout << "BEGIN-SAMPLEANALYZER-TEST" << std::endl;

@@ -1,0 +1,35 @@
+#TITLE NLO signed regions, weighted/unit-weight datasets and signal/background
+#MODE PARTON
+# Two copies of the same events deliberately isolate the weighted_events option.
+import samples/ttbar_nlo.lhe.gz as weighted
+import samples/ttbar_nlo.lhe.gz as unweighted
+set weighted.weighted_events = true
+set unweighted.weighted_events = false
+set weighted.type = signal
+set unweighted.type = background
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu- ta+ ta-
+define_region inclusive positive negative loose tight empty
+
+plot WEIGHTS 60 -1500 1500
+plot NPID
+plot N(b) 8 0 8
+# WEIGHTS reads the input nominal weight even for the unit-weight dataset.
+select WEIGHTS > 0 {positive}
+select WEIGHTS < 0 {negative}
+# Region-local object filtering must not alter the inclusive/sign regions.
+select (lep) PT > 15 {loose tight}
+select N(lep) >= 1 {loose tight}
+select N(b) >= 2
+select PT(b[1]) > 30 {loose tight}
+select MET > 50 {tight}
+select N(b) < 0 {empty}
+# Overlapping associations and automatic splitting after distinct cuts.
+plot PT(b[1]) 30 0 600 {positive negative}
+plot MET 30 0 300 {loose tight}
+plot N(lep) 6 0 6
+select N(b) >= 0
+plot WEIGHTS 60 -1500 1500
+plot MET 30 0 300 {empty}
+submit

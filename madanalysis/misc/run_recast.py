@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -21,22 +21,48 @@
 #
 ################################################################################
 
+"""Execution of the recasting mode (``set main.recast = on`` followed by ``submit``).
+
+For each detector card listed in the recasting card (see
+:mod:`madanalysis.configuration.recast_configuration`), the events of every dataset are
+processed by the corresponding detector simulation and PAD analyses:
+
+* ``v1.2`` (PAD) and ``v1.1`` (PADForMA5tune): a SampleAnalyzer job running Delphes
+  (resp. Delphes-MA5tune) and the analyses is built in ``<job>_RecastRun``
+  (:meth:`RunRecast.run_delphes_analysis`);
+* ``vSFS`` (PADForSFS): the SFS card is loaded with a nested interpreter and a
+  SampleAnalyzer job running FastJet+SFS and the analyses is built in
+  ``<job>_SFSRun`` (:meth:`RunRecast.run_SimplifiedFastSim`).
+
+The cut-flows are then combined with the information files (``<analysis>.info``) of
+the analyses to compute the 95% CL upper limits on the signal cross section and the
+exclusion confidence levels with Spey (:meth:`RunRecast.compute_cls`), for each signal
+region, simplified likelihood (covariance matrix) and full likelihood (pyhf), possibly
+for extrapolated luminosities and with theory/systematic uncertainty bands. The
+results are written in ``Output/SAF/<dataset>/CLs_output*.dat``.
+
+References:
+    * arXiv:1407.3278 (PAD), arXiv:2006.09387 (SFS), arXiv:1910.11418 (uncertainties
+      and luminosity extrapolation), arXiv:2206.14870 (global likelihoods),
+      arXiv:2307.06996 (Spey).
+"""
 
 from __future__ import absolute_import
+from typing import Any, TextIO
 
 import copy
 import json
 import logging
 import math
 import os
-import re
 import shutil
 import time
 from pathlib import Path
+from typing import Union
 
 import numpy as np
 from shell_command import ShellCommand  # pylint: disable=import-error
-from six.moves import input, range
+from six.moves import range
 from string_tools import StringTools  # pylint: disable=import-error
 
 from madanalysis.configuration.delphes_configuration import DelphesConfiguration
@@ -44,6 +70,7 @@ from madanalysis.configuration.delphesMA5tune_configuration import (
     DelphesMA5tuneConfiguration,
 )
 from madanalysis.core.main import Main
+from madanalysis.dataset.dataset_collection import DatasetCollection
 from madanalysis.install.detector_manager import DetectorManager
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from madanalysis.IOinterface.job_writer import JobWriter
@@ -54,6 +81,12 @@ from madanalysis.misc.histfactory_reader import (
     construct_histfactory_dictionary,
 )
 from madanalysis.misc.theoretical_error_setup import error_dict_setup
+from madanalysis.misc.utils import (
+    clean_region_name,
+    edit_recasting_card,
+    get_runs,
+    read_xsec,
+)
 
 # pylint: disable=logging-fstring-interpolation,import-outside-toplevel
 
@@ -61,9 +94,38 @@ log = logging.getLogger("MA5")
 
 
 class RunRecast:
+    """Controller of a recasting run.
+
+    Attributes:
+        dirname (``str``): job directory.
+        main (``Main``): session state (its fast-simulation and recasting settings are
+            temporarily modified during the run).
+        delphes_runcard (``list[tuple[str, str]]``): ``(version, detector card)`` pairs to run.
+        analysis_runcard (``list[tuple[str, str]]``): ``(version, analysis)`` pairs to run.
+        forced (``bool``): original value of ``main.forced`` (restored at the end).
+        detector (``str``): detector simulation of the current run (``delphes``,
+            ``delphesMA5tune`` or ``fastjet``).
+        pad (``str``): path to the PAD of the current run.
+        pyhf_config (``dict``): full-likelihood (HistFactory) configuration of the current
+            analysis.
+        cov_config (``dict``): simplified-likelihood (covariance) configuration of the
+            current analysis.
+        TACO_output (``str``): TACO output file name (empty = disabled).
+        pad_dict (``dict[str, tuple[str, str]]``): version -> (PAD folder, detector) for the
+            available PADs.
+        delphes_inc_pths (``list[str]``): Delphes include paths.
+    """
+
     def __init__(self, main: Main, dirname: str):
+        """Initialise the controller.
+
+        Args:
+            main (``Main``): session state.
+            dirname (``str``): job directory.
+        """
         self.dirname: str = dirname
         self.main: Main = main
+        self.logger = logging.getLogger("MA5")
         self.delphes_runcard = []
         self.analysis_runcard = []
         self.forced = self.main.forced
@@ -74,22 +136,37 @@ class RunRecast:
         self.pyhf_config = {}  # initialize and configure histfactory
         self.cov_config = {}
         self.TACO_output = self.main.recasting.TACO_output
+        self.pad_dict = {}
+
+        if self.main.recasting.ma5tune:
+            self.pad_dict.update({"v1.1": ("PADForMA5tune", "delphesMA5tune")})
+        if self.main.recasting.delphes:
+            self.pad_dict.update({"v1.2": ("PAD", "delphes")})
+        if self.main.archi_info.has_fastjet:
+            self.pad_dict.update({"vSFS": ("PADForSFS", "fastjet")})
 
         self.delphes_inc_pths = []
         if len(self.main.archi_info.delphes_inc_paths) != 0:
-            self.delphes_inc_pths = self.main.archi_info.delphes_inc_paths
+            self.delphes_inc_pths = list(self.main.archi_info.delphes_inc_paths)
             self.delphes_inc_pths.append(
                 next((p for p in self.delphes_inc_pths if Path(p).stem == "delphes"), "")
                 + "/modules"
             )
 
-    def init(self):
+    def init(self) -> bool:
+        """Read the recasting card (after proposing to edit it, unless in forced/script mode).
+
+        Returns:
+            ``bool``:
+            ``True`` if at least one detector card has to be processed.
+        """
         ### First, the analyses to take care off
         log.debug("  Inviting the user to edit the recasting card...")
-        self.edit_recasting_card()
+        if not self.forced and not self.main.script:
+            edit_recasting_card(self.main.session_info.editor, self.dirname)
         ### Getting the list of analyses to recast
         log.info("   Getting the list of delphes simulation to be performed...")
-        self.get_runs()
+        self.delphes_runcard, self.analysis_runcard = get_runs(self.dirname)
         ### Check if we have anything to do
         if len(self.delphes_runcard) == 0:
             log.warning("No recasting to do... Please check the recasting card")
@@ -103,20 +180,26 @@ class RunRecast:
     ################################################
 
     ## Running the machinery
-    def execute(self):
-        self.main.forced = True
-        for delphescard in list(set(sorted(self.delphes_runcard))):
-            ## Extracting run infos and checks
-            version = delphescard[:4]
-            card = delphescard[5:]
-            if not self.check_run(version):
-                self.main.forced = self.forced
-                return False
+    def execute(self) -> bool:
+        """Run all detector cards of the recasting card.
 
-            ## Running the fastsim
-            if not self.fastsim_single(version, card):
+        For each ``(version, card)`` pair, the PAD and detector are selected from
+        :attr:`pad_dict` and :meth:`analysis_single` is executed; the temporary
+        ``<job>_RecastRun`` folder is removed (kept in developer mode). ``main.forced`` is set
+        to ``True`` during the run and restored at the end.
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` on error or for an unavailable PAD version.
+        """
+        self.main.forced = True
+        for version, card in self.delphes_runcard:
+            ## Extracting run infos and checks
+            if not self.pad_dict.get(version, False):
                 self.main.forced = self.forced
                 return False
+            pad, self.detector = self.pad_dict[version]
+            self.pad = f"{self.main.archi_info.ma5dir}/tools/{pad}"
             self.main.fastsim.package = self.detector
 
             ## Running the analyses
@@ -125,404 +208,217 @@ class RunRecast:
                 return False
 
             ## Cleaning
-            if not FolderWriter.RemoveDirectory(
-                os.path.normpath(self.dirname + "_RecastRun")
-            ):
-                return False
+            pth = Path(os.path.normpath(self.dirname + "_RecastRun"))
+            if not self.main.developer_mode:
+                # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
+                if not FolderWriter.RemoveDirectory(str(pth)):
+                    log.error("Cannot remove directory: %s", str(pth))
+            else:
+                log.debug("Analysis kept in %s folder.", str(pth))
 
         # exit
         self.main.forced = self.forced
         return True
 
-    ## Prompt to edit the recasting card
-    def edit_recasting_card(self):
-        if self.forced or self.main.script:
-            return
-        log.info("Would you like to edit the recasting Card ? (Y/N)")
-        allowed_answers = ["n", "no", "y", "yes"]
-        answer = ""
-        while answer not in allowed_answers:
-            answer = input("Answer: ")
-            answer = answer.lower()
-        if answer in ["no", "n"]:
-            return
-        else:
-            err = os.system(
-                self.main.session_info.editor
-                + " "
-                + self.dirname
-                + "/Input/recasting_card.dat"
-            )
-
-        return
-
-    ## Checking the recasting card to get the analysis to run
-    def get_runs(self):
-        del_runs = []
-        ana_runs = []
-        ## decoding the card
-        runcard = open(self.dirname + "/Input/recasting_card.dat", "r")
-        for line in runcard:
-            if len(line.strip()) == 0 or line.strip().startswith("#"):
-                continue
-            myline = line.split()
-            if myline[2].lower() == "on" and myline[3] not in del_runs:
-                del_runs.append(myline[1] + "_" + myline[3])
-            if myline[2].lower() == "on":
-                ana_runs.append(myline[1] + "_" + myline[0])
-        ## saving the information and exti
-        self.delphes_runcard = del_runs
-        self.analysis_runcard = ana_runs
-        return
-
-    def check_run(self, version):
-        ## setup
-        check = False
-        if version == "v1.1":
-            self.detector = "delphesMA5tune"
-            self.pad = self.main.archi_info.ma5dir + "/tools/PADForMA5tune"
-            check = self.main.recasting.ma5tune
-        elif version == "v1.2":
-            self.detector = "delphes"
-            self.pad = self.main.archi_info.ma5dir + "/tools/PAD"
-            check = self.main.recasting.delphes
-        elif version == "vSFS":
-            self.detector = "fastjet"
-            self.pad = self.main.archi_info.ma5dir + "/tools/PADForSFS"
-            check = True
-        ## Check and exit
-        if not check:
-            log.error(
-                "The %s library is not present -> the associated analyses cannot be used",
-                self.detector,
-            )
-            return False
-        return True
-
     ################################################
-    ### DELPHES RUN
+    ### FastSim RUN
     ################################################
-    def fastsim_single(self, version, delphescard):
-        log.debug("Launch a bunch of fastsim with the delphes card: %s", delphescard)
+    # FIXME: 'dataset' is annotated as DatasetCollection but a single Dataset is passed
+    # (same for run_SimplifiedFastSim and compute_cls).
+    def run_delphes_analysis(
+        self, dataset: DatasetCollection, card: str, analysislist: list[str]
+    ) -> bool:
+        """Build, compile and run a SampleAnalyzer job running Delphes and PAD analyses.
 
-        # Init and header
-        self.fastsim_header(version)
+        The job is created in ``<job>_RecastRun`` with the Delphes (or Delphes-MA5tune)
+        detector card of the PAD, the analyses are copied from the PAD, ``main.cpp`` is
+        rewritten to instantiate and execute them (plus the TACO output if requested), the
+        pile-up paths of the card are fixed, and the job is compiled and run. The Delphes ROOT
+        file is moved to ``Output/SAF/<dataset>/RecoEvents/RecoEvents_<v1x1|v1x2>_<card>.root``.
 
-        # Activating the right delphes
-        if self.detector != "fastjet":
-            log.debug("Activating the detector (switch delphes/delphesMA5tune)")
-            self.main.fastsim.package = self.detector
-            detector_handler = DetectorManager(self.main)
-            if not detector_handler.manage(self.detector):
-                log.error("Problem with the activation of delphesMA5tune")
-                return False
+        Args:
+            dataset (``Dataset``): dataset to process (see FIXME on the annotation).
+            card (``str``): name of the Delphes card (in ``tools/<PAD>/Input/Cards``).
+            analysislist (``list[str]``): analyses to run.
 
-        # Checking whether events have already been generated and if not, event generation
-        log.debug("Loop over the datasets...")
-        evtfile = None
-        for item in self.main.datasets:
-            if self.detector == "delphesMA5tune":
-                evtfile = (
-                    self.dirname
-                    + "/Output/SAF/"
-                    + item.name
-                    + "/RecoEvents/RecoEvents_v1x1_"
-                    + delphescard.replace(".tcl", "")
-                    + ".root"
-                )
-            elif self.detector == "delphes":
-                evtfile = (
-                    self.dirname
-                    + "/Output/SAF/"
-                    + item.name
-                    + "/RecoEvents/RecoEvents_v1x2_"
-                    + delphescard.replace(".tcl", "")
-                    + ".root"
-                )
-            elif self.detector == "fastjet":
-                return True
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
+        # Preparing the run
+        self.main.recasting.status = "off"
+        self.main.fastsim.package = self.detector
+        self.main.fastsim.clustering = 0
 
-            log.debug("- applying fastsim and producing %s ...", evtfile)
-            if not os.path.isfile(os.path.normpath(evtfile)):
-                if not self.generate_events(item, delphescard):
-                    return False
+        pad_name = "PAD" if self.detector == "delphes" else "PADForMA5tune"
+        card_path = Path(f"../../../../tools/{pad_name}/Input/Cards/{card}")
+        version = ""
+        if self.detector == "delphesMA5tune":
+            version = "v1x1"
+            self.main.fastsim.delphes = 0
+            self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
+            self.main.fastsim.delphesMA5tune.card = str(card_path)
+        elif self.detector == "delphes":
+            self.main.fastsim.delphesMA5tune = 0
+            self.main.fastsim.delphes = DelphesConfiguration()
+            self.main.fastsim.delphes.card = str(card_path)
+            version = "v1x2"
 
-        # Exit
-        return True
+        recast_path = Path(self.dirname + "_RecastRun").absolute()
+        org_rel = Path("Build/SampleAnalyzer/User/Analyzer")
+        jobber = JobWriter(self.main, str(recast_path))
 
-    def fastsim_header(self, version):
-        ## Gettign the version dependent stuff
-        to_print = False
-        tag = None
-        if version == "v1.1" and self.first11:
-            to_print = True
-            tag = version
-            self.first11 = False
-        elif version != "v1.1" and self.first12:
-            to_print = True
-            tag = "v1.2+"
-            self.first12 = False
-        ## Printing
-        if to_print:
-            log.info("   **********************************************************")
-            log.info("   %s", StringTools.Center(f"{tag} detector simulations", 57))
-            log.info("   **********************************************************")
-
-    def run_delphes(self, dataset, card):
-        # Initializing the JobWriter
-        if os.path.isdir(self.dirname + "_RecastRun"):
-            if not FolderWriter.RemoveDirectory(
-                os.path.normpath(self.dirname + "_RecastRun")
-            ):
-                return False
-        jobber = JobWriter(self.main, self.dirname + "_RecastRun")
-
-        # Writing process
-        log.info("   Creating folder '" + self.dirname.split("/")[-1] + "_RecastRun'...")
+        log.info("   Creating folder '%s'", recast_path.stem)
         if not jobber.Open():
             return False
         log.info("   Copying 'SampleAnalyzer' source files...")
         if not jobber.CopyLHEAnalysis():
             return False
-        if not jobber.CreateBldDir():
+        if not jobber.CreateBldDir(
+            analysisName="DelphesRun", outputName="DelphesRun.saf"
+        ):
             return False
-        log.info("   Inserting your selection into 'SampleAnalyzer'...")
         if not jobber.WriteSelectionHeader(self.main):
             return False
         if not jobber.WriteSelectionSource(self.main):
             return False
+
+        # remove default user selection files if present
+        try:
+            (recast_path / org_rel / "user.h").unlink(missing_ok=True)
+            (recast_path / org_rel / "user.cpp").unlink(missing_ok=True)
+        except Exception as err:
+            log.debug("Could not remove user files: %s", err)
+
         log.info("   Writing the list of datasets...")
         jobber.WriteDatasetList(dataset)
         log.info("   Creating Makefiles...")
         if not jobber.WriteMakefiles(ma5_fastjet_mode=False):
             return False
-        log.debug("   Fixing the pileup path...")
-        self.fix_pileup(self.dirname + "_RecastRun/Input/" + card)
 
-        # Creating executable
-        log.info("   Compiling 'SampleAnalyzer'...")
-        # os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
-        # os.environ["FASTJET_FLAG"] = ""
-        if not jobber.CompileJob():
-            return False
-        log.info("   Linking 'SampleAnalyzer'...")
-        if not jobber.LinkJob():
-            return False
+        # Build analysisList.h and copy analyzer files from the pad
+        analysis_list_path = recast_path / org_rel / "analysisList.h"
+        pad_path = Path(self.pad)
+        pad_org = pad_path / org_rel
+        recast_org = recast_path / org_rel
 
-        # Running
-        log.info("   Running 'SampleAnalyzer' over dataset '" + dataset.name + "'...")
-        log.info("    *******************************************************")
-        if not jobber.RunJob(dataset):
-            log.error("run over '" + dataset.name + "' aborted.")
-        log.info("    *******************************************************")
-
-        # Exit
-        return True
-
-    def run_SimplifiedFastSim(self, dataset, card, analysislist):
-        """
-
-        Parameters
-        ----------
-        dataset : MA5 Dataset
-            one of the datasets from self.main.dataset
-        card : SFS Run Card
-            SFS description for the detector simulation
-        analysislist : LIST of STR
-            list of analysis names
-
-        Returns
-        -------
-        bool
-            SFS run correctly (True), there was a mistake (False)
-
-        """
-        if any(
-            any(x.endswith(y) for y in ["root", "lhco", "lhco.gz"])
-            for x in dataset.filenames
-        ):
-            log.error("   Dataset can not contain reconstructed file type.")
-            return False
-        # Load the analysis card
-        from madanalysis.core.script_stack import ScriptStack
-
-        ScriptStack.AddScript(card)
-        self.main.recasting.status = "off"
-        self.main.superfastsim.Reset()
-        script_mode = self.main.script
-        self.main.script = True
-        from madanalysis.interpreter.interpreter import Interpreter
-
-        interpreter = Interpreter(self.main)
-        interpreter.load(verbose=self.main.developer_mode)
-        self.main.script = script_mode
-        old_fastsim = self.main.fastsim.package
-        self.main.fastsim.package = "fastjet"
-        if self.main.recasting.store_events:
-            output_name = "SFS_events.lhe"
-            if self.main.archi_info.has_zlib:
-                output_name += ".gz"
-            log.debug("   Setting the output LHE file :" + output_name)
-
-        # Initializing the JobWriter
-        jobber = JobWriter(self.main, self.dirname + "_SFSRun")
-
-        # Writing process
-        log.info("   Creating folder '" + self.dirname.split("/")[-1] + "'...")
-        if not jobber.Open():
-            return False
-        log.info("   Copying 'SampleAnalyzer' source files...")
-        if not jobber.CopyLHEAnalysis():
-            return False
-        if not jobber.CreateBldDir(analysisName="SFSRun", outputName="SFSRun.saf"):
-            return False
-        if not jobber.WriteSelectionHeader(self.main):
-            return False
-        os.remove(self.dirname + "_SFSRun/Build/SampleAnalyzer/User/Analyzer/user.h")
-        if not jobber.WriteSelectionSource(self.main):
-            return False
-        os.remove(self.dirname + "_SFSRun/Build/SampleAnalyzer/User/Analyzer/user.cpp")
-        #######
-        log.info("   Writing the list of datasets...")
-        jobber.WriteDatasetList(dataset)
-        log.info("   Creating Makefiles...")
-        if not jobber.WriteMakefiles():
-            return False
-        # Copying the analysis files
-        analysisList = open(
-            self.dirname + "_SFSRun/Build/SampleAnalyzer/User/Analyzer/analysisList.h",
-            "w",
-        )
-        for ana in analysislist:
-            analysisList.write('#include "SampleAnalyzer/User/Analyzer/' + ana + '.h"\n')
-        analysisList.write(
-            '#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n'
-        )
-        analysisList.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
-        if self.main.superfastsim.isTaggerOn():
-            analysisList.write('#include "new_tagger.h"\n')
-        if self.main.superfastsim.isNewSmearerOn():
-            analysisList.write('#include "new_smearer_reco.h"\n')
-        analysisList.write(
-            "// -----------------------------------------------------------------------------\n"
-        )
-        analysisList.write("// BuildUserTable\n")
-        analysisList.write(
-            "// -----------------------------------------------------------------------------\n"
-        )
-        analysisList.write("void BuildUserTable(MA5::AnalyzerManager& manager)\n")
-        analysisList.write("{\n")
-        analysisList.write("  using namespace MA5;\n")
         try:
-            for ana in analysislist:
-                shutil.copyfile(
-                    self.pad + "/Build/SampleAnalyzer/User/Analyzer/" + ana + ".cpp",
-                    self.dirname
-                    + "_SFSRun/Build/SampleAnalyzer/User/Analyzer/"
-                    + ana
-                    + ".cpp",
+            with analysis_list_path.open("w", encoding="utf-8") as f:
+                for ana in analysislist:
+                    f.write(f'#include "SampleAnalyzer/User/Analyzer/{ana}.h"\n')
+                f.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
+                f.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
+                f.write(
+                    "// -----------------------------------------------------------------------------\n"
                 )
-                shutil.copyfile(
-                    self.pad + "/Build/SampleAnalyzer/User/Analyzer/" + ana + ".h",
-                    self.dirname
-                    + "_SFSRun/Build/SampleAnalyzer/User/Analyzer/"
-                    + ana
-                    + ".h",
+                f.write("// BuildUserTable\n")
+                f.write(
+                    "// -----------------------------------------------------------------------------\n"
                 )
-                analysisList.write('  manager.Add("' + ana + '", new ' + ana + ");\n")
+                f.write("void BuildUserTable(MA5::AnalyzerManager& manager)\n{\n")
+                f.write("  using namespace MA5;\n")
+                for ana in analysislist:
+                    pad_cpp = pad_org / f"{ana}.cpp"
+                    pad_h = pad_org / f"{ana}.h"
+                    rec_cpp = recast_org / f"{ana}.cpp"
+                    rec_h = recast_org / f"{ana}.h"
+                    # require header, cpp may be optional (but typically present)
+                    if not pad_h.exists():
+                        log.error("Missing analysis header in PAD: %s", pad_h)
+                        return False
+                    shutil.copyfile(str(pad_h), str(rec_h))
+                    if pad_cpp.exists():
+                        shutil.copyfile(str(pad_cpp), str(rec_cpp))
+                    else:
+                        log.debug(
+                            "No .cpp for %s in PAD; continuing with header only.", ana
+                        )
+                    f.write(f'  manager.Add("{ana}", new {ana});\n')
+                f.write("}\n")
         except Exception as err:
-            log.debug(str(err))
-            log.error("Cannot copy the analysis: " + ana)
-            log.error(
-                "Please make sure that corresponding analysis downloaded propoerly."
-            )
+            log.error("Cannot prepare analysisList.h: %s", err)
             return False
-        analysisList.write("}\n")
-        analysisList.close()
 
-        # Update Main
-        log.info("   Updating the main executable")
-        shutil.move(
-            self.dirname + "_SFSRun/Build/Main/main.cpp",
-            self.dirname + "_SFSRun/Build/Main/main.bak",
-        )
-        mainfile = open(self.dirname + "_SFSRun/Build/Main/main.bak", "r")
-        newfile = open(self.dirname + "_SFSRun/Build/Main/main.cpp", "w")
+        # Update main executable: backup and create modified main.cpp
+        main_base = recast_path / "Build" / "Main" / "main"
+        main_cpp = main_base.with_suffix(".cpp")
+        main_bak = main_base.with_suffix(".bak")
+        try:
+            shutil.move(str(main_cpp), str(main_bak))
+        except Exception as err:
+            log.error("Cannot backup main.cpp: %s", err)
+            return False
+
+        try:
+            with main_bak.open("r", encoding="utf-8") as infile:
+                lines = infile.readlines()
+        except Exception as err:
+            log.error("Cannot read main.bak: %s", err)
+            return False
+
+        new_lines = []
         ignore = False
-        for line in mainfile:
+        for line in lines:
             if "// Getting pointer to the analyzer" in line:
                 ignore = True
-                newfile.write(line)
+                new_lines.append(line)
                 for analysis in analysislist:
-                    newfile.write(
-                        "  std::map<std::string, std::string> prm" + analysis + ";\n"
+                    new_lines.append(
+                        f"  std::map<std::string, std::string> param_{analysis};\n"
                     )
-                    newfile.write("  AnalyzerBase* analyzer_" + analysis + "=\n")
-                    newfile.write(
-                        '    manager.InitializeAnalyzer("'
-                        + analysis
-                        + '","'
-                        + analysis
-                        + '.saf",'
-                        + "prm"
-                        + analysis
-                        + ");\n"
+                    new_lines.append(f"  AnalyzerBase* analyzer_{analysis}=\n")
+                    new_lines.append(
+                        f'    manager.InitializeAnalyzer("{analysis}", "{analysis}.saf", param_{analysis});\n'
                     )
-                    newfile.write("  if (analyzer_" + analysis + "==0) return 1;\n\n")
-                if self.main.recasting.store_events:
-                    newfile.write("  //Getting pointer to the writer\n")
-                    newfile.write("  WriterBase* writer1 = \n")
-                    newfile.write(
-                        '      manager.InitializeWriter("lhe","' + output_name + '");\n'
-                    )
-                    newfile.write("  if (writer1==0) return 1;\n\n")
-            elif (
+                    new_lines.append(f"  if (analyzer_{analysis}==0) return 1;\n\n")
+                continue
+            if (
                 "// Post initialization (creates the new output directory structure)"
                 in line
                 and self.TACO_output != ""
             ):
-                newfile.write(
-                    '    std::ofstream out;\n      out.open("../Output/'
-                    + self.TACO_output
-                    + '");\n'
+                new_lines.append(line)
+                new_lines.append(
+                    f'    std::ofstream out;\n      out.open("../Output/{self.TACO_output}");\n'
                 )
-                newfile.write("\n      manager.HeadSR(out);\n      out << std::endl;\n")
-            elif "//Getting pointer to the clusterer" in line:
+                new_lines.append("      manager.HeadSR(out);\n      out << std::endl;\n")
+                continue
+            if "//Getting pointer to fast-simulation package" in line:
                 ignore = False
-                newfile.write(line)
-            elif "!analyzer1" in line and not ignore:
+                new_lines.append(line)
+                continue
+            if "!analyzer1" in line and not ignore:
                 ignore = True
-                if self.main.recasting.store_events:
-                    newfile.write("      writer1->WriteEvent(myEvent,mySample);\n")
                 for analysis in analysislist:
-                    newfile.write(
-                        "      if (!analyzer_"
-                        + analysis
-                        + "->Execute(mySample,myEvent)) continue;\n"
+                    new_lines.append(
+                        f"      if (!analyzer_{analysis}->Execute(mySample,myEvent)) continue;\n"
                     )
                 if self.TACO_output != "":
-                    newfile.write("\n      manager.DumpSR(out);\n")
-            elif "    }" in line:
-                newfile.write(line)
+                    new_lines.append("\n      manager.DumpSR(out);\n")
+                continue
+            if "    }" in line:
+                new_lines.append(line)
                 ignore = False
-            elif (
-                "manager.Finalize(mySamples,myEvent);" in line and self.TACO_output != ""
-            ):
-                newfile.write(line)
-                newfile.write("  out.close();\n")
-            elif not ignore:
-                newfile.write(line)
-        mainfile.close()
-        newfile.close()
-        # restore
-        self.main.recasting.status = "on"
-        self.main.fastsim.package = old_fastsim
+                continue
+            if "manager.Finalize(mySamples,myEvent);" in line and self.TACO_output != "":
+                new_lines.append(line)
+                new_lines.append("  out.close();\n")
+                continue
+            if not ignore:
+                new_lines.append(line)
 
-        # @Jack: new setup configuration. In order to run the code in SFS-FastJet mode analysis
-        # has to be compiled with `-DMA5_FASTJET_MODE` flag but this needs to be deactivated for
-        # Delphes-ROOT based analyses.
+        try:
+            with main_cpp.open("w", encoding="utf-8") as outfile:
+                outfile.writelines(new_lines)
+        except Exception as err:
+            log.error("Cannot write new main.cpp: %s", err)
+            return False
 
-        # Creating executable
+        # Fix pileup in the card copied into the run folder
+        if not self.fix_pileup(str(recast_path / "Input" / card)):
+            return False
+
+        # Compile / Link / Run
         log.info("   Compiling 'SampleAnalyzer'...")
         if not jobber.CompileJob():
             log.error("job submission aborted.")
@@ -531,260 +427,355 @@ class RunRecast:
         if not jobber.LinkJob():
             log.error("job submission aborted.")
             return False
-        # Running
-        log.info("   Running 'SampleAnalyzer' over dataset '" + dataset.name + "'...")
+
+        log.info("   Running 'SampleAnalyzer' over dataset '%s'...", dataset.name)
         log.info("    *******************************************************")
         if not jobber.RunJob(dataset):
-            log.error("run over '" + dataset.name + "' aborted.")
+            log.error("run over '%s' aborted.", dataset.name)
             return False
         log.info("    *******************************************************")
 
-        if not os.path.isdir(self.dirname + "/Output/SAF/" + dataset.name):
-            os.mkdir(self.dirname + "/Output/SAF/" + dataset.name)
-        for analysis in analysislist:
-            if not os.path.isdir(
-                self.dirname + "/Output/SAF/" + dataset.name + "/" + analysis
-            ):
-                os.mkdir(self.dirname + "/Output/SAF/" + dataset.name + "/" + analysis)
-            if not os.path.isdir(
-                self.dirname
-                + "/Output/SAF/"
-                + dataset.name
-                + "/"
-                + analysis
-                + "/CutFlows"
-            ):
-                os.mkdir(
-                    self.dirname
-                    + "/Output/SAF/"
-                    + dataset.name
-                    + "/"
-                    + analysis
-                    + "/Cutflows"
-                )
-            if not os.path.isdir(
-                self.dirname
-                + "/Output/SAF/"
-                + dataset.name
-                + "/"
-                + analysis
-                + "/Histograms"
-            ):
-                os.mkdir(
-                    self.dirname
-                    + "/Output/SAF/"
-                    + dataset.name
-                    + "/"
-                    + analysis
-                    + "/Histograms"
-                )
-            if (
-                not os.path.isdir(
-                    self.dirname
-                    + "/Output/SAF/"
-                    + dataset.name
-                    + "/"
-                    + analysis
-                    + "/RecoEvents"
-                )
-                and self.main.recasting.store_events
-            ):
-                os.mkdir(
-                    self.dirname
-                    + "/Output/SAF/"
-                    + dataset.name
-                    + "/"
-                    + analysis
-                    + "/RecoEvents"
-                )
-            cutflow_list = os.listdir(
-                self.dirname
-                + "_SFSRun/Output/SAF/_"
-                + dataset.name
-                + "/"
-                + analysis
-                + "_0/Cutflows"
-            )
-            histogram_list = os.listdir(
-                self.dirname
-                + "_SFSRun/Output/SAF/_"
-                + dataset.name
-                + "/"
-                + analysis
-                + "_0/Histograms"
-            )
-            # Copy dataset info file
-            if os.path.isfile(
-                self.dirname
-                + "_SFSRun/Output/SAF/_"
-                + dataset.name
-                + "/_"
-                + dataset.name
-                + ".saf"
-            ):
-                shutil.move(
-                    self.dirname
-                    + "_SFSRun/Output/SAF/_"
-                    + dataset.name
-                    + "/_"
-                    + dataset.name
-                    + ".saf",
-                    self.dirname
-                    + "/Output/SAF/"
-                    + dataset.name
-                    + "/"
-                    + dataset.name
-                    + ".saf",
-                )
-            for cutflow in cutflow_list:
-                shutil.move(
-                    self.dirname
-                    + "_SFSRun/Output/SAF/_"
-                    + dataset.name
-                    + "/"
-                    + analysis
-                    + "_0/Cutflows/"
-                    + cutflow,
-                    self.dirname
-                    + "/Output/SAF/"
-                    + dataset.name
-                    + "/"
-                    + analysis
-                    + "/Cutflows/"
-                    + cutflow,
-                )
-            for histos in histogram_list:
-                shutil.move(
-                    self.dirname
-                    + "_SFSRun/Output/SAF/_"
-                    + dataset.name
-                    + "/"
-                    + analysis
-                    + "_0/Histograms/"
-                    + histos,
-                    self.dirname
-                    + "/Output/SAF/"
-                    + dataset.name
-                    + "/"
-                    + analysis
-                    + "/Histograms/"
-                    + histos,
-                )
-            if self.main.recasting.store_events:
-                event_list = os.listdir(
-                    self.dirname
-                    + "_SFSRun/Output/SAF/_"
-                    + dataset.name
-                    + "/lheEvents0_0/"
-                )
-                if len(event_list) > 0:
-                    shutil.move(
-                        self.dirname
-                        + "_SFSRun/Output/SAF/_"
-                        + dataset.name
-                        + "/lheEvents0_0/"
-                        + event_list[0],
-                        self.dirname
-                        + "/Output/SAF/"
-                        + dataset.name
-                        + "/"
-                        + analysis
-                        + "/RecoEvents/"
-                        + event_list[0],
-                    )
-            if self.TACO_output != "":
-                filename = (
-                    ".".join(self.TACO_output.split(".")[:-1])
-                    + "_"
-                    + card.split("/")[-1].replace("ma5", "")
-                    + self.TACO_output.split(".")[-1]
-                )
-                shutil.move(
-                    self.dirname + "_SFSRun/Output/" + self.TACO_output,
-                    self.dirname + "/Output/SAF/" + dataset.name + "/" + filename,
-                )
-
-        if not self.main.developer_mode:
-            # Remove the analysis folder
-            if not FolderWriter.RemoveDirectory(
-                os.path.normpath(self.dirname + "_SFSRun")
-            ):
-                log.error("Cannot remove directory: " + self.dirname + "_SFSRun")
-        else:
-            log.debug("Analysis kept in " + self.dirname + "_SFSRun folder.")
-
-        if dataset.xsection == 0.0:
-            dataset.xsection = self.read_xsec(
-                f"{self.dirname}/Output/SAF/{dataset.name}/{dataset.name}.saf"
-            )
-            log.debug(f"Cross-section has been set to {dataset.xsection} pb.")
-
-        return True
-
-    def generate_events(self, dataset, card):
-        # Preparing the run
-        self.main.recasting.status = "off"
-        self.main.fastsim.package = self.detector
-        self.main.fastsim.clustering = 0
-        if self.detector == "delphesMA5tune":
-            self.main.fastsim.delphes = 0
-            self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
-            self.main.fastsim.delphesMA5tune.card = os.path.normpath(
-                "../../../../tools/PADForMA5tune/Input/Cards/" + card
-            )
-        elif self.detector == "delphes":
-            self.main.fastsim.delphesMA5tune = 0
-            self.main.fastsim.delphes = DelphesConfiguration()
-            self.main.fastsim.delphes.card = os.path.normpath(
-                "../../../../tools/PAD/Input/Cards/" + card
-            )
-        # Execution
-        if not self.run_delphes(dataset, card):
-            log.error("The " + self.detector + " problem with the running of the fastsim")
-            return False
         # Restoring the run
         self.main.recasting.status = "on"
         self.main.fastsim.package = "none"
-        ## Saving the output
-        if not os.path.isdir(self.dirname + "/Output/SAF/" + dataset.name):
-            os.mkdir(self.dirname + "/Output/SAF/" + dataset.name)
-        if not os.path.isdir(
-            self.dirname + "/Output/SAF/" + dataset.name + "/RecoEvents"
+
+        # NOTE: FileNotFoundError if the output folder of the dataset does not exist.
+        event_path = next((x for x in (recast_path / f"Output/SAF/_{dataset.name}").iterdir() if "RecoEvents" in str(x)), None)
+        if event_path is not None:
+            root_filename = "DelphesMA5tuneEvents.root" if self.detector == "delphesMA5tune" else "DelphesEvents.root"
+            root_path = event_path / root_filename
+            if root_path.is_file():
+                main_event_path = (Path(self.dirname) / f"Output/SAF/{dataset.name}/RecoEvents")
+                main_event_path.mkdir(parents=True, exist_ok=True)
+                moved_smp = (main_event_path / f"RecoEvents_{version}_{card.replace('.tcl', '')}.root")
+                shutil.move(str(root_path), str(moved_smp))
+
+        return True
+
+    def run_SimplifiedFastSim(
+        self, dataset: DatasetCollection, card: str, analysislist: list[str]
+    ) -> bool:
+        """Build, compile and run a SampleAnalyzer job running the SFS and PADForSFS analyses.
+
+        The SFS card is loaded through a nested interpreter (it defines the jet clustering,
+        smearers, efficiencies and taggers), a job is created in ``<job>_SFSRun`` with the
+        analyses copied from the PADForSFS and ``main.cpp`` rewritten to execute them (plus
+        an LHE writer if ``store_events`` is set, and the TACO output if requested). After the
+        run, the cut-flows, histograms, (optional) events and sample summary are moved to
+        ``Output/SAF/<dataset>/<analysis>``.
+
+        Args:
+            dataset (``Dataset``): dataset to process (hadron-level files only).
+            card (``str``): path to the SFS card.
+            analysislist (``list[str]``): analyses to run.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
+        # Reject already-reconstructed inputs
+        if any(
+            any(x.endswith(ext) for ext in ("root", "lhco", "lhco.gz"))
+            for x in dataset.filenames
         ):
-            os.mkdir(self.dirname + "/Output/SAF/" + dataset.name + "/RecoEvents")
-        if self.detector == "delphesMA5tune":
-            shutil.move(
-                self.dirname
-                + "_RecastRun/Output/SAF/_"
-                + dataset.name
-                + "/RecoEvents0_0/DelphesMA5tuneEvents.root",
-                self.dirname
-                + "/Output/SAF/"
-                + dataset.name
-                + "/RecoEvents/RecoEvents_v1x1_"
-                + card.replace(".tcl", "")
-                + ".root",
-            )
-        elif self.detector == "delphes":
-            shutil.move(
-                self.dirname
-                + "_RecastRun/Output/SAF/_"
-                + dataset.name
-                + "/RecoEvents0_0/DelphesEvents.root",
-                self.dirname
-                + "/Output/SAF/"
-                + dataset.name
-                + "/RecoEvents/RecoEvents_v1x2_"
-                + card.replace(".tcl", "")
-                + ".root",
-            )
-        ## Exit
+            log.error("   Dataset can not contain reconstructed file type.")
+            return False
+
+        # Load the analysis card and configure interpreter / fastsim temporarily
+        from madanalysis.core.script_stack import ScriptStack
+
+        ScriptStack.AddScript(card)
+
+        self.main.recasting.status = "off"
+        self.main.superfastsim.Reset()
+
+        old_script_mode = self.main.script
+        self.main.script = True
+        try:
+            from madanalysis.interpreter.interpreter import Interpreter
+
+            interpreter = Interpreter(self.main)
+            interpreter.load(verbose=self.main.developer_mode)
+        except Exception as err:
+            log.debug(err)
+            self.main.script = old_script_mode
+            return False
+        finally:
+            self.main.script = old_script_mode
+
+        old_fastsim = self.main.fastsim.package
+        self.main.fastsim.package = "fastjet"
+
+        output_name = None
+        if self.main.recasting.store_events:
+            output_name = "SFS_events.lhe"
+            if self.main.archi_info.has_zlib:
+                output_name += ".gz"
+            log.debug("   Setting the output LHE file: %s", output_name)
+
+        run_dir = Path(self.dirname + "_SFSRun")
+        jobber = JobWriter(self.main, str(run_dir))
+
+        # Prepare build/run directory and analysis sources
+        log.info("   Creating folder '%s'...", Path(self.dirname).name)
+        if not jobber.Open():
+            self.main.fastsim.package = old_fastsim
+            return False
+        log.info("   Copying 'SampleAnalyzer' source files...")
+        if not jobber.CopyLHEAnalysis():
+            self.main.fastsim.package = old_fastsim
+            return False
+        if not jobber.CreateBldDir(analysisName="SFSRun", outputName="SFSRun.saf"):
+            self.main.fastsim.package = old_fastsim
+            return False
+        if not jobber.WriteSelectionHeader(self.main):
+            self.main.fastsim.package = old_fastsim
+            return False
+        # remove potentially generated user files safely
+        (run_dir / "Build/SampleAnalyzer/User/Analyzer/user.h").unlink(missing_ok=True)
+        if not jobber.WriteSelectionSource(self.main):
+            self.main.fastsim.package = old_fastsim
+            return False
+        (run_dir / "Build/SampleAnalyzer/User/Analyzer/user.cpp").unlink(missing_ok=True)
+
+        log.info("   Writing the list of datasets...")
+        jobber.WriteDatasetList(dataset)
+        log.info("   Creating Makefiles...")
+        if not jobber.WriteMakefiles():
+            self.main.fastsim.package = old_fastsim
+            return False
+
+        # Create analysisList.h and copy analyzer files from PAD
+        analysis_list_path = run_dir / "Build/SampleAnalyzer/User/Analyzer/analysisList.h"
+        pad_analyzer_dir = Path(self.pad) / "Build/SampleAnalyzer/User/Analyzer"
+        analyzer_dest = run_dir / "Build/SampleAnalyzer/User/Analyzer"
+        try:
+            analyzer_dest.mkdir(parents=True, exist_ok=True)
+            with analysis_list_path.open("w", encoding="utf-8") as f:
+                for ana in analysislist:
+                    f.write(f'#include "SampleAnalyzer/User/Analyzer/{ana}.h"\n')
+                f.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
+                f.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
+                if self.main.superfastsim.isTaggerOn():
+                    f.write('#include "new_tagger.h"\n')
+                if self.main.superfastsim.isNewSmearerOn():
+                    f.write('#include "new_smearer_reco.h"\n')
+                f.write(
+                    "// -----------------------------------------------------------------------------\n"
+                )
+                f.write("// BuildUserTable\n")
+                f.write(
+                    "// -----------------------------------------------------------------------------\n"
+                )
+                f.write("void BuildUserTable(MA5::AnalyzerManager& manager)\n{\n")
+                f.write("  using namespace MA5;\n")
+                for ana in analysislist:
+                    src_cpp = pad_analyzer_dir / f"{ana}.cpp"
+                    src_h = pad_analyzer_dir / f"{ana}.h"
+                    dst_cpp = analyzer_dest / f"{ana}.cpp"
+                    dst_h = analyzer_dest / f"{ana}.h"
+                    if not src_h.exists():
+                        log.error("Missing analysis header in PAD: %s", src_h)
+                        return False
+                    shutil.copyfile(str(src_h), str(dst_h))
+                    if src_cpp.exists():
+                        shutil.copyfile(str(src_cpp), str(dst_cpp))
+                    else:
+                        log.debug(
+                            "No .cpp for %s in PAD; continuing with header only.", ana
+                        )
+                    f.write(f'  manager.Add("{ana}", new {ana});\n')
+                f.write("}\n")
+        except Exception as err:
+            log.error("Error preparing analysisList.h or copying analyzers: %s", err)
+            self.main.fastsim.package = old_fastsim
+            return False
+
+        # Modify main to register analyzers / optional writer / TACO output
+        try:
+            main_path = run_dir / "Build/Main"
+            main_cpp = main_path / "main.cpp"
+            main_bak = main_path / "main.bak"
+            shutil.move(str(main_cpp), str(main_bak))
+            with main_bak.open("r", encoding="utf-8") as infile, main_cpp.open(
+                "w", encoding="utf-8"
+            ) as outfile:
+                ignore = False
+                for line in infile:
+                    if "// Getting pointer to the analyzer" in line:
+                        ignore = True
+                        outfile.write(line)
+                        for analysis in analysislist:
+                            outfile.write(
+                                f"  std::map<std::string, std::string> prm{analysis};\n"
+                            )
+                            outfile.write(f"  AnalyzerBase* analyzer_{analysis}=\n")
+                            outfile.write(
+                                f'    manager.InitializeAnalyzer("{analysis}","{analysis}.saf",prm{analysis});\n'
+                            )
+                            outfile.write(f"  if (analyzer_{analysis}==0) return 1;\n\n")
+                        if output_name:
+                            outfile.write("  //Getting pointer to the writer\n")
+                            outfile.write("  WriterBase* writer1 = \n")
+                            outfile.write(
+                                f'      manager.InitializeWriter("lhe","{output_name}");\n'
+                            )
+                            outfile.write("  if (writer1==0) return 1;\n\n")
+                        continue
+                    if (
+                        "// Post initialization (creates the new output directory structure)"
+                        in line
+                        and self.TACO_output != ""
+                    ):
+                        outfile.write(line)
+                        outfile.write(
+                            f'    std::ofstream out;\n      out.open("../Output/{self.TACO_output}");\n'
+                        )
+                        outfile.write(
+                            "      manager.HeadSR(out);\n      out << std::endl;\n"
+                        )
+                        continue
+                    if "//Getting pointer to the clusterer" in line:
+                        ignore = False
+                        outfile.write(line)
+                        continue
+                    if "!analyzer1" in line and not ignore:
+                        ignore = True
+                        if output_name:
+                            outfile.write(
+                                "      writer1->WriteEvent(myEvent,mySample);\n"
+                            )
+                        for analysis in analysislist:
+                            outfile.write(
+                                f"      if (!analyzer_{analysis}->Execute(mySample,myEvent)) continue;\n"
+                            )
+                        if self.TACO_output != "":
+                            outfile.write("\n      manager.DumpSR(out);\n")
+                        continue
+                    if "    }" in line:
+                        outfile.write(line)
+                        ignore = False
+                        continue
+                    if (
+                        "manager.Finalize(mySamples,myEvent);" in line
+                        and self.TACO_output != ""
+                    ):
+                        outfile.write(line)
+                        outfile.write("  out.close();\n")
+                        continue
+                    if not ignore:
+                        outfile.write(line)
+        except Exception as err:
+            log.error("Cannot update main.cpp: %s", err)
+            self.main.fastsim.package = old_fastsim
+            return False
+
+        # Restore recasting status and fastsim package
+        self.main.recasting.status = "on"
+        self.main.fastsim.package = old_fastsim
+
+        # Compile, link and run
+        log.info("   Compiling 'SampleAnalyzer'...")
+        if not jobber.CompileJob():
+            log.error("job submission aborted.")
+            return False
+        log.info("   Linking 'SampleAnalyzer'...")
+        if not jobber.LinkJob():
+            log.error("job submission aborted.")
+            return False
+
+        log.info("   Running 'SampleAnalyzer' over dataset '%s'...", dataset.name)
+        log.info("    *******************************************************")
+        if not jobber.RunJob(dataset):
+            log.error("run over '%s' aborted.", dataset.name)
+            return False
+        log.info("    *******************************************************")
+
+        # Move produced SAF/cutflows/histograms/events into main Output/SAF layout
+        out_base = Path(self.dirname) / "Output/SAF" / dataset.name
+        out_base.mkdir(parents=True, exist_ok=True)
+
+        sfs_out_base = run_dir / "Output/SAF" / f"_{dataset.name}"
+        for analysis in analysislist:
+            dest_analysis = out_base / analysis
+            (dest_analysis / "Cutflows").mkdir(parents=True, exist_ok=True)
+            (dest_analysis / "Histograms").mkdir(parents=True, exist_ok=True)
+            if self.main.recasting.store_events:
+                (dest_analysis / "RecoEvents").mkdir(parents=True, exist_ok=True)
+
+            src_analysis_dir = sfs_out_base / f"{analysis}_0"
+            # Cutflows
+            src_cutflows = src_analysis_dir / "Cutflows"
+            if src_cutflows.is_dir():
+                for src in src_cutflows.iterdir():
+                    shutil.move(str(src), str(dest_analysis / "Cutflows" / src.name))
+            # Histograms
+            src_histos = src_analysis_dir / "Histograms"
+            if src_histos.is_dir():
+                for src in src_histos.iterdir():
+                    shutil.move(str(src), str(dest_analysis / "Histograms" / src.name))
+
+            # Move event file if any
+            if self.main.recasting.store_events:
+                # NOTE: the event file is moved for the first analysis only; the next analyses find an empty folder.
+                src_event_dir = sfs_out_base / "lheEvents0_0"
+                if src_event_dir.is_dir():
+                    # move first event file found
+                    try:
+                        first = next(src_event_dir.iterdir())
+                        shutil.move(
+                            str(first),
+                            str(dest_analysis / "RecoEvents" / first.name),
+                        )
+                    except StopIteration:
+                        pass
+
+        # Move dataset .saf if produced
+        saf_src = sfs_out_base / f"_{dataset.name}.saf"
+        if saf_src.exists():
+            shutil.move(str(saf_src), str(out_base / f"{dataset.name}.saf"))
+
+        # Move TACO_output if requested
+        if self.TACO_output:
+            taco_src = run_dir / "Output" / self.TACO_output
+            if taco_src.exists():
+                filename = (
+                    ".".join(self.TACO_output.split(".")[:-1])
+                    + "_"
+                    + Path(card).name.replace("ma5", "")
+                    + self.TACO_output.split(".")[-1]
+                )
+                shutil.move(str(taco_src), str(out_base / filename))
+
+        # Cleanup the SFS run directory unless in developer mode
+        if not self.main.developer_mode:
+            # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
+            if not FolderWriter.RemoveDirectory(str(run_dir)):
+                log.error("Cannot remove directory: %s", run_dir)
+        else:
+            log.debug("Analysis kept in %s folder.", run_dir)
+
         return True
 
     ################################################
     ### ANALYSIS EXECUTION
     ################################################
-    def analysis_single(self, version, card):
+    def analysis_single(self, version: str, card: str) -> bool:
+        """Process all datasets with one detector card and compute the limits.
+
+        The detector simulation is activated if needed, the analyses associated with the card
+        are selected, each dataset is processed (Delphes or SFS), the dataset cross section is
+        read from the SAF file if not set by the user, and :meth:`compute_cls` is called
+        (unless in analysis-only mode).
+
+        Args:
+            version (``str``): PAD version (``v1.1``, ``v1.2`` or ``vSFS``).
+            card (``str``): detector card.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ## Init and header
         self.analysis_header(version, card)
 
@@ -795,9 +786,7 @@ class RunRecast:
             return False
 
         ## Getting the analyses associated with the given card
-        analyses = [
-            x.replace(version + "_", "") for x in self.analysis_runcard if version in x
-        ]
+        analyses = [ana for v, ana in self.analysis_runcard if version == v]
         for del_card, ana_list in self.main.recasting.DelphesDic.items():
             if card == del_card:
                 analyses = [x for x in analyses if x in ana_list]
@@ -805,17 +794,9 @@ class RunRecast:
 
         # Executing the PAD
         for myset in self.main.datasets:
-            xsec_check = True
             if not self.main.recasting.stat_only_mode:
                 if version in ["v1.1", "v1.2"]:
-                    # os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
-                    # os.environ["FASTJET_FLAG"] = ""
-                    if myset.xsection == 0.0:
-                        xsec_check = False
-                    ## Preparing the PAD
-                    self.update_pad_main(analyses)
-                    if not self.make_pad():
-                        self.main.forced = self.forced
+                    if not self.run_delphes_analysis(myset, card, analyses):
                         return False
                     ## Getting the file name corresponding to the events
                     eventfile = os.path.normpath(
@@ -831,10 +812,7 @@ class RunRecast:
                     if not os.path.isfile(eventfile):
                         log.error(f"The file called {eventfile} is not found...")
                         return False
-                    ## Running the PAD
-                    if not self.run_pad(eventfile):
-                        self.main.forced = self.forced
-                        return False
+
                     ## Saving the output and cleaning
                     if not self.save_output(
                         '"' + eventfile + '"', myset.name, analyses, card
@@ -849,9 +827,7 @@ class RunRecast:
                     # Run SFS
                     if not self.run_SimplifiedFastSim(
                         myset,
-                        self.main.archi_info.ma5dir
-                        + "/tools/PADForSFS/Input/Cards/"
-                        + card,
+                        f"{self.main.archi_info.ma5dir}/tools/PADForSFS/Input/Cards/{card}",
                         analyses,
                     ):
                         return False
@@ -859,20 +835,32 @@ class RunRecast:
                         log.warning(
                             "Simplified-FastSim does not use root, hence file will not be stored."
                         )
+
+                # NOTE: the cross section read from the SAF file overwrites the dataset setting (side effect).
+                if myset.xsection == 0.0:
+                    myset.xsection = read_xsec(
+                        f"{self.dirname}/Output/SAF/{myset.name}/{myset.name}.saf"
+                    )
+                    log.debug(f"Cross-section has been set to {myset.xsection} pb.")
             else:
                 self.dirname = self.main.recasting.stat_only_dir
             ## Running the CLs exclusion script (if available)
-            if xsec_check:
-                if not self.main.recasting.analysis_only_mode:
-                    log.debug(f"Compute CLs exclusion for {myset.name}")
-                    if not self.compute_cls(analyses, myset):
-                        self.main.forced = self.forced
-                        return False
+            if not self.main.recasting.analysis_only_mode:
+                log.debug(f"Compute CLs exclusion for {myset.name}")
+                if not self.compute_cls(analyses, myset):
+                    self.main.forced = self.forced
+                    return False
 
         # Exit
         return True
 
-    def analysis_header(self, version, card):
+    def analysis_header(self, version: str, card: str) -> None:
+        """Log the banner of a PAD run.
+
+        Args:
+            version (``str``): PAD version.
+            card (``str``): detector card.
+        """
         ## Printing
         log.info("   **********************************************************")
         log.info(
@@ -884,10 +872,24 @@ class RunRecast:
         log.info("   " + StringTools.Center(card, 57))
         log.info("   **********************************************************")
 
-    def update_pad_main(self, analysislist):
+    def update_pad_main(self, analysislist: list[str]) -> bool:
+        """Legacy: write the ``main.cpp`` and ``analysisList.h`` of ``<job>_RecastRun`` from the
+        PAD ``main.cpp`` for the selected analyses.
+
+        .. note::
+            Not called anywhere on this branch (superseded by :meth:`run_delphes_analysis`).
+
+        Args:
+            analysislist (``list[str]``): analyses to include.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         ## Migrating the necessary files to the working directory
         log.info("   Writing the PAD analyses")
         ## Safety (for backwards compatibility)
+        # NOTE: legacy method, not called anywhere on this branch (see also make_pad).
         if not os.path.isfile(self.pad + "/Build/Main/main.bak"):
             shutil.copy(
                 self.pad + "/Build/Main/main.cpp", self.pad + "/Build/Main/main.bak"
@@ -895,6 +897,7 @@ class RunRecast:
         mainfile = open(self.pad + "/Build/Main/main.bak", "r")
         newfile = open(self.dirname + "_RecastRun/Build/Main/main.cpp", "w")
         # Clean the analyzer folder
+        # FIXME: FolderWriter.RemoveDirectory returns a (truthy) tuple: this failure test never triggers.
         if not FolderWriter.RemoveDirectory(
             os.path.normpath(
                 self.dirname + "_RecastRun/Build/SampleAnalyzer/User/Analyzer"
@@ -1009,9 +1012,18 @@ class RunRecast:
         time.sleep(1.0)
         return True
 
-    def make_pad(self):
+    def make_pad(self) -> bool:
+        """Legacy: compile the job in ``<job>_RecastRun/Build``.
+
+        .. note::
+            Not called anywhere on this branch.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Initializing the compiler
-        log.info("   Compiling the PAD located in " + self.dirname + "_RecastRun")
+        log.info("   Compiling the PAD located in %s_RecastRun", self.dirname)
         compiler = LibraryWriter("lib", self.main)
         ncores = compiler.get_ncores2()
         # compiling
@@ -1034,41 +1046,29 @@ class RunRecast:
             return False
         return True
 
-    def run_pad(self, eventfile):
-        ## input file
-        if os.path.isfile(self.dirname + "_RecastRun/Input/PADevents.list"):
-            os.remove(self.dirname + "_RecastRun/Input/PADevents.list")
-        infile = open(self.dirname + "_RecastRun/Input/PADevents.list", "w")
-        infile.write(eventfile)
-        infile.close()
-        jobber = JobWriter(self.main, self.dirname + "_RecastRun")
-        if not jobber.WriteMakefiles(ma5_fastjet_mode=False):
-            return False
-        ## cleaning the output directory
-        if os.path.isdir(
-            os.path.normpath(self.dirname + "_RecastRun/Output/SAF/PADevents")
-        ):
-            if not FolderWriter.RemoveDirectory(
-                os.path.normpath(self.dirname + "_RecastRun/Output/SAF/PADevents")
-            ):
-                return False
-        ## running
-        command = ["./MadAnalysis5job", "../Input/PADevents.list"]
-        ok = ShellCommand.Execute(command, self.dirname + "_RecastRun/Build")
-        ## checks
-        if not ok:
-            log.error("Problem with the run of the PAD on the file: %s", eventfile)
-            return False
-        os.remove(self.dirname + "_RecastRun/Input/PADevents.list")
-        ## exit
-        time.sleep(1.0)
-        return True
+    def save_output(
+        self, eventfile: str, setname: str, analyses: list[str], card: str
+    ) -> bool:
+        """Move the results of a Delphes/PAD run to the job directory.
 
-    def save_output(self, eventfile, setname, analyses, card):
+        The sample summary SAF file is moved (or its ``<FileInfo>`` block extended if it
+        already exists), the analysis outputs are moved to ``Output/SAF/<dataset>/<analysis>``
+        and the TACO output (if any) is renamed after the card.
+
+        Args:
+            eventfile (``str``): quoted path of the reconstructed event file.
+            setname (``str``): dataset name.
+            analyses (``list[str]``): analyses of the run.
+            card (``str``): detector card.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         outfile = self.dirname + "/Output/SAF/" + setname + "/" + setname + ".saf"
         if not os.path.isfile(outfile):
             shutil.move(
-                self.dirname + "_RecastRun/Output/SAF/PADevents/PADevents.saf", outfile
+                self.dirname + f"_RecastRun/Output/SAF/_{setname}/_{setname}.saf", outfile
             )
         else:
             inp = open(outfile, "r")
@@ -1110,7 +1110,7 @@ class RunRecast:
             shutil.move(outfile + ".2", outfile)
         for analysis in analyses:
             shutil.move(
-                self.dirname + "_RecastRun/Output/SAF/PADevents/" + analysis + "_0",
+                self.dirname + f"_RecastRun/Output/SAF/_{setname}/" + analysis + "_0",
                 self.dirname + "/Output/SAF/" + setname + "/" + analysis,
             )
         if self.TACO_output != "":
@@ -1130,7 +1130,27 @@ class RunRecast:
     ### CLS CALCULATIONS AND OUTPUT
     ################################################
 
-    def compute_cls(self, analyses, dataset):
+    def compute_cls(self, analyses: list[str], dataset: DatasetCollection) -> bool:
+        """Compute the limits for all analyses of a dataset.
+
+        For the nominal luminosity and every extrapolated luminosity, the information file and
+        the cut-flows of each analysis are read, the statistical models are built with Spey
+        (:func:`~madanalysis.misc.statistical_models.initialise_statistical_models`), the 95% CL
+        upper limits on the cross section and (if the cross section is known) the exclusion
+        confidence levels are computed, possibly for varied cross sections (scale, PDF and
+        systematic uncertainties), and the results are written in
+        ``Output/SAF/<dataset>/CLs_output[_lumi_<L>].dat``. A ``bibliography.bib`` file with the
+        relevant references is written in the job directory.
+
+        Args:
+            analyses (``list[str]``): analyses to process.
+            dataset (``Dataset``): the dataset (see FIXME on the annotation).
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` if an information file or cut-flow is missing or
+            the cross section is not defined.
+        """
         import spey
         from spey.system.webutils import get_bibtex
 
@@ -1206,6 +1226,7 @@ class RunRecast:
             outfile = os.path.join(
                 self.dirname, "Output/SAF", dataset.name, "CLs_output" + outext + ".dat"
             )
+            # NOTE: the file is not closed when returning False below.
             if os.path.isfile(outfile):
                 mysummary = open(outfile, "a+")
                 mysummary.write("\n")
@@ -1372,9 +1393,17 @@ class RunRecast:
             mysummary.close()
         return True
 
-    def check_xml_scipy_methods(self):
+    def check_xml_scipy_methods(self) -> "Any":
+        """Get an XML parsing module (lxml if available, else ``xml.etree.ElementTree``).
+
+        Returns:
+            ``Any``:
+            The ElementTree-like module, or ``False`` if none is available.
+        """
         ## Checking XML parsers
         try:
+            # FIXME: lxml has no 'ET' member ('from lxml import etree as ET' was intended): the
+            # standard library parser is always used.
             from lxml import ET
         except ImportError as err:
             log.debug(str(err))
@@ -1387,7 +1416,20 @@ class RunRecast:
         # exit
         return ET
 
-    def parse_info_file(self, etree, analysis, extrapolated_lumi):
+    def parse_info_file(
+        self, etree: "Any", analysis: str, extrapolated_lumi: Union[str, float]
+    ) -> tuple[float, list, dict]:
+        """Read the information file ``<analysis>.info`` of an analysis.
+
+        Args:
+            etree (``module``): ElementTree-like module.
+            analysis (``str``): analysis name.
+            extrapolated_lumi (``Union[str, float]``): ``"default"`` or a luminosity in fb^-1.
+
+        Returns:
+            ``tuple[float, list, dict]``:
+            See :meth:`header_info_file`; ``(-1, -1, -1)`` on error.
+        """
         ## Is file existing?
         filename = (
             self.pad + "/Build/SampleAnalyzer/User/Analyzer/" + analysis + ".info"
@@ -1412,16 +1454,28 @@ class RunRecast:
             log.warning("Cannot parse the info file")
             return -1, -1, -1
 
-    def fix_pileup(self, filename):
+    def fix_pileup(self, filename: str) -> bool:
+        """Point the ``PileUpFile`` entries of a Delphes card to the PAD pile-up folder.
+
+        The original card is saved as ``<card>.original``.
+
+        Args:
+            filename (``str``): Delphes card to modify.
+
+        Returns:
+            ``bool``:
+            ``False`` if the card or a referenced pile-up file is missing.
+        """
         # x
-        log.debug("delphes card is here: " + filename)
+        filename = str(filename)
+        log.debug("delphes card is here: %s", filename)
 
         # Container for pileup
         FoundPileup = []
 
         # Safe
         if not os.path.isfile(filename):
-            log.error("internal error: file " + filename + " is not found")
+            log.error("internal error: file %s is not found", filename)
             return False
 
         # Estimate the newpath of pileup
@@ -1465,15 +1519,37 @@ class RunRecast:
 
         return True
 
-    def header_info_file(self, etree, analysis, extrapolated_lumi):
-        log.debug("Reading info from the file related to " + analysis + "...")
+    def header_info_file(
+        self, etree: "Any", analysis: str, extrapolated_lumi: Union[str, float]
+    ) -> "tuple[float, list, dict] | tuple[int, int, int]":
+        """Decode the XML information file of an analysis.
+
+        The luminosity, the signal regions (``<region>`` with ``<nobs>``, ``<nb>`` and
+        ``<deltanb>`` or ``<deltanb_syst>``/``<deltanb_stat>``) and the optional covariance
+        matrices (``cov_subset``) and full likelihoods (``<pyhf>``) are read. For an
+        extrapolated luminosity, the yields are rescaled and the background uncertainties
+        extrapolated according to ``main.recasting.error_extrapolation``. The simplified and
+        full likelihood configurations are stored in :attr:`cov_config` and
+        :attr:`pyhf_config`.
+
+        Args:
+            etree (``ElementTree``): parsed information file.
+            analysis (``str``): analysis name.
+            extrapolated_lumi (``Union[str, float]``): ``"default"`` or a luminosity in fb^-1.
+
+        Returns:
+            ``tuple[float, list, dict] | tuple[int, int, int]``:
+            ``(lumi, regions, regiondata)`` where ``regiondata[region]`` holds ``nobs``, ``nb``
+            and ``deltanb``; ``(-1, -1, -1)`` for an invalid file.
+        """
+        log.debug("Reading info from the file related to %s...", analysis)
         ## checking the header of the file
         info_root = etree.getroot()
         if info_root.tag != "analysis":
-            log.warning("Invalid info file (" + analysis + "): <analysis> tag.")
+            log.warning("Invalid info file (%s): <analysis> tag.", analysis)
             return -1, -1, -1
         if info_root.attrib["id"].lower() != analysis.lower():
-            log.warning("Invalid info file (" + analysis + "): <analysis id> tag.")
+            log.warning("Invalid info file (%s): <analysis id> tag.", analysis)
             return -1, -1, -1
         ## extracting the information
         lumi = 0
@@ -1655,8 +1731,11 @@ class RunRecast:
                 corr = invsigma @ cov @ invsigma
 
                 if self.main.recasting.error_extrapolation == "sqrt":
-                    new_sigma = round(math.sqrt(sigma) * lumi_scaling, 8)
+                    new_sigma = np.round(sigma * math.sqrt(lumi_scaling), 8)
                 elif self.main.recasting.error_extrapolation == "linear":
+                    # FIXME: inconsistent with the per-region linear extrapolation (deltanb * lumi_scaling above):
+                    # the standard deviation is scaled by lumi_scaling**2; the user-defined case below mixes
+                    # sigma, sqrt(sigma) and the relative uncertainties of the per-region formula.
                     new_sigma = sigma * lumi_scaling**2
                 else:
                     new_sigma = (
@@ -1676,12 +1755,17 @@ class RunRecast:
 
         return lumi, regions, regiondata
 
-    def pyhf_info_file(self, info_root):
-        """In order to make use of HistFactory, we need some pieces of information. First,
-        the location of the specific background-only likelihood json files that are given
-        in the info file. The collection of SR contributing to a given profile must be
-        provided. One can process multiple likelihood profiles dedicated to different sets
-        of SRs.
+    def pyhf_info_file(self, info_root: "Any") -> dict:
+        """Build and validate the full-likelihood configurations declared in an information file.
+
+        Args:
+            info_root (``Element``): root of the information file.
+
+        Returns:
+            ``dict``:
+            Valid likelihood profiles (see
+            :func:`~madanalysis.misc.histfactory_reader.construct_histfactory_dictionary`);
+            empty if there is none or spey-pyhf is not available.
         """
         self.pyhf_config = {}  # reset
         if any(x.tag == "pyhf" for x in info_root):
@@ -1736,7 +1820,13 @@ class RunRecast:
 
         return pyhf_config
 
-    def write_cls_header(self, xs, out):
+    def write_cls_header(self, xs: float, out: "TextIO") -> None:
+        """Write the column header of a ``CLs_output.dat`` file.
+
+        Args:
+            xs (``float``): signal cross section (``<= 0``: only the upper limits are computed).
+            out (``TextIO``): output file.
+        """
         if xs <= 0:
             log.info(
                 "   Signal xsection not defined. The 95% excluded xsection will be calculated."
@@ -1785,24 +1875,21 @@ class RunRecast:
                 )
             out.write("\n")
 
-    @staticmethod
-    def read_xsec(path: str) -> float:
-        """Read cross section value from SAF file"""
-        saf_file = Path(path)
-        if not saf_file.exists():
-            return 0.0
-        with saf_file.open("r", encoding="utf-8") as f:
-            smp_info = (
-                [
-                    match.group(1)
-                    for match in re.finditer(r"<SampleGlobalInfo>(.*?)<", f.read(), re.S)
-                ][0]
-                .splitlines()[-1]
-                .split()
-            )
-        return float(smp_info[0])
+    def read_cutflows(self, path: str, regions: list[str], regiondata: dict) -> dict:
+        """Read the initial and final sums of weights of each signal region.
 
-    def read_cutflows(self, path, regions, regiondata):
+        Regions combined with ``;`` in the information file are summed. The cut-flow file
+        names are obtained with :func:`~madanalysis.misc.utils.clean_region_name`.
+
+        Args:
+            path (``str``): ``Cutflows`` folder of the analysis.
+            regions (``list[str]``): signal regions.
+            regiondata (``dict``): region data (``N0`` and ``Nf`` are added).
+
+        Returns:
+            ``dict``:
+            The updated region data, or ``-1`` if a cut-flow is missing or invalid.
+        """
         log.debug("Read the cutflow from the files:")
         for reg in regions:
             regname = clean_region_name(reg)
@@ -1882,6 +1969,24 @@ class RunRecast:
         lumi: float,
         is_extrapolated: bool,
     ) -> dict:
+        """Compute the exclusion confidence levels and select the best regions/likelihoods.
+
+        For single regions, the best region is the one with the largest ratio of expected
+        signal to expected excluded signal (``rSR``); for simplified and full likelihoods, it
+        is the one with the smallest expected upper limit.
+
+        Args:
+            regiondata (``dict``): region data with the upper limits.
+            stat_models (``dict``): statistical models (see
+                :func:`~madanalysis.misc.statistical_models.initialise_statistical_models`).
+            xsection (``float``): signal cross section in pb.
+            lumi (``float``): luminosity in fb^-1.
+            is_extrapolated (``bool``): extrapolated luminosity (a-priori expected CLs is used).
+
+        Returns:
+            ``dict``:
+            The region data with the ``CLs``, ``rSR`` and ``best`` entries.
+        """
         from .statistical_models import APRIORI, OBSERVED
 
         log.debug("Compute CLs...")
@@ -1898,6 +2003,7 @@ class RunRecast:
                 rSR = -1
                 myCLs = 0
             else:
+                # NOTE: ZeroDivisionError if the expected upper limit is 0.
                 n95 = (
                     float(regiondata[reg]["s95exp"])
                     * lumi
@@ -1955,8 +2061,24 @@ class RunRecast:
         return regiondata
 
     def write_cls_output(
-        self, analysis, regions, regiondata, errordata, summary, xsflag, lumi
-    ):
+        self, analysis: "str", regions: "list[str]", regiondata: "dict", errordata: "dict", summary: "TextIO", xsflag: "bool", lumi: "float"
+    ) -> None:
+        """Write the results of an analysis in a ``CLs_output.dat`` file.
+
+        One line is written per signal region, simplified likelihood (``[SL]``) and full
+        likelihood (``[pyhf]``), with the upper limits, the CLs, the efficiency and its
+        statistical/systematic uncertainties, followed by the uncertainty bands. In developer
+        mode, the region data and the signal patches are also dumped as JSON files.
+
+        Args:
+            analysis (``str``): analysis name.
+            regions (``list[str]``): signal regions.
+            regiondata (``dict``): nominal results.
+            errordata (``dict``): results for the varied cross sections.
+            summary (``TextIO``): output file.
+            xsflag (``bool``): ``True`` if only upper limits are available (no cross section).
+            lumi (``float``): luminosity in fb^-1.
+        """
         log.debug("Write CLs...")
         if self.main.developer_mode:
             to_save = {analysis: {"regiondata": regiondata, "errordata": errordata}}
@@ -1977,7 +2099,7 @@ class RunRecast:
             if self.pyhf_config != {}:
                 iterator = copy.deepcopy(list(self.pyhf_config.items()))
                 for n, (likelihood_profile, config) in enumerate(iterator):
-                    if regiondata.get("pyhf", {}).get(likelihood_profile, False) == False:
+                    if not regiondata.get("pyhf", {}).get(likelihood_profile, False):
                         continue
                     signal = HF_Signal(config, regiondata, xsection=1.0)
                     name = summary.name.split(".dat")[0]
@@ -1991,9 +2113,7 @@ class RunRecast:
             ["TH_up", "TH_dn", "TH   error"],
         ]
         for reg in regions:
-            eff = regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-            if eff < 0:
-                eff = 0
+            eff = max(regiondata[reg]["Nf"] / regiondata[reg]["N0"], 0.0)
             stat = round(
                 math.sqrt(eff * (1 - eff) / (abs(regiondata[reg]["N0"]) * lumi)), 10
             )
@@ -2003,16 +2123,16 @@ class RunRecast:
                     syst.append(round(0.5 * (unc[0] + unc[1]) * eff, 8))
             else:
                 syst = [0]
-            myeff = "%.7f" % eff
-            mystat = "%.7f" % stat
-            mysyst = ["%.7f" % x for x in syst]
+            myeff = f"{eff:.7f}"
+            mystat = f"{stat:.7f}"
+            mysyst = [f"{x:.7f}" for x in syst]
             myxsexp = regiondata[reg]["s95exp"]
             if "s95obs" in list(regiondata[reg].keys()):
                 myxsobs = regiondata[reg]["s95obs"]
             else:
                 myxsobs = "-1"
             if not xsflag:
-                mycls = "%.10f" % regiondata[reg]["CLs"]
+                mycls = f"{regiondata[reg]['CLs']:.7f}"
                 summary.write(
                     analysis.ljust(30, " ")
                     + reg.ljust(60, " ")
@@ -2030,6 +2150,8 @@ class RunRecast:
                 band = []
                 for error_set in err_sets:
                     if len([x for x in error_set if x in list(errordata.keys())]) == 2:
+                        # FIXME: 'band' is not reset between the error sets (and the systematics below): each band
+                        # also includes the values of the previous ones.
                         band = band + [
                             errordata[error_set[0]][reg]["CLs"],
                             errordata[error_set[1]][reg]["CLs"],
@@ -2041,9 +2163,9 @@ class RunRecast:
                             "".ljust(90, " ")
                             + error_set[2]
                             + " band:         ["
-                            + ("%.4f" % min(band))
+                            + (f"{min(band):.4f}")
                             + ", "
-                            + ("%.4f" % max(band))
+                            + (f"{max(band):.4f}")
                             + "]\n"
                         )
                 for i, sys in enumerate(self.main.recasting.systematics):
@@ -2241,19 +2363,3 @@ class RunRecast:
                     + "".ljust(15, " ")
                 )
                 summary.write("\n")
-
-
-def clean_region_name(mystr):
-    newstr = mystr.replace("/", "_slash_")
-    newstr = newstr.replace("->", "_to_")
-    newstr = newstr.replace(">=", "_greater_than_or_equal_to_")
-    newstr = newstr.replace(">", "_greater_than_")
-    newstr = newstr.replace("<=", "_smaller_than_or_equal_to_")
-    newstr = newstr.replace("<", "_smaller_than_")
-    newstr = newstr.replace(" ", "_")
-    newstr = newstr.replace(",", "_")
-    newstr = newstr.replace("+", "_")
-    newstr = newstr.replace("-", "_")
-    newstr = newstr.replace("(", "_lp_")
-    newstr = newstr.replace(")", "_rp_")
-    return newstr

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,15 +22,39 @@
 ################################################################################
 
 
+"""Detection of Python (mandatory)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging, os, sys, platform
 from shell_command import ShellCommand
 from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectPython:
+    """Detector of Python (mandatory).
 
-    def __init__(self, archi_info, user_info, session_info, debug):
+    The methods are called by
+    :meth:`madanalysis.system.detect_manager.DetectManager.Execute` in the following
+    order (only when defined): ``IsItVetoed``, ``AreDependenciesInstalled``,
+    ``ManualDetection``, ``ToolsDetection``, ``AutoDetection``, ``ExtractInfo`` and
+    ``SaveInfo``.
+
+    Attributes:
+        name (``str``): name displayed in the configuration check.
+        mandatory (``bool``): whether MadAnalysis 5 can run without the package.
+    """
+
+    def __init__(self, archi_info: Any, user_info: Any, session_info: Any, debug: bool) -> None:
+        """Create the detector of Python (mandatory).
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration, filled by :meth:`SaveInfo`.
+            user_info (``UserInfo``): user options (vetoes, forced paths).
+            session_info (``SessionInfo``): session information, filled by :meth:`SaveInfo`.
+            debug (``bool``): print detailed information.
+        """
         # mandatory options
         self.archi_info   = archi_info
         self.user_info    = user_info
@@ -44,15 +68,29 @@ class DetectPython:
         # adding what you want here
 
 
-    def PrintDisableMessage(self):
+    def PrintDisableMessage(self) -> None:
+        """Log the consequences of Python (mandatory) being unavailable."""
         self.logger.warning("Python not found. Please install it before using MadAnalysis 5")
         
 
-    def AutoDetection(self):
+    def AutoDetection(self) -> tuple[int, str]:
+        """Look for Python (mandatory) on the system.
+
+        Returns:
+            ``tuple[int, str]``:
+            Detection status (:class:`~madanalysis.enumeration.detect_status_type.DetectStatusType`)
+            and a message.
+        """
         return DetectStatusType.FOUND,''
 
 
-    def ExtractInfo(self):
+    def ExtractInfo(self) -> bool:
+        """Extract detailed information about the detected Python (mandatory) (version, paths, ...).
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         
         # Debug general
         if self.debug:
@@ -77,6 +115,7 @@ class DetectPython:
         if self.debug:
             result = ShellCommand.Which('python3',all=True,mute=True)
             if len(result)==0:
+                # NOTE: the message mentions g++ instead of python3.
                 self.logger.error('g++ compiler not found. Please install it before ' + \
                                   'using MadAnalysis 5')
                 return False
@@ -112,7 +151,13 @@ class DetectPython:
         return True
 
 
-    def SaveInfo(self):
+    def SaveInfo(self) -> bool:
+        """Store the information about Python (mandatory) in the architecture/session information.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         return True
 
 

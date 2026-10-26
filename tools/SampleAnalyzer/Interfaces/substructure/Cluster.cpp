@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file Cluster.cpp
+ * @brief Supposed to implement MA5::Substructure::Cluster.
+ */
+
+// FIXME: this file does not implement Substructure::Cluster (Cluster::Initialize() is missing). It
+//   contains a copy of a NullSmearer class (include guard NULLSMEARER_H) instead.
 #ifndef NULLSMEARER_H
 #define NULLSMEARER_H
 
@@ -32,12 +39,13 @@
 
 namespace MA5
 {
+    /** @brief Smearer that does nothing (stale code, see the FIXME above). */
     class NullSmearer: public SmearerBase {
         public:
-            /// Constructor without argument
+            /** @brief Constructor. */
             NullSmearer() { }
 
-            /// Destructor
+            /** @brief Destructor. */
             ~NullSmearer() {}
 
     };

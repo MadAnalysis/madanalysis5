@@ -2,7 +2,7 @@
 
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -24,7 +24,16 @@
 ################################################################################
 
 
+"""Interpreter of MadAnalysis 5 usable as a library by external codes.
+
+.. note::
+    Importing this module inserts the MadAnalysis 5 root folder and
+    ``tools/ReportGenerator/Services`` at the beginning of :data:`sys.path`.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any, TextIO
 import logging
 import os
 import shutil
@@ -51,26 +60,45 @@ from madanalysis.system.architecture_info         import ArchitectureInfo
 
 
 class InvalidPython(Exception):
+    """Raised when the Python version is not supported."""
     pass
 class InvalidMA5dir(Exception):
+    """Raised when the MadAnalysis 5 folder does not exist."""
     pass
 class InvalidServiceMA5dir(Exception):
+    """Raised when the ``tools/ReportGenerator/Services`` folder does not exist."""
     pass
 class InvalidMA5version(Exception):
+    """Raised when ``version.txt`` cannot be read."""
     pass
 class MA5Configuration(Exception):
+    """Raised when the configuration check fails."""
     pass
 class MA5Dependence(Exception):
+    """Raised for a dependency problem (unused)."""
     pass
 class SampleAnalyzer(Exception):
+    """Raised for a SampleAnalyzer problem (unused)."""
     pass
 class UNK_OPT(Exception):
+    """Raised for an unknown option of :meth:`MA5Interpreter.further_install`."""
     pass
 
 
 
 class MA5Interpreter(Interpreter):
-    """This is a class allowing to call an MA5 interpreter from an external code"""
+    """MadAnalysis 5 interpreter driven by an external code (e.g. MadGraph5_aMC@NLO).
+
+    The constructor performs the whole session initialisation of ``bin/ma5`` (logger,
+    configuration checks, library compilation) in forced mode, and restores the
+    environment variables of the caller afterwards. Most methods are decorated with
+    :func:`~madanalysis.misc.freeze_environment.freeze_environment` so that the MA5
+    environment is only active during their execution.
+
+    Attributes:
+        use_rawinput (``int``): ``0``: the commands are provided by the external code.
+        ma5_environ (``dict[str, str]``): environment variables of the MA5 session.
+    """
 
     # Make sure that this cmd.Cmd daughter class doesn't assume that its user
     # input is raw, i.e. provided by a user via the interactive interface.
@@ -78,13 +106,31 @@ class MA5Interpreter(Interpreter):
     # external code using this intepreter.
     use_rawinput = 0
 
-    def __init__(self, ma5dir, LoggerLevel=logging.INFO, LoggerStream=sys.stdout,
-       no_compilation=False, forced=True, *args, **opts):
+    def __init__(self, ma5dir: str, LoggerLevel: int = logging.INFO, LoggerStream: TextIO = sys.stdout,
+       no_compilation: bool = False, forced: bool = True, *args, **opts) -> None:
+        """Initialise a complete MadAnalysis 5 session.
+
+        Args:
+            ma5dir (``str``): path to the MadAnalysis 5 installation.
+            LoggerLevel (``int``, default ``logging.INFO``): level of the ``MA5`` logger.
+            LoggerStream (``TextIO``, default ``sys.stdout``): stream of the logger.
+            no_compilation (``bool``, default ``False``): do not build SampleAnalyzer.
+            forced (``bool``, default ``True``): forced mode (no questions).
+            *args: extra arguments of :class:`~madanalysis.interpreter.interpreter.Interpreter`.
+            **opts: extra keyword arguments of :class:`~madanalysis.interpreter.interpreter.Interpreter`.
+
+        Raises:
+            ``InvalidPython``: if the Python version is not supported.
+            ``InvalidMA5dir``: if ``ma5dir`` does not exist.
+            ``InvalidMA5version``: if ``version.txt`` cannot be read.
+            ``MA5Configuration``: if the configuration check fails.
+        """
 
         # variables
         old_environ = dict(os.environ)
 
         # Checking if the correct release of Python is installed and tab completion
+        # FIXME: only the minor version is tested (and the message does not match the test).
         if sys.version_info[1] < 6:
             raise InvalidPython('Python release '+ sys.version + ' not supported.\n' + \
             'MadAnalysis 5 works only with python 2.7 or  python 3.7 and later.')
@@ -99,6 +145,7 @@ class MA5Interpreter(Interpreter):
         # Python services
         ma5servicedir = os.path.normpath(ma5dir+'/tools/ReportGenerator/Services/')
         if not os.path.isdir(ma5servicedir):
+            # FIXME: 'InvalidMA5Servicedir' is undefined (NameError); the class is InvalidServiceMA5dir.
             raise InvalidMA5Servicedir('Incorrect MadAnalysis5 service folder: ' + ma5servicedir)
 
         if not ma5servicedir in sys.path:
@@ -132,6 +179,7 @@ class MA5Interpreter(Interpreter):
         main.redirectSAlogger = True
 
         # quiet please
+        # FIXME: this sets the level to DEBUG (10): the logger becomes more verbose, not quiet.
         if (LoggerLevel>logging.DEBUG):
            self.logger.setLevel(10)
 
@@ -162,13 +210,21 @@ class MA5Interpreter(Interpreter):
         os.environ.update(old_environ)
 
     @freeze_environment
-    def compile(self):
+    def compile(self) -> bool:
+        """Build the SampleAnalyzer libraries if needed.
+
+        Returns:
+            ``bool``:
+            ``True`` on success (the failure branch raises, see the FIXME).
+        """
         if not self.main.BuildLibrary():
+            # FIXME: 'SampleAnalyzerBuilding' is undefined (NameError).
             raise SampleAnalyzerBuilding('Issue with the configuration')
         return True
 
     @freeze_environment
-    def print_banner(self):
+    def print_banner(self) -> None:
+        """Log the welcome banner."""
         self.logger.info('*************************************************************')
         self.logger.info('*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
         self.logger.info('*                                                           *')
@@ -180,7 +236,17 @@ class MA5Interpreter(Interpreter):
         self.logger.info('*************************************************************')
 
     @freeze_environment
-    def load(self, *args, **opts):
+    def load(self, *args, **opts) -> None:
+        """Execute a list of commands.
+
+        The script stack is emptied and filled with the commands; if a command contains
+        ``set main.mode = parton``, the session is switched to parton level first
+        (:meth:`init_parton`) and the command is removed from the list.
+
+        Args:
+            *args: the first element is the list of commands (modified in place).
+            **opts: unused.
+        """
         from madanalysis.core.script_stack import ScriptStack
         ScriptStack.Reset()
         ScriptStack.stack = [] # reset does not 
@@ -188,6 +254,8 @@ class MA5Interpreter(Interpreter):
         for arg in args[0]:
             if 'set main.mode = parton' in arg:
                 self.init_parton()
+                # NOTE: raises ValueError if the command only contains 'set main.mode = parton'
+                # with different spacing.
                 arguments.remove('set main.mode = parton')
                 break
         ScriptStack.stack.append(['',arguments])
@@ -195,11 +263,21 @@ class MA5Interpreter(Interpreter):
 #        Interpreter.load(self,*args,**opts)
 
     @freeze_environment
-    def setLogLevel(self,level):
+    def setLogLevel(self,level: int) -> None:
+        """Set the level of the ``MA5`` logger.
+
+        Args:
+            level (``int``): logging level.
+        """
         self.logger.setLevel(level)
 
     @freeze_environment
-    def init_reco(self):
+    def init_reco(self) -> None:
+        """Switch the session to the reconstructed-event (RECO) mode.
+
+        Datasets, selection, parameters, history, observables and (multi)particles are
+        reset.
+        """
         # changing the running mode
         self.main.mode=MA5RunningType.RECO
 
@@ -226,7 +304,12 @@ class MA5Interpreter(Interpreter):
         self.setLogLevel(lvl)
 
     @freeze_environment
-    def init_parton(self):
+    def init_parton(self) -> None:
+        """Switch the session to the parton-level mode.
+
+        Datasets, selection, parameters, history, observables and (multi)particles are
+        reset.
+        """
         # changing the running mode
         self.main.mode=MA5RunningType.PARTON
 
@@ -254,20 +337,55 @@ class MA5Interpreter(Interpreter):
 
 
     @freeze_environment
-    def further_install(self, opts):
+    def further_install(self, opts: dict[str, Any]) -> bool:
+        """Install/configure the dependencies requested by the external code.
+
+        Supported keys: ``veto-delphes``, ``veto-delphesMA5tune``, ``veto-root`` (booleans),
+        ``with-zlib``, ``with-fastjet``, ``with-root`` (paths, stored in
+        ``installation_options.dat``), ``with-delphes``, ``with-delphesMA5tune`` (booleans)
+        and ``with-PADForSFS``/``with-padforsfs``/``PADForSFS``. zlib and FastJet are
+        installed if missing; Delphes(MA5tune) and the corresponding PADs are installed if
+        requested. The configuration is then re-detected and SampleAnalyzer is rebuilt.
+
+        Args:
+            opts (``dict[str, Any]``): options.
+
+        Raises:
+            ``UNK_OPT``: for an unknown option.
+            ``MA5Configuration``: if the final configuration check fails.
+
+        Returns:
+            ``bool``:
+            ``True`` on success, ``False`` if an installation fails.
+        """
         # initialization
         install_delphes         = False
         install_delphesMA5tune  = False
         user_info               = UserInfo()
 
         # A few useful methods
-        def validate_bool_key(key):
+        def validate_bool_key(key: str) -> bool:
+            """Get a boolean option.
+
+            Args:
+                key (``str``): option name.
+
+            Returns:
+                ``bool``:
+                The value, or ``False`` (with a warning) if it is not a boolean.
+            """
             if not isinstance(opts[key],bool):
                 self.logger.warning('Unknown value for the further_install key '+ key + '. Ignoring.')
                 return False
             return opts[key]
 
-        def update_options(usrkey,value):
+        def update_options(usrkey: str,value: str) -> None:
+            """Rewrite the line of an option in ``madanalysis/input/installation_options.dat``.
+
+            Args:
+                usrkey (``str``): option name in the file.
+                value (``str``): new value.
+            """
             inname  = os.path.join(MA5_root_path,'madanalysis','input','installation_options.dat')
             outname = os.path.join(MA5_root_path,'madanalysis','input','installation_options.new')
             infile  = open(inname ,'r')
@@ -281,7 +399,16 @@ class MA5Interpreter(Interpreter):
             outfile.close()
             shutil.move(outname,inname)
 
-        def setinc(key,usrkey,value, archi_reset=''):
+        def setinc(key: str,usrkey: str,value: str, archi_reset: dict[str, Any] | str = '') -> None:
+            """Store a path option in the user options and in the installation card.
+
+            Args:
+                key (``str``): option name of :meth:`further_install`.
+                usrkey (``str``): option name in the installation card.
+                value (``str``): new value.
+                archi_reset (``dict[str, Any] | str``, default ``''``): one attribute of
+                    ``archi_info`` to reset, as ``{name: value}``.
+            """
             if opts[key] not in [True,None] and os.path.isdir(opts[key]):
                 user_info.SetValue(usrkey,value,'')
                 update_options(usrkey,value)
@@ -334,10 +461,21 @@ class MA5Interpreter(Interpreter):
 
         # Muting the logger
         lvl = self.logger.getEffectiveLevel()
+        # FIXME: this sets the level to DEBUG (10) instead of muting the logger.
         self.setLogLevel(10)
 
         # updating the configuration internally
-        def config_update(checkup):
+        def config_update(checkup: CheckUp) -> bool | None:
+            """Re-detect the optional packages and copy the zlib/FastJet/ROOT settings to
+            ``main.archi_info``.
+
+            Args:
+                checkup (``CheckUp``): configuration checker.
+
+            Returns:
+                ``bool | None``:
+                ``False`` if the detection fails, ``None`` otherwise.
+            """
             if not checkup.CheckOptionalProcessingPackages():
                 self.logger.error('Impossible to internally update the paths of the dependences.')
                 return False
@@ -371,6 +509,7 @@ class MA5Interpreter(Interpreter):
                 return False
 
         # If FastJet is installed, install PADForSFS
+        # FIXME: NameError on 'install_padforsfs' if no PADForSFS option is given.
         if self.main.archi_info.has_fastjet and install_padforsfs:
             self.logger.info('Installing PAD for SFS')
             installer=InstallManager(self.main)
@@ -410,6 +549,8 @@ class MA5Interpreter(Interpreter):
         if not self.main.archi_info.has_root and install_delphesMA5tune:
             self.logger.warning('The root package has not been found. Skipping the delphesMA5tune installation.')
 
+        # FIXME: 'not has_root' should probably be 'has_root' (this message is never shown
+        # when relevant).
         if not self.main.archi_info.has_root and install_delphesMA5tune and not root_v:
             self.logger.warning('DelphesMA5tune is not compatible with root 6. Skipping its installation.')
 

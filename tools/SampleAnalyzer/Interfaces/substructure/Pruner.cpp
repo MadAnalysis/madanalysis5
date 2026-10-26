@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // FastJet headers
+/**
+ * @file Pruner.cpp
+ * @brief Implementation of MA5::Substructure::Pruner.
+ */
+
 #include "fastjet/tools/Pruner.hh"
 
 // SampleAnalyser headers

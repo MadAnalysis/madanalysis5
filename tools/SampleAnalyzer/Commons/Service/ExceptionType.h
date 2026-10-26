@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ExceptionType.h
+ * @brief Exception type of SampleAnalyzer (EXCEPTION_WARNING, EXCEPTION_ERROR).
+ */
+
 #ifndef EXCEPTION_TYPE_H
 #define EXCEPTION_TYPE_H
 
@@ -35,27 +40,17 @@
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 
-// ShortCut to the creation of ExceptionType instance 
+/** @brief Create a warning exception located at the current file, line and function. */
 #define EXCEPTION_WARNING(msg,details,num) MA5::ExceptionType(__FILE__,__LINE__,__FUNCTION__,true, msg,details,num)
+/** @brief Create an error exception located at the current file, line and function. */
 #define EXCEPTION_ERROR(msg,details,num)   MA5::ExceptionType(__FILE__,__LINE__,__FUNCTION__,false,msg,details,num)
+/** @brief Create a warning exception that can be silenced (verbose = false). */
 #define EXCEPTION_WARNING_VERBOSE(msg,details,num,verbose) MA5::ExceptionType(__FILE__,__LINE__,__FUNCTION__,true, msg,details,num,verbose)
 
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class ExceptionType extends the content of standard exception 
-/// (std::exception).
-///
-/// ExceptionService contains : <BR>
-///  <DT> description of the exception </DT>
-///  <DT> details about the exception </DT>
-///  <DT> location of the exception : file name, 
-///                                   function name, 
-///                                   line number </DT>
-///  <DT> logger to be used : WARNING or ERROR </DT>
-///  <DT> number ID </DT>
-//////////////////////////////////////////////////////////////////////////////
+/** @brief Exception carrying a message, details, its location, its level (warning or error) and an identifier. */
 class ExceptionType : public std::exception
 {
   // -------------------------------------------------------------
@@ -63,28 +58,28 @@ class ExceptionType : public std::exception
   // -------------------------------------------------------------
  private :
 
-  /// Name of the file where the exception has been thrown
+  /** @brief File where the exception is thrown. */
   std::string FileName_;
 
-  /// Description of the exception
+  /** @brief Description of the exception. */
   std::string Msg_;
 
-  /// Name of the function where the exception has been thrown
+  /** @brief Function where the exception is thrown. */
   std::string Function_;
 
-  /// Details about the exception
+  /** @brief Details about the exception. */
   std::string Details_; 
 
-  /// Line number of the file where the exception has been thrown
+  /** @brief Line where the exception is thrown. */
   MAuint32 Line_;
 
-  /// Logger to be used : WARNING (=true), ERROR(=false)
+  /** @brief Level: warning (true) or error (false). */
   MAbool Warning_;
 
-  /// Number ID specified by the user
+  /** @brief Identifier given by the user. */
   MAint32 Num_;
 
-  // Verbosity
+  /** @brief Should the exception be displayed? */
   MAbool Verbose_;
   
 
@@ -93,7 +88,18 @@ class ExceptionType : public std::exception
   // -------------------------------------------------------------
  public:
 
-  /// Constructor with arguments
+  /**
+   * @brief Constructor.
+   *
+   * @param filename file name.
+   * @param line line number.
+   * @param function function name.
+   * @param warning true for a warning, false for an error.
+   * @param msg description.
+   * @param details details.
+   * @param Num identifier.
+   * @param Verbose display the exception.
+   */
   ExceptionType(const std::string& filename, 
                 const MAuint32& line,
                 const std::string function,
@@ -112,47 +118,87 @@ class ExceptionType : public std::exception
                                             Verbose_(Verbose)
   { }
  
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~ExceptionType() throw()
   {}
 
-  /// Accessor to the description of the exception
+  /**
+   * @brief Accessor to the description.
+   *
+   * @return the description.
+   */
   virtual const MAchar* what() const throw()
   { return Msg_.c_str(); }
 
-  /// Accessor to the number ID
+  /**
+   * @brief Accessor to the identifier.
+   *
+   * @return the identifier.
+   */
   const MAint32& GetID() const throw()
   { return Num_; }
 
-  /// Is WARNING logger used ? 
+  /**
+   * @brief Is it a warning?
+   *
+   * @return true for a warning.
+   */
   MAbool IsWarning() const throw()
   { return Warning_; }
 
-  /// Is ERROR logger used ?
+  /**
+   * @brief Is it an error?
+   *
+   * @return true for an error.
+   */
   MAbool IsError() const throw()
   { return !Warning_; }
 
-  /// Accessor to the description of the exception
+  /**
+   * @brief Accessor to the description.
+   *
+   * @return the description.
+   */
   const std::string& GetMsg() const throw()
   { return Msg_; }
 
-  /// Accessor to the file name
+  /**
+   * @brief Accessor to the file name.
+   *
+   * @return the file name.
+   */
   const std::string& GetFileName() const throw()
   { return FileName_; }
 
-  /// Accessor to the line number
+  /**
+   * @brief Accessor to the line number.
+   *
+   * @return the line number.
+   */
   const MAuint32& GetLine() const throw()
   { return Line_; }
 
-  /// Accessor to the function name
+  /**
+   * @brief Accessor to the function name.
+   *
+   * @return the function name.
+   */
   const std::string& GetFunction() const throw()
   { return Function_; }
 
-  /// Accessor to the details about the exception 
+  /**
+   * @brief Accessor to the details.
+   *
+   * @return the details.
+   */
   const std::string& GetDetails() const throw()
   { return Details_; }
 
-  /// accessor to the verbosity level
+  /**
+   * @brief Should the exception be displayed?
+   *
+   * @return the verbosity flag.
+   */
   MAbool verbose() const throw()
   { return Verbose_; }
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file LoopService.cpp
+ * @brief Implementation of MA5::LoopService.
+ */
+
 #include "SampleAnalyzer/Commons/Service/LoopService.h"
 
 using namespace MA5;
@@ -44,6 +49,7 @@ MAbool LoopService::IrrelevantPhoton_core(const MCParticleFormat* part,
 
   // Patch for Herwig
   if (mySample.sampleGenerator()==MA5GEN::HERWIG6) 
+    // Herwig 6: stop at the status codes 103, 110 and 120
     if (part->mothers()[0]->statuscode()==103 || 
         part->mothers()[0]->statuscode()==110 ||
         part->mothers()[0]->statuscode()==120) return false;
@@ -92,6 +98,7 @@ MAbool LoopService::ComingFromHadronDecay_core(const MCParticleFormat* part,
   //  if (part->mother1()==part) { std::cout << "exit" << std::endl; exit(0); }
 
   // Checking if hard-scattering objects directly generated from the initial state
+  // status 21: incoming particles of the hard process (Pythia 8)
   if(part->mothers().size()==2 && part->mothers()[0]->statuscode()==21 && part->mothers()[1]->statuscode()==21) return false;
 
   // Checking if mother is hadron

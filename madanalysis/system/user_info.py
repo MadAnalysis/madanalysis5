@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,11 +22,23 @@
 ################################################################################
 
 
+"""User options forcing the detection of the dependencies (``installation_options.dat``).
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 class UserInfo:
+    """Options read from ``madanalysis/input/installation_options.dat``.
 
-    def __init__(self):
+    For each optional package, ``<package>_veto`` disables the package and the path
+    options (``*_bin_path``, ``*_includes``, ``*_libs``, ``*_build_path``) force its
+    location. ``None`` means that the option is not set. A template of the file is
+    written by ``./bin/ma5 -i``.
+    """
+
+    def __init__(self) -> None:
+        """Initialise all options to ``None`` (not set)."""
         # General
         self.tmp_dir        = None
         self.download_dir   = None
@@ -91,20 +103,53 @@ class UserInfo:
         # logger
         self.logger = logging.getLogger('MA5')
 
-    def dump(self):
+    def dump(self) -> None:
+        """Log all attributes at debug level."""
         for item in self.__dict__:
             self.logger.debug(item+'\t'+str(self.__dict__[item]))
 
-    def __eq__(self,other):
+    def __eq__(self,other: UserInfo) -> bool:
+        """Compare all attributes with another object.
+
+        Args:
+            other (``UserInfo``): object to compare with.
+
+        Returns:
+            ``bool``:
+            ``True`` if all attributes are equal.
+        """
         return self.__dict__==other.__dict__
 
-    def __neq__(self,other):
+    def __neq__(self,other: UserInfo) -> bool:
+        """Negation of :meth:`__eq__`.
+
+        .. note::
+            Python uses ``__ne__``, not ``__neq__``: this method is never called implicitly
+            (``!=`` already falls back to the negation of ``__eq__``).
+
+        Args:
+            other (``UserInfo``): object to compare with.
+
+        Returns:
+            ``bool``:
+            ``True`` if at least one attribute differs.
+        """
         return not self.__eq__(other)
 
-    def save(self,filename):
+    def save(self,filename: str) -> bool:
+        """Pickle the user options into a file.
+
+        Args:
+            filename (``str``): destination file.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # Open the file
         try:
+            # FIXME: pickle requires a binary file ('wb').
             file = open(filename,"w")
         except:
             self.logger.error("impossible to write the configuration file '" + \
@@ -126,10 +171,22 @@ class UserInfo:
         # Return the operation status
         return test
         
-    def load(self,filename):
+    def load(self,filename: str) -> bool:
+        """Load the user options from a pickle file.
+
+        Only the attributes existing in the current object are copied.
+
+        Args:
+            filename (``str``): pickle file.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # Open the file
         try:
+            # FIXME: pickle requires a binary file ('rb').
             file = open(filename,"r")
         except:
             self.logger.error("impossible to read the configuration file '" + \
@@ -164,7 +221,18 @@ class UserInfo:
         return test
 
 
-    def ConvertToBool(self,option,value,filename):
+    def ConvertToBool(self,option: str,value: str,filename: str) -> bool | None:
+        """Convert a ``0``/``1`` option value into a boolean.
+
+        Args:
+            option (``str``): name of the option (for the warning message).
+            value (``str``): ``"0"`` or ``"1"``.
+            filename (``str``): name of the option file (for the warning message).
+
+        Returns:
+            ``bool | None``:
+            The boolean value, or ``None`` (with a warning) for other values.
+        """
         if value=='0':
             return False
         elif value=='1':
@@ -174,7 +242,14 @@ class UserInfo:
             return None
         
 
-    def SetValue(self,option,value,filename):
+    def SetValue(self,option: str,value: str,filename: str) -> None:
+        """Set an option read from the option file.
+
+        Args:
+            option (``str``): name of the option (e.g. ``root_veto``, ``fastjet_bin_path``).
+            value (``str``): raw value.
+            filename (``str``): name of the option file (for the warning messages).
+        """
 
         # General
         if   option=='tmp_dir':
@@ -196,6 +271,7 @@ class UserInfo:
 
         # Gnuplot
         elif   option=='gnuplot_veto':
+            # FIXME: typo 'gnuplot_veto_veto': the gnuplot veto is never set.
             self.gnuplot_veto_veto=self.ConvertToBool(option,value,filename)
 
         # Scipy
@@ -271,7 +347,18 @@ class UserInfo:
             self.logger.warning(filename+': the option called "'+option+'" is not found')
         
 
-    def ReadUserOptions(self,filename):
+    def ReadUserOptions(self,filename: str) -> bool:
+        """Read an option file (``madanalysis/input/installation_options.dat``).
+
+        Each non-comment line has the form ``option = value``; ``#`` starts a comment.
+
+        Args:
+            filename (``str``): path to the option file.
+
+        Returns:
+            ``bool``:
+            ``False`` if the file cannot be opened, ``True`` otherwise.
+        """
 
         # Open the user options
         self.logger.debug("Opening the file: "+filename)
@@ -294,6 +381,7 @@ class UserInfo:
                 continue
             self.logger.debug("  - "+line)
             words=line.split('=')
+            # FIXME: no 'continue' after the warning: a line without '=' raises an IndexError below.
             if len(words)!=2:
                 self.logger.warning(filename+': the following line is incorrect and is skipped:')
                 self.logger.warning(line)

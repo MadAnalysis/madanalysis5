@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // FastJet headers
+/**
+ * @file EnergyCorrelator.cpp
+ * @brief Implementation of MA5::Substructure::EnergyCorrelator.
+ */
+
 #include "fastjet/contrib/EnergyCorrelator.hh"
 
 // SampleAnalyser headers

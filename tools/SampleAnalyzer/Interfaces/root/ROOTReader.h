@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ROOTReader.h
+ * @brief Reader of ROOT files produced by Delphes or Delphes-MA5tune.
+ */
+
 #ifndef ROOT_READER_h
 #define ROOT_READER_h
 
@@ -40,6 +45,7 @@ class TFile;
 namespace MA5
 {
 
+/** @brief Reader of ROOT files, delegating the reading to the tree reader matching the file (Delphes or Delphes-MA5tune). */
 class ROOTReader : public ReaderBase
 {
 
@@ -48,8 +54,11 @@ class ROOTReader : public ReaderBase
   // -------------------------------------------------------------
  protected:
 
+  /** @brief Input ROOT file. */
   TFile *         source_;
+  /** @brief Tree reader selected for the file. */
   TreeReaderBase* treeReader_;
+  /** @brief Name of the file. */
   std::string     filename_;
 
   // -------------------------------------------------------------
@@ -57,45 +66,85 @@ class ROOTReader : public ReaderBase
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   ROOTReader()
   { 
     source_=0;
     treeReader_=0;
   } 
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~ROOTReader()
   { }
 
-  /// Initialize
+  /**
+   * @brief Open the file and select the tree reader.
+   *
+   * @param rawfilename file name.
+   * @param cfg run configuration.
+   * @return false if the file or the tree cannot be read.
+   */
   virtual MAbool Initialize(const std::string& rawfilename,
                           const Configuration& cfg);
 
-  /// Finalize
+  /**
+   * @brief Close the file.
+   *
+   * @return true.
+   */
   virtual MAbool Finalize();
 
-  /// Read the header
+  /**
+   * @brief Read the header (a warning is issued if the ROOT versions differ).
+   *
+   * @param mySample sample to fill.
+   * @return the result of the tree reader.
+   */
   virtual MAbool ReadHeader(SampleFormat& mySample);
 
-  /// Finalize the header
+  /**
+   * @brief Finalise the header (nothing to do).
+   *
+   * @param mySample sample.
+   * @return true.
+   */
   virtual MAbool FinalizeHeader(SampleFormat& mySample)
   { return true; }
 
-  /// Read the event
+  /**
+   * @brief Read the next event.
+   *
+   * @param myEvent event to fill.
+   * @param mySample sample.
+   * @return the status of the reading.
+   */
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
   { return treeReader_->ReadEvent(myEvent,mySample); }
 
-  /// Finalize the event
+  /**
+   * @brief Finalise the event.
+   *
+   * @param mySample sample.
+   * @param myEvent event.
+   * @return the result of the tree reader.
+   */
   virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   { return treeReader_->FinalizeEvent(mySample,myEvent); }
 
 
-  /// Get the file size
+  /**
+   * @brief Final position (from the tree reader).
+   *
+   * @return the final position.
+   */
   virtual MAint64 GetFinalPosition()
   { return treeReader_->GetFinalPosition(); }
 
-  /// Get the file size
+  /**
+   * @brief Size of the file.
+   *
+   * @return the size in bytes.
+   */
   virtual MAint64 GetFileSize()
   {
     MAint64 length = 0;
@@ -107,12 +156,21 @@ class ROOTReader : public ReaderBase
     return length;
   }
 
-  /// Get the position in file (in octet)
+  /**
+   * @brief Current position (from the tree reader).
+   *
+   * @return the position.
+   */
   virtual MAint64 GetPosition()
   { return treeReader_->GetPosition(); }
 
 
  private:
+  /**
+   * @brief Select the tree reader matching the content of the file.
+   *
+   * @return false if no suitable tree is found.
+   */
   MAbool SelectTreeReader();
 
 

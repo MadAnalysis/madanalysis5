@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,15 +22,29 @@
 ################################################################################
 
 
+"""Reader of the default particle labels (``madanalysis/input``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import madanalysis.core.main as Main
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import logging
 import os
 
 class ParticleReader():
+    """Reader of the default particle definitions from ``particles_name_default.txt`` (parton level; plus ``hadron_default.txt`` at hadron level) or ``reco_default.txt`` (reco level).
+    """
 
-    def __init__(self,path,cmd_define,level=MA5RunningType.PARTON,forced=False):
+    def __init__(self,path: str,cmd_define: Any,level: int = MA5RunningType.PARTON,forced: bool = False) -> None:
+        """Create the reader.
+
+        Args:
+            path (``str``): MadAnalysis 5 installation folder.
+            cmd_define (``CmdDefine``): ``define`` command used to register the labels.
+            level (``int``, default ``MA5RunningType.PARTON``): running mode.
+            forced (``bool``, default ``False``): overwrite existing labels without asking.
+        """
         self.cmd_define = cmd_define
         self.npart      = 0
         self.path       = path
@@ -39,7 +53,13 @@ class ParticleReader():
         self.forced     = forced
         self.logger = logging.getLogger('MA5')
 
-    def Load(self):
+    def Load(self) -> bool | None:
+        """Read the default particle labels of the running mode.
+
+        Returns:
+            ``bool | None``:
+            ``False`` if a file cannot be opened, ``None`` otherwise.
+        """
         if self.level==MA5RunningType.PARTON:
             if not self.OpenPartonLevel():
                 return False
@@ -60,7 +80,13 @@ class ParticleReader():
             self.Close()
             
          
-    def OpenPartonLevel(self):
+    def OpenPartonLevel(self) -> bool:
+        """Open the parton-level file (in ``input/`` or ``madanalysis/input/``).
+
+        Returns:
+            ``bool``:
+            ``True`` if the file has been opened.
+        """
 
         # Choose the good filename
         filename="input/particles_name_default.txt"
@@ -86,6 +112,8 @@ class ParticleReader():
 
         # Open the file 
         if os.path.isfile(name):
+            # FIXME: 'isopen' is never set to True, so Close() never closes the file (same in the
+            # other Open* methods).
             self.file = open (name, "r")
         else:
             self.logger.error("File not found")
@@ -94,7 +122,13 @@ class ParticleReader():
         # Ok
         return True    
 
-    def OpenHadronLevel(self):
+    def OpenHadronLevel(self) -> bool:
+        """Open the hadron-level file.
+
+        Returns:
+            ``bool``:
+            ``True`` if the file has been opened.
+        """
 
         # Choose the good filename
         filename="input/hadron_default.txt"
@@ -115,7 +149,13 @@ class ParticleReader():
 
         return True    
 
-    def OpenRecoLevel(self):
+    def OpenRecoLevel(self) -> bool:
+        """Open the reco-level file.
+
+        Returns:
+            ``bool``:
+            ``True`` if the file has been opened.
+        """
 
         # Choose the good filename
         filename="input/reco_default.txt"
@@ -135,7 +175,9 @@ class ParticleReader():
 
         return True    
 
-    def Read(self):
+    def Read(self) -> None:
+        """Read the open file and register each label (lines of the form ``<PDG-id> <label>``; ``#`` starts a comment).
+        """
 
         counter = 0
         for line in self.file:
@@ -172,14 +214,22 @@ class ParticleReader():
             self.npart += 1
 
     @staticmethod        
-    def DisplayErrorMessage(arg,counter):
+    def DisplayErrorMessage(arg: list[str],counter: int) -> None:
+            """Log a syntax error.
+
+            Args:
+                arg (``list[str]``): words of the faulty line.
+                counter (``int``): line number.
+            """
             text = "Syntax error at line "\
                    + str(counter) +  " : "
             for item in arg:
                 text += item + " "
+            # FIXME: 'self' is undefined in this static method (NameError).
             self.logger.error(text)    
 
-    def Close(self):
+    def Close(self) -> None:
+        """Close the file and log the number of labels read."""
 
         if self.isopen:
            self.file.close() 

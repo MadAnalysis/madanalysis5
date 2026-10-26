@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,20 +22,48 @@
 ################################################################################
 
 
+"""Interpreter command ``define``: (multi)particles, SFS modules and jet algorithms."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 import madanalysis.interpreter.cmd_base as CmdBase
 from madanalysis.enumeration.ma5_running_type       import MA5RunningType
 import logging
 
 class CmdDefine(CmdBase.CmdBase):
-    """Command DEFINE"""
+    """Command ``define``.
 
-    def __init__(self,main):
+    Supported forms:
+
+    * ``define <name> = <PDG-ids / (multi)particles>``: (multi)particle definition;
+    * ``define tagger|smearer|reco_efficiency|jes|energy_scaling|scaling ...``: SFS
+      detector modules (RECO mode with FastJet);
+    * ``define jet_algorithm <name> <algorithm> [<keyword args>]``: additional jet
+      collection (RECO mode with FastJet).
+    """
+
+    def __init__(self,main: Main) -> None:
+        """Register the ``define`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         CmdBase.CmdBase.__init__(self,main,"define")
 
-    def do(self,args):
+    def do(self,args: list[str]) -> None:
+        """Execute a ``define`` command (see the class documentation).
+
+        Args:
+            args (``list[str]``): arguments of the command (split by
+                :meth:`~madanalysis.interpreter.interpreter_base.InterpreterBase.split_arg`).
+        """
 
         # tagger / smearer
+        # FIXME: IndexError if the command has no argument.
         if args[0] in ['tagger', 'smearer', 'reco_efficiency', 'jes', 'scaling', 'energy_scaling']:
             if self.main.mode != MA5RunningType.RECO:
                 logging.getLogger('MA5').error("Smearing/tagging/reconstruction/scaling are only available in the RECO mode")
@@ -80,7 +108,19 @@ class CmdDefine(CmdBase.CmdBase):
         self.fill(args[0],args[2:],self.main.forced)
 
 
-    def fill(self,name,args,forced=False):
+    def fill(self,name: str,args: list[str],forced: bool = False) -> None:
+        """Define a (multi)particle.
+
+        The name must not be a reserved word nor a dataset name and must be a valid label.
+        Each item is either a PDG identifier or an existing (multi)particle whose
+        identifiers are copied.
+
+        Args:
+            name (``str``): name of the (multi)particle.
+            args (``list[str]``): PDG identifiers and/or (multi)particle names.
+            forced (``bool``, default ``False``): passed to
+                :meth:`~madanalysis.multiparticle.multiparticle_collection.MultiParticleCollection.Add`.
+        """
         # Checking if the name is authorized
         if name in self.reserved_words:
             logging.getLogger('MA5').error("name '" +name+ "' is a reserved keyword. Please choose a different name.")
@@ -120,7 +160,9 @@ class CmdDefine(CmdBase.CmdBase):
 
         self.main.multiparticles.Add(name,ids,forced)
 
-    def help(help):
+    # NOTE: the instance argument is named 'help' instead of 'self'.
+    def help(help) -> None:
+        """Display the help of the ``define`` command."""
         logging.getLogger('MA5').info("   Syntax: define <particle name> = PDG-id")
         logging.getLogger('MA5').info("   Associates a symbol to a specific particle defined by its PDG-id.")
         logging.getLogger('MA5').info("   Syntax: define <(multi)particle name> = "+\
@@ -159,6 +201,7 @@ class CmdDefine(CmdBase.CmdBase):
         logging.getLogger('MA5').info("   The corresponding scaling function is given by <function>.")
         logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies (pt > ..., eta < ..., etc.).")
         logging.getLogger('MA5').info("")
+        # NOTE: 'genkt' appears twice in the list below.
         algorithms = ['antikt','cambridge', 'genkt','gridjet','kt','genkt', 'cdfjetclu','cdfmidpoint','siscone']
         logging.getLogger('MA5').info('   Syntax: define jet_algorithm <name> <algorithm> <keyword args>')
         logging.getLogger('MA5').info('           - <name>         : Name to be assigned to the jet.')
@@ -167,7 +210,19 @@ class CmdDefine(CmdBase.CmdBase):
         logging.getLogger('MA5').info('           - <keyword args> : (Optional) depending on the nature of the algorithm.')
         logging.getLogger('MA5').info("                              it can be radius=0.4, ptmin=20 etc.")
 
-    def complete(self,text,line,begidx,endidx):
+    def complete(self,text: str,line: str,begidx: int,endidx: int) -> list[str] | None:
+        """Tab completion of the ``define`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str] | None``:
+            Possible completions, or ``None``.
+        """
 
         #Getting back arguments
         args = line.split()

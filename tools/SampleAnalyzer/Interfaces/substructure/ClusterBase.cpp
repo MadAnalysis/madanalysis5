@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // FastJet headers
+/**
+ * @file ClusterBase.cpp
+ * @brief Implementation of MA5::Substructure::ClusterBase.
+ */
+
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/PseudoJet.hh"
 
@@ -37,6 +42,7 @@ namespace MA5 {
         // Set the Jet definition using algorithm and radius input
         void ClusterBase::SetJetDef(Algorithm algorithm, MAfloat32 radius)
         {
+            // NOTE: a previously allocated jet definition is not deleted (memory leak if called twice).
             isPlugin_ = false;
             JetDefinition_ = new fastjet::JetDefinition(__get_clustering_algorithm(algorithm), radius);
         }
@@ -58,6 +64,8 @@ namespace MA5 {
 
         // Execute with a single jet. This method reclusters the given jet using its constituents by filtering
         // reclustered events with respect to the initial jet
+        // NOTE: this member template is defined in the .cpp file and is not explicitly instantiated: calling
+        //   it from another translation unit (e.g. a user analysis) gives an undefined reference.
         template<typename Func>
         std::vector<const RecJetFormat *> ClusterBase::Execute(const RecJetFormat *jet, Func func)
         {

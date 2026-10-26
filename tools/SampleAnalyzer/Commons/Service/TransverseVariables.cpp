@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file TransverseVariables.cpp
+ * @brief Implementation of MT2, MT2W and alphaT.
+ */
+
 #include <cmath>
 
 // SampleAnalyzer headers
@@ -38,6 +43,16 @@ using namespace MA5;
 /// Funcions related to the computation of the mt2
 /// -----------------------------------------------
 
+/**
+ * @brief Number of sign conservations between consecutive terms of a sequence.
+ *
+ * @param t1 term 1.
+ * @param t2 term 2.
+ * @param t3 term 3.
+ * @param t4 term 4.
+ * @param t5 term 5.
+ * @return the number of pairs with the same sign.
+ */
 inline MAint32 signchange_n(MAfloat128 t1,MAfloat128 t2,MAfloat128 t3,MAfloat128 t4,MAfloat128 t5)
 {
   MAint32 nsc=0;
@@ -48,6 +63,16 @@ inline MAint32 signchange_n(MAfloat128 t1,MAfloat128 t2,MAfloat128 t3,MAfloat128
   return nsc;
 }
 
+/**
+ * @brief Number of sign changes between consecutive terms of a sequence.
+ *
+ * @param t1 term 1.
+ * @param t2 term 2.
+ * @param t3 term 3.
+ * @param t4 term 4.
+ * @param t5 term 5.
+ * @return the number of pairs with opposite signs.
+ */
 inline MAint32 signchange_p(MAfloat128 t1,MAfloat128 t2,MAfloat128 t3,MAfloat128 t4,MAfloat128 t5)
 {
    MAint32 nsc=0;
@@ -111,6 +136,13 @@ MAint32 TransverseVariables::Nsolutions(const MAfloat64 &E)
 }
 
 
+/**
+ * @brief Sign of a value.
+ *
+ * @tparam T type.
+ * @param val value.
+ * @return -1, 0 or +1.
+ */
 template <typename T> MAint32 sgn(T val) { return (T(0) < val) - (val < T(0)); }
 
 MAint32 TransverseVariables::Nsolutions_massless(const MAfloat64 &dsq)
@@ -514,7 +546,16 @@ MAfloat64 TransverseVariables::MT2W(std::vector<const MCParticleFormat*> jets, c
 
 
 
-/// The alphaT variable
+/**
+ * @brief Recursive enumeration of the partitions of the jets into two pseudo-jets (fast version).
+ *
+ * @param n1 number of jets in the first pseudo-jet.
+ * @param jets jets.
+ * @param MinDHT minimum HT difference found (updated).
+ * @param last index of the last jet added to the first pseudo-jet.
+ * @param Ids membership of each jet to the first pseudo-jet.
+ * @param nIds number of jets already in the first pseudo-jet.
+ */
 void LoopForAlphaT(const MAuint32 n1, const std::vector<RecJetFormat>& jets,
                    MAfloat64 &MinDHT, const MAint32 last, std::vector<bool>& Ids, MAuint32 nIds)
 {
@@ -547,7 +588,15 @@ void LoopForAlphaT(const MAuint32 n1, const std::vector<RecJetFormat>& jets,
 }
 
 
-/// The alphaT variable
+/**
+ * @brief Recursive enumeration of the partitions of the partons into two pseudo-jets.
+ *
+ * @param n1 number of partons in the first pseudo-jet.
+ * @param jets partons.
+ * @param MinDHT minimum HT difference found (updated).
+ * @param last index of the last parton added.
+ * @param Ids indices of the partons of the first pseudo-jet.
+ */
 void SlowLoopForAlphaT(const MAuint32 n1, const std::vector<const MCParticleFormat*> jets,
   MAfloat64 &MinDHT, const MAint32 last, std::vector<MAuint32> Ids)
 {
@@ -584,6 +633,15 @@ void SlowLoopForAlphaT(const MAuint32 n1, const std::vector<const MCParticleForm
    }
 }
 
+/**
+ * @brief Recursive enumeration of the partitions of the jets into two pseudo-jets (reference version).
+ *
+ * @param n1 number of jets in the first pseudo-jet.
+ * @param jets jets.
+ * @param MinDHT minimum HT difference found (updated).
+ * @param last index of the last jet added.
+ * @param Ids indices of the jets of the first pseudo-jet.
+ */
 void SlowLoopForAlphaT(const MAuint32 n1, std::vector<RecJetFormat> jets,
   MAfloat64 &MinDHT, const MAint32 last, std::vector<MAuint32> Ids)
 {
@@ -658,6 +716,7 @@ MAfloat64 TransverseVariables::AlphaT(const MCEventFormat* event)
   // more than 3 jets : split into 2 sets
   // n1 = number of jets in the first set
   // n2 = number of jets in the second set
+  // NOTE: the Monte Carlo AlphaT uses the same (slow) enumeration as SlowAlphaT.
   for (MAuint32 n1=1; n1<=(jets.size()/2); n1++)
   {
     std::vector<MAuint32> DummyJet;

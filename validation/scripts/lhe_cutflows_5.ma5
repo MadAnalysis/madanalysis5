@@ -1,0 +1,30 @@
+#TITLE Signed NLO object selection and rejection
+#MODE PARTON
+# Signed NLO sample; compare nominal outputs with the non-multiweight branch.
+import samples/ttbar_nlo.lhe.gz as testset
+set testset.weighted_events = true
+set main.normalize = none
+set main.lumi = 1.0
+define lep = e+ e- mu+ mu- ta+ ta-
+define heavy = t t~
+
+plot N(lep) 6 0 6
+plot PT(lep) 40 0 200
+plot N(j) 12 0 12
+plot PT(j) 40 0 400
+select (lep) PT > 10
+reject (lep) ABSETA > 2.5
+select (j) PT > 25 and ABSETA < 4
+reject (b) PT < 30
+plot N(lep) 6 0 6
+plot PT(lep) 40 0 200
+plot N(j) 12 0 12
+plot PT(j) 40 0 400
+# Object filtering is exposed through event counters and subsequent histograms.
+select N(lep) == 1
+select N(j) >= 2
+select N(b) >= 1
+select PT(j[1]) > 50
+plot MET 30 0 300
+plot M(j[1] j[2]) 40 0 1000
+submit

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Writer of the LaTeX reports (compiled with latex or pdflatex)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.IOinterface.text_report import TextReport
 import madanalysis.IOinterface.text_file_writer as TextFileWriter
 from madanalysis.enumeration.color_type import ColorType
 from madanalysis.enumeration.font_type import FontType
@@ -35,9 +42,17 @@ import os
 import pwd
 
 class LATEXReportWriter(TextFileWriter.TextFileWriter):
-    """Generate LaTeX report"""
+    """Generator of the LaTeX report (``main.tex``)."""
 
-    def __init__(self,filename,stylepath,pdflatex=False):
+    def __init__(self,filename: str,stylepath: str,pdflatex: bool = False) -> None:
+        """Create the writer and copy the JHEP style file next to the report.
+
+        Args:
+            filename (``str``): path of ``main.tex``.
+            stylepath (``str``): folder containing ``jheppub.sty``.
+            pdflatex (``bool``, default ``False``): use PNG figures (pdflatex) instead of EPS
+                figures (latex).
+        """
         TextFileWriter.TextFileWriter.__init__(self,filename)
         self.pdflatex=pdflatex
         self.bullet=0
@@ -55,13 +70,23 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
             self.ext='.png'
 
         if os.path.isfile(stylepath+'/jheppub.sty'):
+            # NOTE: shell command built by string concatenation; paths with spaces break it.
             os.system('cp ' + stylepath + '/jheppub.sty ' + dirname)
         else:
             logging.getLogger('MA5').error('jheppub.sty not found. Cannot generate a latex report.')
 
 
     @staticmethod    
-    def CheckStructure(dirname):
+    def CheckStructure(dirname: str) -> bool:
+        """Check that a LaTeX report folder contains the expected files.
+
+        Args:
+            dirname (``str``): report folder.
+
+        Returns:
+            ``bool``:
+            ``True`` if the folder and its files exist.
+        """
         if not os.path.isdir(dirname):
             return False
         if not os.path.isfile(dirname+'/main.tex'):
@@ -73,7 +98,8 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
             return False
         return True
 
-    def WriteHeader(self):
+    def WriteHeader(self) -> None:
+        """Write the LaTeX preamble."""
         self.file.write('% '.ljust(79,'-')+'\n')
         self.file.write('% ' + 'HEADER'.center(78)+'\n')
         self.file.write('% '.ljust(79,'-')+'\n')
@@ -86,7 +112,12 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         self.file.write('% ' + 'COVER PAGE'.center(78)+'\n')
         self.file.write('% '.ljust(79,'-')+'\n')
 
-    def WriteTitle(self,title):
+    def WriteTitle(self,title: str) -> None:
+        """Write the title block (title, logo, author and date).
+
+        Args:
+            title (``str``): report title.
+        """
         self.file.write('\\title{{\\includegraphics[scale=.4]{')
         self.file.write('logo'+self.ext+'}}\\ The LaTeX report}\n\n')
         try:
@@ -120,13 +151,20 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         self.file.write('\\maketitle\n')
         self.file.write('\\flushbottom\n\n')
 
-    def WriteSpacor(self):
+    def WriteSpacor(self) -> None:
+        """Write a separator (page break)."""
         self.file.write("\\newpage\n")
 
-    def WriteVspace(self):
+    def WriteVspace(self) -> None:
+        """Write a vertical space."""
         self.file.write("\\vspace{1cm}\n")
 
-    def WriteSubTitle(self,subtitle):
+    def WriteSubTitle(self,subtitle: str) -> None:
+        """Write a section title.
+
+        Args:
+            subtitle (``str``): title.
+        """
         self.file.write('% '.ljust(79,'-')+'\n')
         self.file.write('% ' + ('SECTION ' + subtitle).center(78)+'\n')
         self.file.write('% '.ljust(79,'-')+'\n')
@@ -138,7 +176,12 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         self.file.write('}\n\n')
         text.Reset()
 
-    def WriteSubSubTitle(self,subsubtitle):
+    def WriteSubSubTitle(self,subsubtitle: str) -> None:
+        """Write a subsection title.
+
+        Args:
+            subsubtitle (``str``): title.
+        """
         if( subsubtitle.find('Histogram')!=-1 or subsubtitle.find('Cut')!=-1 ):
             if self.firstselection:
                 self.firstselection=False
@@ -151,20 +194,33 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         self.file.write('}\n\n')
         text.Reset()
 
-    def WriteText(self,text):
+    def WriteText(self,text: TextReport) -> None:
+         """Write formatted text (as a list item inside a bullet list).
+
+         Args:
+             text (``TextReport``): text to write.
+         """
          if self.bullet!=0:
             self.file.write("  \\item")
          text.WriteLATEX(self.file)
                   
-    def OpenBullet(self):
+    def OpenBullet(self) -> None:
+        """Open a bullet list."""
         self.bullet=self.bullet+1
         self.file.write("\\begin{itemize}\n")
 
-    def CloseBullet(self):
+    def CloseBullet(self) -> None:
+        """Close the current bullet list."""
         self.bullet=self.bullet-1
         self.file.write("\n\\end{itemize}\n")
 
-    def CreateTable(self,col,caption):
+    def CreateTable(self,col: list[float],caption: TextReport) -> None:
+        """Open a table.
+
+        Args:
+            col (``list[float]``): relative widths of the columns.
+            caption (``TextReport``): caption (ignored if empty).
+        """
         self.table=self.table+1
         self.number_col=len(col)
         self.file.write("\\begin{table}[H]\n  \\begin{center}\n")
@@ -178,7 +234,14 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
             self.file.write("m{"+str(size)+"mm}|")
         self.file.write("}\n      \\hline\n")
 
-    def NewCell(self,color=None,span=1):
+    def NewCell(self,color: int | None = None,span: int = 1) -> None:
+        """Open a new cell in the current row.
+
+        Args:
+            color (``int | None``, default ``None``): background colour
+                (:class:`~madanalysis.enumeration.color_type.ColorType` code, white if ``None``).
+            span (``int``, default ``1``): number of spanned columns.
+        """
         if color is None:
             color=ColorType.WHITE
         self.current_col=self.current_col+span
@@ -197,28 +260,38 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
             else:
                 self.file.write("}& {\\cellcolor{"+ColorType.convert2string(color)+"}")
 
-    def NewBlankLine(self):
+    def NewBlankLine(self) -> None:
+        """Insert a line break."""
         self.current_col=0
         self.first_cell=True
         self.file.write("\\\\\n")
 
-    def NewLine(self):
+    def NewLine(self) -> None:
+        """Close the current row and start a new one."""
         self.current_col=0
         self.first_cell=True
         self.file.write("}\\\\\n      \\hline\n")
 
-    def EndLine(self):
+    def EndLine(self) -> None:
+        """Close the current (last) row."""
         self.current_col=0
         self.first_cell=True
         self.file.write("}\\\\\n")
 
-    def EndTable(self):
+    def EndTable(self) -> None:
+        """Close the current table."""
         self.table=self.table-1
         self.file.write('\\hline\n    \\end{tabular}\n')
         self.file.write('  \\end{center}\n\\end{table}\n\n')
 
 
-    def WriteFigure(self,caption,filename):
+    def WriteFigure(self,caption: TextReport,filename: str) -> None:
+        """Insert a figure.
+
+        Args:
+            caption (``TextReport``): caption.
+            filename (``str``): path of the figure without extension (````.eps`` or ``.png````).
+        """
         thefile = os.path.normpath(filename)
         if os.path.isfile(thefile+self.ext):
             scale=0.45
@@ -231,7 +304,8 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         else:
             logging.getLogger('MA5').warning(thefile+self.ext+" does not exist.")
         
-    def WriteFoot(self):
+    def WriteFoot(self) -> None:
+        """Close the document (and check that bullets and tables are closed)."""
         if self.bullet!=0:
             logging.getLogger('MA5').warning("the number of 'OpenBullet()' and 'CloseBullet()' are different.")
         if self.table!=0:

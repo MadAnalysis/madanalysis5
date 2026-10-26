@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LHCOParticleFormat.h
+ * @brief Object line of an LHCO file.
+ */
+
 #ifndef LHCO_PARTICLE_FORMAT_h
 #define LHCO_PARTICLE_FORMAT_h
 
@@ -37,6 +42,7 @@
 namespace MA5
 {
 
+/** @brief Content of an object line of an LHCO event. */
 class LHCOParticleFormat
 {
 
@@ -45,6 +51,7 @@ class LHCOParticleFormat
   // -------------------------------------------------------------
  public:
 
+  /** @brief Type (0 photon, 1 electron, 2 muon, 3 tau, 4 jet, 6 MET), kinematics, number of tracks (with the charge sign), b-tag and HAD/EM ratio. */
   MAuint32 id;
   MAfloat32 eta;
   MAfloat32 phi;
@@ -54,9 +61,22 @@ class LHCOParticleFormat
   MAfloat32 btag;
   MAfloat32 hadem;
 
+  /** @brief Line reminding the meaning of the columns. */
   static const std::string header;
 
+  /**
+   * @brief Write the object line.
+   *
+   * @param num index of the object in the event.
+   * @param out output stream.
+   */
   void Print(MAuint32 num, std::ostream* out);
+  /**
+   * @brief Write the header line of an event.
+   *
+   * @param numEvent 0-based event number.
+   * @param out output stream.
+   */
   static void WriteEventHeader(MAuint32 numEvent,std::ostream* out);
 };
 

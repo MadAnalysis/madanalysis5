@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,10 @@
 ################################################################################
 
 
+"""Definition of a dataset (``import <file> as <dataset>``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 from madanalysis.enumeration.linestyle_type import LineStyleType
 from madanalysis.enumeration.backstyle_type import BackStyleType
 from madanalysis.enumeration.color_type import ColorType
@@ -31,6 +34,27 @@ from madanalysis.layout.layout import Layout
 import logging
 
 class Dataset:
+    """Collection of event files sharing the same physical properties and plotting style.
+
+    The attributes that can be modified with ``set <dataset>.<attribute> = <value>`` are
+    listed in :attr:`userVariables`.
+
+    Attributes:
+        name (``str``): name of the dataset (lower case).
+        title (``str``): title used in the legends of the reports.
+        filenames (``list[str]``): event files of the dataset.
+        weight (``float``): user-defined weight applied to the dataset.
+        xsection (``float``): user-defined cross section in pb (``0`` = taken from the files).
+        scaleup / scaledn / pdfup / pdfdn (``float | None``): relative scale and PDF
+            uncertainties on the cross section (used in recasting).
+        background (``bool``): ``True`` for a background dataset, ``False`` for a signal one.
+        weighted_events (``bool``): whether the event weights are taken into account.
+        linecolor / linestyle / lineshade / linewidth (``int``): line style of the histograms.
+        backcolor / backstyle / backshade (``int``): fill style of the histograms.
+        measured_global (``SampleInfo``): information measured by SampleAnalyzer for the
+            whole dataset.
+        measured_detail (``list[SampleInfo]``): information measured for each file.
+    """
 
     userVariables = { "type"        : ["signal","background"], \
                       "linecolor"   : ["auto","none","red","black","white","yellow",\
@@ -51,7 +75,13 @@ class Dataset:
                       "title"       : [], \
                       "weighted_events": ["true","false"]}
 
-    def __init__(self,name):
+    def __init__(self,name: str) -> None:
+        """Create an empty signal dataset with default plotting style.
+
+        Args:
+            name (``str``): name of the dataset (stored in lower case; the original
+                spelling is used as default title).
+        """
         self.name              = name.lower()
         self.weight            = 1.
         self.xsection          = 0.
@@ -73,22 +103,63 @@ class Dataset:
         self.measured_global   = SampleInfo() 
         self.measured_detail   = []
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Get the number of event files.
+
+        Returns:
+            ``int``:
+            Number of files of the dataset.
+        """
         return len(self.filenames)
 
-    def __getitem__(self,i):
+    def __getitem__(self,i: int) -> str:
+        """Get an event file.
+
+        Args:
+            i (``int``): index of the file.
+
+        Returns:
+            ``str``:
+            Path of the event file.
+        """
         return self.filenames[i]
 
-    def user_GetValues(self,variable):
+    def user_GetValues(self,variable: str) -> list[str]:
+        """Get the possible values of an attribute (used for tab completion).
+
+        Args:
+            variable (``str``): name of the attribute.
+
+        Returns:
+            ``list[str]``:
+            Possible values, or an empty list for free-valued/unknown attributes.
+        """
         try:
             return Dataset.userVariables[variable]
         except:
             return []
 
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the user-settable attributes.
+
+        Returns:
+            ``list[str]``:
+            Keys of :attr:`userVariables`.
+        """
         return list(Dataset.userVariables.keys())
 
-    def user_SetParameter(self,variable,value,value2="",value3=""):
+    def user_SetParameter(self,variable: str,value: str,value2: str = "",value3: str = "") -> None:
+        """Set an attribute of the dataset (``set <dataset>.<variable> = <value>``).
+
+        Errors are logged and the attribute is left unchanged.
+
+        Args:
+            variable (``str``): name of the attribute (see :attr:`userVariables`).
+            value (``str``): value typed by the user (quoted string for ``title``).
+            value2 (``str``, default ``""``): sign (``'+'`` or ``'-'``) of the colour shade,
+                for ``linecolor`` and ``backcolor`` (e.g. ``red+2``).
+            value3 (``str``, default ``""``): magnitude of the colour shade.
+        """
         #type
         if variable == "type":
             if value=="signal":
@@ -137,6 +208,7 @@ class Dataset:
             elif value=="auto":
                 self.linecolor=ColorType.AUTO
             else:
+                # NOTE: 'green' is accepted but not listed in the error message below.
                 logging.getLogger('MA5').error("the possible values for the attribute 'linecolor' are "+\
                                                "'auto', 'none', 'black', 'white', 'red', 'yellow'," + \
                                                "'blue', 'grey', 'purple', 'cyan', 'orange'.")
@@ -183,6 +255,7 @@ class Dataset:
                 logging.getLogger('MA5').error("the parameter '"+value+"' is not an integer value")
                 return
 
+            # FIXME: the condition accepts 1..9 whereas the error message says '< 11'.
             if code>0 and code<10:
                 self.linewidth=code
             else:
@@ -315,6 +388,7 @@ class Dataset:
         # title
         elif variable == "title":
             quoteTag = False
+            # FIXME: IndexError if 'value' is an empty string.
             if value[0] in ["'",'"'] and value[-1] in ["'",'"']:
                 value=value[1:-1]
                 self.title=value 
@@ -327,7 +401,10 @@ class Dataset:
             logging.getLogger('MA5').error("the class dataset has no attribute denoted by '"+variable+"'.")
             
 
-    def Display(self):
+    def Display(self) -> None:
+        """Log the properties of the dataset, its files and the measured cross section,
+        number of events and fraction of negative weights.
+        """
         logging.getLogger('MA5').info("   ******************************************" )
         logging.getLogger('MA5').info("   Name of the dataset = " + self.name + " (" + self.GetStringTag() + ")")
         self.user_DisplayParameter("title")
@@ -363,7 +440,13 @@ class Dataset:
         logging.getLogger('MA5').info("   ******************************************" )
 
 
-    def user_DisplayParameter(self,parameter):
+    def user_DisplayParameter(self,parameter: str) -> None:
+        """Log the value of one attribute.
+
+        Args:
+            parameter (``str``): name of the attribute (``scale_unc`` and ``PDF_unc`` display
+                the uncertainties).
+        """
         if parameter=="weight":
             logging.getLogger('MA5').info("   User-imposed weight value for the set = "+str(self.weight))
         elif parameter=="xsection":
@@ -412,24 +495,57 @@ class Dataset:
         else:
             logging.getLogger('MA5').error(" the class dataset has no attribute denoted by '"+parameter+"'")
 
-    def GetStringTag(self):
+    def GetStringTag(self) -> str:
+        """Get the type of the dataset.
+
+        Returns:
+            ``str``:
+            ``"background"`` or ``"signal"``.
+        """
         if self.background:
             return "background"
         else:
             return "signal"
 
-    def Find(self,file):
+    def Find(self,file: str) -> bool:
+        """Check whether a file belongs to the dataset.
+
+        Args:
+            file (``str``): path of the event file.
+
+        Returns:
+            ``bool``:
+            ``True`` if the file is in :attr:`filenames`.
+        """
         if file in self.filenames:
             return True
         return False
 
-    def Add(self,file):
+    def Add(self,file: str) -> None:
+        """Add an event file to the dataset (duplicates are ignored).
+
+        Args:
+            file (``str``): path of the event file.
+        """
         if not self.Find(file):
             self.filenames.append(file)
         
-    def Remove(self,file):
+    def Remove(self,file: str) -> None:
+        """Remove an event file from the dataset.
+
+        Args:
+            file (``str``): path of the event file.
+        """
         if self.Find(file):
+            # FIXME: 'file' is a string; deleting list elements by string raises a TypeError
+            # (self.filenames.remove(file) was probably intended).
             del self.filenames[file]
 
-    def GetIds(self):
+    def GetIds(self) -> list[str]:
+        """Get the event files of the dataset.
+
+        Returns:
+            ``list[str]``:
+            :attr:`filenames` (not a copy).
+        """
         return self.filenames

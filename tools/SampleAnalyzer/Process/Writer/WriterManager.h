@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file WriterManager.h
+ * @brief Registry of the event-file writers, selected by file extension.
+ */
+
 #ifndef WRITER_MANAGER_h
 #define WRITER_MANAGER_h
 
@@ -34,6 +39,7 @@
 namespace MA5
 {
 
+/** @brief Registry of the writers (lhe and lhco, and their .gz versions with zlib). */
 class WriterManager : public ManagerBase<WriterBase>
 {
   // -------------------------------------------------------------
@@ -41,21 +47,30 @@ class WriterManager : public ManagerBase<WriterBase>
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   WriterManager() : ManagerBase<WriterBase>()
   { }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~WriterManager()
   { }
 
-  /// Build the table
+  /** @brief Register the available writers. */
   void BuildTable();
 
-  /// Get the good Writer from a given file name
+  /**
+   * @brief Find the writer corresponding to the extension of a file.
+   *
+   * @param filename file name.
+   * @return the writer, or 0 if none.
+   */
   WriterBase* GetByFileExtension(std::string filename);
 
-  /// Print the list of items in the collection
+  /**
+   * @brief Print the registered writers.
+   *
+   * @param os logger.
+   */
   void Print(LogStream& os=INFO) const
   { ManagerBase<WriterBase>::Print(Objects_, Names_, os); }
 

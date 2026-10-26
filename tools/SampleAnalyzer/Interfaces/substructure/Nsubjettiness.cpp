@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // FastJet headers
+/**
+ * @file Nsubjettiness.cpp
+ * @brief Implementation of MA5::Substructure::Nsubjettiness.
+ */
+
 #include "fastjet/contrib/Nsubjettiness.hh"
 
 #include "SampleAnalyzer/Interfaces/substructure/Nsubjettiness.h"

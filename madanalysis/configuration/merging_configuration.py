@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Configuration of the jet-merging validation plots (``set main.merging.*``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.configuration.clustering_kt          import ClusteringKt
 from madanalysis.configuration.clustering_antikt      import ClusteringAntiKt
 from madanalysis.configuration.clustering_genkt       import ClusteringGenKt
@@ -35,24 +39,38 @@ from madanalysis.enumeration.ma5_running_type         import MA5RunningType
 import logging
 
 class MergingConfiguration:
+    """Differential jet rate (DJR) plots used to validate matrix-element/parton-shower merging.
+
+    Attributes:
+        enable (``bool``): whether the merging plots are produced (``check``).
+        njets (``int``): maximum number of jets considered.
+        ma5_mode (``bool``): use the MadAnalysis 5 implementation of the DJR computation.
+    """
 
     userVariables = { "check"    : ["true","false"],\
                       "njets"    : ["4"],\
                       "ma5_mode" : ["true","false"]}
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Disable the merging plots (``njets = 4``)."""
         self.enable = False
         self.njets  = 4
         self.ma5_mode = False
         
-    def Display(self):
+    def Display(self) -> None:
+        """Log the merging-plot settings."""
         self.user_DisplayParameter("check")
         if self.enable:
             self.user_DisplayParameter("njets")
             self.user_DisplayParameter("ma5_mode")
 
         
-    def user_DisplayParameter(self,parameter):
+    def user_DisplayParameter(self,parameter: str) -> None:
+        """Log the value of one parameter.
+
+        Args:
+            parameter (``str``): ``check``, ``njets`` or ``ma5_mode``.
+        """
         if parameter=="check":
             if self.enable:
                 value="true"
@@ -72,12 +90,23 @@ class MergingConfiguration:
             return
 
 
-    def user_SetParameter(self,parameter,value,level,fastjet):
+    def user_SetParameter(self,parameter: str,value: str,level: int,fastjet: bool) -> None:
+        """Set a merging-plot parameter.
+
+        Enabling the plots requires the hadron or reco mode and FastJet. Errors are logged.
+
+        Args:
+            parameter (``str``): ``check``, ``njets`` or ``ma5_mode``.
+            value (``str``): value typed by the user.
+            level (``int``): running mode.
+            fastjet (``bool``): whether FastJet is available.
+        """
         # enable
         if parameter=="check":
             if value=="true":
                 # Only in reco mode
                 if level==MA5RunningType.PARTON:
+                    # NOTE: misleading message: this concerns the merging plots, not the clustering.
                     logging.getLogger('MA5').error("clustering algorithm is only available in HADRON or RECO mode")
                     return
                 
@@ -121,11 +150,26 @@ class MergingConfiguration:
             return
 
         
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the settable parameters.
+
+        Returns:
+            ``list[str]``:
+            ``["check", "njets", "ma5_mode"]``.
+        """
         return list(MergingConfiguration.userVariables.keys())
 
 
-    def user_GetValues(self,variable):
+    def user_GetValues(self,variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            Suggested values, or an empty list.
+        """
         try:
             return MergingConfiguration.userVariables[variable]
         except:

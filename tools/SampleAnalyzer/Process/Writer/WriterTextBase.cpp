@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file WriterTextBase.cpp
+ * @brief Implementation of MA5::WriterTextBase.
+ */
+
 #include <string>
 
 // ZIP headers
@@ -65,6 +70,7 @@ MAbool WriterTextBase::Initialize(const Configuration* cfg,
 
   // Cleaning the file (remove rfio or local location)
   std::string filename = rawfilename;
+  // FIXME: the result of CleanFilename() is discarded: the rfio:/file: prefix is not removed.
   ReaderBase::CleanFilename(filename);
 
   // Is compressed file ?
@@ -74,6 +80,7 @@ MAbool WriterTextBase::Initialize(const Configuration* cfg,
   if (compress_)
   {
 #ifndef ZIP_USE
+    // NOTE: the message mentions RFIO_USE while zlib support (ZIP_USE) is missing.
     ERROR << "'zip file' is not allowed. Please set the RFIO_USE"
           << " variable in the Makefile to 1 and recompile the program if"
           << " you would like to use this option." << endmsg;

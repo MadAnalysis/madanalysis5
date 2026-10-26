@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,14 +22,31 @@
 ################################################################################
 
 
+"""Cut-flow counters of one cut (as read from the SampleAnalyzer SAF files)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 class CutInfo:
+    """Counters of one cut, split into events with positive and negative weights.
 
-    def __init__(self):
+    Attributes:
+        nentries_pos (``int``): number of selected events with a positive weight.
+        nentries_neg (``int``): number of selected events with a negative weight.
+        sumw_pos (``float``): sum of the positive weights.
+        sumw_neg (``float``): sum of the absolute values of the negative weights.
+        sumw2_pos (``float``): sum of the squared positive weights.
+        sumw2_neg (``float``): sum of the squared negative weights.
+        cutname (``str``): name of the cut.
+        cutregion (``str``): name of the region.
+    """
+
+    def __init__(self) -> None:
+        """Initialise the counters to zero."""
         self.Reset()
 
-    def Reset(self):
+    def Reset(self) -> None:
+        """Reset the counters to zero."""
         self.nentries_pos = 0
         self.nentries_neg = 0
         self.sumw_pos     = 0.
@@ -39,7 +56,8 @@ class CutInfo:
         self.cutname      = ""
         self.cutregion    = ""
 
-    def Print(self):
+    def Print(self) -> None:
+        """Log the counters."""
         logging.getLogger('MA5').info("nentries_pos = " + str(self.nentries_pos))
         logging.getLogger('MA5').info("nentries_neg = " + str(self.nentries_neg))
         logging.getLogger('MA5').info("sumw_pos     = " + str(self.sumw_pos))

@@ -21,6 +21,11 @@
 //
 //////////////////////////////////////////////////////
 
+/**
+ * @file SoftDrop.h
+ * @brief Soft-drop grooming (FastJet contrib RecursiveTools).
+ */
+
 #ifndef MADANALYSIS5_SOFTDROP_H
 #define MADANALYSIS5_SOFTDROP_H
 
@@ -36,6 +41,7 @@ namespace fastjet {
 
 namespace MA5 {
     namespace Substructure {
+        /** @brief Soft-drop jet grooming (arXiv:1402.2657), see the description below. */
         class SoftDrop {
 
             // SoftDrop wrapper arXiv:1402.2657.
@@ -62,6 +68,7 @@ namespace MA5 {
             //                                 data members
             //---------------------------------------------------------------------------------
             protected :
+                /** @brief FastJet soft-drop tool (owned). */
                 fastjet::contrib::SoftDrop * softDrop_;
 
             // -------------------------------------------------------------
@@ -69,17 +76,25 @@ namespace MA5 {
             // -------------------------------------------------------------
             public:
 
-                // Constructor without argument
+                /** @brief Constructor without argument (call Initialize() before use). */
+                // FIXME: the default constructor leaves the pointer(s) uninitialised, but the destructor deletes them
+                //   (undefined behaviour if Initialize() is never called).
                 SoftDrop() {}
 
-                // Destructor
+                /** @brief Destructor (deletes the soft-drop tool). */
                 ~SoftDrop();
 
                 //============================//
                 //        Initialization      //
                 //============================//
                 
-                // Constructor with arguments
+                /**
+                 * @brief Constructor with arguments (calls Initialize()).
+                 *
+                 * @param beta angular exponent beta.
+                 * @param symmetry_cut value of z_cut.
+                 * @param R0 angular normalisation.
+                 */
                 SoftDrop(
                     MAfloat32 beta,             // the value of the beta parameter
                     MAfloat32 symmetry_cut,     // the value of the cut on the symmetry measure
@@ -87,16 +102,37 @@ namespace MA5 {
                  )
                 { Initialize(beta, symmetry_cut, R0); }
 
+                /**
+                 * @brief Create the soft-drop tool.
+                 *
+                 * @param beta angular exponent beta.
+                 * @param symmetry_cut value of z_cut.
+                 * @param R0 angular normalisation.
+                 */
                 void Initialize(MAfloat32 beta, MAfloat32 symmetry_cut, MAfloat32 R0=1.);
 
                 //=======================//
                 //        Execution      //
                 //=======================//
                 
-                // Execute with a single jet
+                /**
+                 * @brief Groom a jet.
+                 *
+                 * The returned jets are allocated on the heap and are owned by the caller.
+                 *
+                 * @param jet jet to process (its constituents are used).
+                 * @return the groomed jet.
+                 */
                 const RecJetFormat * Execute(const RecJetFormat *jet) const;
 
-                // Execute with a list of jets
+                /**
+                 * @brief Groom each jet of a collection.
+                 *
+                 * The returned jets are allocated on the heap and are owned by the caller.
+                 *
+                 * @param jets jets to process.
+                 * @return the groomed jets, pT-ordered.
+                 */
                 std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets) const;
         };
     }

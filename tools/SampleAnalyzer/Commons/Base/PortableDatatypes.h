@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -21,6 +21,14 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * @file PortableDatatypes.h
+ * @brief Portable fixed-size types used throughout SampleAnalyzer (MAbool, MAint32, MAfloat64, ...).
+ *
+ * The sizes of int and long are checked by Configuration/PortabilityCheckup, which
+ * defines INT_4BYTES and LONG_8BYTES in PortabilityTags.h.
+ */
 
 #ifndef PORTABLE_DATATYPE_H
 #define PORTABLE_DATATYPE_H

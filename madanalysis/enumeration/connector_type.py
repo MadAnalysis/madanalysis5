@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,27 +22,67 @@
 ################################################################################
 
 
+"""Logical connectors between conditions of a cut (``and``, ``or``, ``xor``)."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
+        """Metaclass turning the class attribute access ``ConnectorType.NAME`` into an integer code.
+
+        Accessing ``ConnectorType.NAME`` returns the index of ``NAME`` in ``ConnectorType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
     
-        def __getattr__(self, name):
+        def __getattr__(self, name: str) -> int:
+            """Get the integer code of an enumeration entry.
+
+            Unknown names are mapped to the index of ``UNKNOWN`` instead of raising.
+
+            Args:
+                name (``str``): name of the entry (e.g. ``ConnectorType.AND``).
+
+            Returns:
+                ``int``:
+                Index of the entry in ``values``.
+            """
             if name in list(self.values.keys()):
                 return list(self.values.keys()).index(name)
             else:
                 return list(self.values.keys()).index('UNKNOWN')
 
-        def convert2string(self,op):
+        def convert2string(self,op: int) -> str:
+            """Get the user keyword of a connector.
+
+            Args:
+                op (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                ``'or'``, ``'and'``, ``'xor'`` or ``''``.
+            """
             name = list(self.values.keys())[op]
             return self.values[name][0]
 
-        def convert2cpp(self,op):
+        def convert2cpp(self,op: int) -> str:
+            """Get the C++ operator of a connector.
+
+            Args:
+                op (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                ``'||'``, ``'&&'`` or ``''`` (``xor`` has no C++ counterpart here).
+            """
             name = list(self.values.keys())[op]
             return self.values[name][1]
 
 
 @six.add_metaclass(metaclass)
 class ConnectorType(object):
+    """Logical connectors. Each entry of ``values`` is ``[user_keyword, cpp_operator]``.
+    """
     values = { 'OR'      : ["or","||"],\
                'AND'     : ["and","&&"],\
                'XOR'     : ["xor",""],\

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Selection of the fast-simulation package (``set main.fastsim.package``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.configuration.clustering_configuration import ClusteringConfiguration
 from madanalysis.configuration.delphes_configuration    import DelphesConfiguration
@@ -30,17 +34,29 @@ from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA
 import logging
 
 class FastsimConfiguration:
+    """Fast-simulation (detector) configuration of the reco mode.
+
+    Attributes:
+        package (``str``): ``"none"``, ``"fastjet"`` (jet clustering + SFS),
+            ``"delphes"`` or ``"delphesMA5tune"``.
+        clustering (``ClusteringConfiguration | int``): clustering settings (``0`` if unused).
+        delphes (``DelphesConfiguration | int``): Delphes settings (``0`` if unused).
+        delphesMA5tune (``DelphesMA5tuneConfiguration | int``): Delphes-MA5tune settings
+            (``0`` if unused).
+    """
 
     userVariables = { "package" : ["fastjet","delphes","delphesMA5tune","none"] }
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise without fast-simulation package."""
         self.clustering = 0
         self.delphes = 0
         self.delphesMA5tune = 0
         self.package    = "none"
 
         
-    def Display(self):
+    def Display(self) -> None:
+        """Log the package and its settings."""
         self.user_DisplayParameter("package")
         if self.package=="fastjet":
             self.clustering.Display()
@@ -50,7 +66,12 @@ class FastsimConfiguration:
             self.delphesMA5tune.Display()
 
 
-    def user_DisplayParameter(self,parameter):
+    def user_DisplayParameter(self,parameter: str) -> None:
+        """Log the value of one parameter (dispatched to the active package).
+
+        Args:
+            parameter (``str``): name of the parameter.
+        """
         if parameter=="package":
             logging.getLogger('MA5').info(" fast-simulation package : "+self.package)
             return
@@ -62,7 +83,13 @@ class FastsimConfiguration:
             self.delphesMA5tune.user_DisplayParameter(parameter)
 
 
-    def SampleAnalyzerConfigString(self):
+    def SampleAnalyzerConfigString(self) -> dict[str, str]:
+        """Get the options of the active package passed to SampleAnalyzer.
+
+        Returns:
+            ``dict[str, str]``:
+            Options of the active package (empty if ``none``).
+        """
         if self.package=="fastjet":
             mydict = {}
             mydict.update(self.clustering.SampleAnalyzerConfigString())
@@ -79,7 +106,24 @@ class FastsimConfiguration:
             return {}
 
 
-    def user_SetParameter(self,parameter,value,datasets,level,archi_info):
+    def user_SetParameter(self,parameter: str,value: str,datasets: Any,level: int,archi_info: Any) -> bool | None:
+        """Set the package or one of its parameters.
+
+        Switching a package on requires the reco mode, the corresponding library and no
+        LHCO/ROOT dataset; switching it off requires that no LHE/HEP/HepMC dataset is
+        imported.
+
+        Args:
+            parameter (``str``): ``package`` or a parameter of the active package.
+            value (``str``): value typed by the user.
+            datasets (``DatasetCollection``): datasets of the session.
+            level (``int``): running mode.
+            archi_info (``ArchitectureInfo``): detected configuration (available libraries).
+
+        Returns:
+            ``bool | None``:
+            Result of the sub-configuration setter, or ``None``.
+        """
 
         # algorithm
         if parameter=="package":
@@ -181,7 +225,13 @@ class FastsimConfiguration:
             return self.delphesMA5tune.user_SetParameter(parameter,value,datasets,level)
 
         
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the settable parameters.
+
+        Returns:
+            ``list[str]``:
+            ``package`` followed by the parameters of the active package.
+        """
         if self.package=="fastjet":
             table = list(FastsimConfiguration.userVariables.keys())
             table.extend(self.clustering.user_GetParameters())
@@ -196,7 +246,16 @@ class FastsimConfiguration:
         return table
 
 
-    def user_GetValues(self,variable):
+    def user_GetValues(self,variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            Suggested values, or an empty list.
+        """
         table = []
         if self.package=="fastjet":
             try:

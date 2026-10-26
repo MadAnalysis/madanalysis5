@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file Nsubjettiness.h
+ * @brief N-subjettiness (FastJet contrib Nsubjettiness).
+ */
+
 #ifndef MADANALYSIS5_NSUBJETTINESS_H
 #define MADANALYSIS5_NSUBJETTINESS_H
 
@@ -42,17 +47,22 @@ namespace fastjet {
 
 namespace MA5 {
     namespace Substructure {
+        /** @brief N-subjettiness tau_N (Thaler and Van Tilburg, arXiv:1011.2268). */
         class Nsubjettiness {
             //---------------------------------------------------------------------------------
             //                                 data members
             //---------------------------------------------------------------------------------
             protected:
+                /** @brief Order N of tau_N. */
                 MAint32 order_;
+                /** @brief Axes definition (owned). */
                 fastjet::contrib::AxesDefinition* axesdef_;
+                /** @brief Measure definition (owned). */
                 fastjet::contrib::MeasureDefinition* measuredef_;
 
             public:
 
+                /** @brief Axes definitions (the commented ones are not supported). */
                 enum AxesDef {
                     KT_Axes,
                     CA_Axes,
@@ -79,6 +89,7 @@ namespace MA5 {
     //            Comb_GenET_GenKT_Axes,     // (nExtra, delta, p, R0 = infinity)
                 };
 
+                /** @brief Measure definitions (the parameters used by each measure are given in the comments). */
                 enum MeasureDef {
                     NormalizedMeasure,            // (beta,R0)
                     UnnormalizedMeasure,          // (beta)
@@ -86,10 +97,12 @@ namespace MA5 {
                     UnnormalizedCutoffMeasure,    // (beta,Rcutoff)
                 };
 
-                /// Constructor without argument
+                /** @brief Constructor without argument (call Initialize() before use). */
+                // FIXME: the default constructor leaves the pointer(s) uninitialised, but the destructor deletes them
+                //   (undefined behaviour if Initialize() is never called).
                 Nsubjettiness() {}
 
-                /// Destructor
+                /** @brief Destructor (deletes the axes and measure definitions). */
                 ~Nsubjettiness();
 
                 //============================//
@@ -99,7 +112,16 @@ namespace MA5 {
                 // Hence it would be optimum execution to initialize the algorithm during the initialisation
                 // of the analysis
 
-                // Constructor with arguments
+                /**
+                 * @brief Constructor with arguments (calls Initialize()).
+                 *
+                 * @param order order N.
+                 * @param axesdef axes definition.
+                 * @param measuredef measure definition.
+                 * @param beta angular exponent.
+                 * @param R0 characteristic jet radius (normalised measures and anti-kt axes).
+                 * @param Rcutoff cutoff radius (cutoff measures).
+                 */
                 Nsubjettiness(
                     MAint32 order,
                     AxesDef axesdef,
@@ -110,6 +132,16 @@ namespace MA5 {
                 )
                 { Initialize(order, axesdef, measuredef, beta, R0, Rcutoff); }
 
+                /**
+                 * @brief Create the axes and measure definitions.
+                 *
+                 * @param order order N.
+                 * @param axesdef axes definition.
+                 * @param measuredef measure definition.
+                 * @param beta angular exponent.
+                 * @param R0 characteristic jet radius (normalised measures and anti-kt axes).
+                 * @param Rcutoff cutoff radius (cutoff measures).
+                 */
                 void Initialize(
                     MAint32 order,
                     AxesDef axesdef,
@@ -123,7 +155,12 @@ namespace MA5 {
                 //        Execution      //
                 //=======================//
 
-                // Method to calculate nsub for a given jet with respect to initialization parameters
+                /**
+                 * @brief Compute tau_N for a jet.
+                 *
+                 * @param jet jet to process (its constituents are used).
+                 * @return tau_N.
+                 */
                 MAdouble64 Execute(const RecJetFormat *jet) const;
         };
     }

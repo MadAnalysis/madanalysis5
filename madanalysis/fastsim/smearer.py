@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,12 +22,23 @@
 ################################################################################
 
 
+"""Resolution (smearing) functions of the SFS (``define smearer``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 class Smearer:
+    """Gaussian smearing of the observables of reconstructed objects.
+
+    Each rule is stored in :attr:`rules` as ``{key: {'id_true', 'obs', 'efficiencies': {n: {'function':
+    AST, 'bounds': AST}}}}``: several (function, bounds) pairs can be attached to the
+    same object and observable, each applying in its own domain.
+    """
 
     # Initialization
-    def __init__(self):
+    def __init__(self) -> None:
+        """Create an empty set of rules."""
         self.logger = logging.getLogger('MA5');
         self.rules = {}
         self.vars = ['PT','ETA','PHI','E','PX','PY','PZ','D0','DZ']
@@ -35,7 +46,16 @@ class Smearer:
 
     # Adding a rule to the tagger
     # The bounds and function are written as ASTs
-    def add_rule(self, id_true, obs, function, bounds):
+    def add_rule(self, id_true: str, obs: str, function: Any, bounds: Any) -> None:
+        """Add a smearing rule.
+
+        Args:
+            id_true (``str``): PDG code or label of the object.
+            obs (``str``): smeared observable (``PT``, ``ETA``, ``PHI``, ``E``, ``PX``, ``PY``,
+                ``PZ``, ``D0``, ``DZ``).
+            function (``AST``): resolution (standard deviation) formula.
+            bounds (``AST``): domain of validity.
+        """
         ## Checking whether the smearer is supported
         check, id_true = self.is_supported(id_true, obs)
         if not check:
@@ -55,7 +75,12 @@ class Smearer:
             'bounds': bounds }
 
 
-    def display(self, jetrecomode):
+    def display(self, jetrecomode: str) -> None:
+        """Log the defined smearing rules (the C++ translation is logged at debug level).
+
+        Args:
+            jetrecomode (``str``): jet reconstruction mode (``jets`` or ``constituents``).
+        """
         self.logger.info('*********************************')
         self.logger.info('       Smearer information       ')
         self.logger.info('*********************************')
@@ -81,7 +106,17 @@ class Smearer:
             self.logger.info('  --------------------')
 
 
-    def is_supported(self,id_true,obs):
+    def is_supported(self,id_true: str,obs: str) -> tuple[bool, str]:
+        """Check whether an object and observable can be smeared.
+
+        Args:
+            id_true (``str``): PDG code or label of the object.
+            obs (``str``): observable.
+
+        Returns:
+            ``tuple[bool, str]``:
+            Whether the smearing is supported, and the PDG code of the object.
+        """
         supported = {'e':'11', 'mu':'13', 'ta':'15', 'j':'21', 'a':'22', 'track':'track'}
         if not obs in self.vars:
             self.logger.error('Unsupported smearer. The smeared variable must be part of ' + \

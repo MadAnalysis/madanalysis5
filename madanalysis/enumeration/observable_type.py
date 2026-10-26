@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,26 +22,79 @@
 ################################################################################
 
 
+"""Legacy table of observables with their C++ implementation for each running mode.
+
+.. note::
+    The observables used to generate the analysis code are defined in
+    :mod:`madanalysis.observable.observable_list`; this table is still used by the
+    ``plot``/``select``/``reject`` commands for completion and validation.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import math
 import six
 
 class metaclass(type):
-        def __getattr__(self, name):
+        """Metaclass turning the class attribute access ``ObservableType.NAME`` into an integer code.
+
+        Accessing ``ObservableType.NAME`` returns the index of ``NAME`` in ``ObservableType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
+        def __getattr__(self, name: str) -> int:
+            """Get the integer code of an enumeration entry.
+
+            Unknown names are mapped to the index of ``UNKNOWN`` instead of raising.
+
+            Args:
+                name (``str``): name of the entry (e.g. ``ObservableType.PT``).
+
+            Returns:
+                ``int``:
+                Index of the entry in ``values``.
+            """
             if name in list(self.values.keys()):
                 return list(self.values.keys()).index(name)
             else:
                 return list(self.values.keys()).index('UNKNOWN')
 
-        def accept_particles(self, index):
+        def accept_particles(self, index: int) -> bool:
+            """Check whether an observable takes particles as arguments.
+
+            Args:
+                index (``int``): integer code of the entry.
+
+            Returns:
+                ``bool``:
+                ``True`` for particle observables (``PT``, ``M``, ...).
+            """
             name = list(self.values.keys())[index]
             return self.values[name][0]
 
-        def convert2string(self,index):
+        def convert2string(self,index: int) -> str:
+            """Get the name of an observable.
+
+            Args:
+                index (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                Name such as ``'PT'``.
+            """
             return list(self.values.keys())[index]
 
-        def convert2job_string(self,index,level):
+        def convert2job_string(self,index: int,level: int) -> str:
+            """Get the C++ expression of an observable for a running mode.
+
+            Args:
+                index (``int``): integer code of the entry.
+                level (``int``): running mode (:class:`~madanalysis.enumeration.ma5_running_type.MA5RunningType`).
+
+            Returns:
+                ``str``:
+                C++ code (empty if not available in this mode).
+            """
             name = list(self.values.keys())[index]
             if level==MA5RunningType.PARTON:
                 return self.values[name][1]
@@ -51,31 +104,96 @@ class metaclass(type):
                 return self.values[name][3]
             return ""
 
-        def convert2unit(self,index):
+        def convert2unit(self,index: int) -> str:
+            """Get the unit of an observable.
+
+            Args:
+                index (``int``): integer code of the entry.
+
+            Returns:
+                ``str``:
+                Unit in LaTeX-like notation (e.g. ``'GeV/c'``).
+            """
             name = list(self.values.keys())[index]
             return self.values[name][4]
 
-        def convert2nbins(self,index):
+        def convert2nbins(self,index: int) -> int:
+            """Get the default number of bins.
+
+            Args:
+                index (``int``): integer code of the entry.
+
+            Returns:
+                ``int``:
+                Number of bins.
+            """
             name = list(self.values.keys())[index]
             return self.values[name][5]
 
-        def convert2xmin(self,index):
+        def convert2xmin(self,index: int) -> float:
+            """Get the default lower bound of the histograms.
+
+            Args:
+                index (``int``): integer code of the entry.
+
+            Returns:
+                ``float``:
+                Lower bound.
+            """
             name = list(self.values.keys())[index]
             return self.values[name][6]
 
-        def convert2xmax(self,index):
+        def convert2xmax(self,index: int) -> float:
+            """Get the default upper bound of the histograms.
+
+            Args:
+                index (``int``): integer code of the entry.
+
+            Returns:
+                ``float``:
+                Upper bound.
+            """
             name = list(self.values.keys())[index]
             return self.values[name][7]
 
-        def isCuttable(self,index):
+        def isCuttable(self,index: int) -> bool:
+            """Check whether cuts can be applied on an observable.
+
+            Args:
+                index (``int``): integer code of the entry.
+
+            Returns:
+                ``bool``:
+                ``True`` if the observable can be used in cuts.
+            """
             name = list(self.values.keys())[index]
             return self.values[name][8]
 
-        def prefix(self,index):
+        def prefix(self,index: int) -> bool:
+            """Check whether combination prefixes are allowed.
+
+            Args:
+                index (``int``): integer code of the entry.
+
+            Returns:
+                ``bool``:
+                ``True`` if ``s``/``v``/``d``/``r`` prefixes are accepted.
+            """
             name = list(self.values.keys())[index]
             return self.values[name][9]
 
-        def get_list(self,level=None):
+        def get_list(self,level: int | None = None) -> list[str]:
+            """Get the observables available in a running mode (with their prefixed variants).
+
+            Args:
+                level (``int | None``, default ``None``): running mode
+                    (:class:`~madanalysis.enumeration.ma5_running_type.MA5RunningType`); parton level
+                    if ``None``.
+
+            Returns:
+                ``list[str]``:
+                Observable names, including the prefixed names (``sPT``, ``vPT``, ...).
+            """
             if level == None:
                 level = MA5RunningType.PARTON
             output = []
@@ -95,7 +213,18 @@ class metaclass(type):
                     output.append('r'+item)
             return output
 
-        def get_cutlist1(self,level=None):
+        def get_cutlist1(self,level: int | None = None) -> list[str]:
+            """Get the cuttable observables that do not take particle arguments (plus ``N``).
+
+            Args:
+                level (``int | None``, default ``None``): running mode
+                    (:class:`~madanalysis.enumeration.ma5_running_type.MA5RunningType`); parton level
+                    if ``None``.
+
+            Returns:
+                ``list[str]``:
+                Observable names usable in event-level cuts.
+            """
             if level is None:
                 level = MA5RunningType.PARTON
             output = []
@@ -113,7 +242,18 @@ class metaclass(type):
                 output.append(item)
             return output
 
-        def get_cutlist2(self,level=None):
+        def get_cutlist2(self,level: int | None = None) -> list[str]:
+            """Get the cuttable observables taking particle arguments (with prefixed variants).
+
+            Args:
+                level (``int | None``, default ``None``): running mode
+                    (:class:`~madanalysis.enumeration.ma5_running_type.MA5RunningType`); parton level
+                    if ``None``.
+
+            Returns:
+                ``list[str]``:
+                Observable names usable in candidate-level cuts.
+            """
             if level is None:
                 level = MA5RunningType.PARTON
             output = []
@@ -148,6 +288,20 @@ class metaclass(type):
 
 @six.add_metaclass(metaclass)
 class ObservableType(object):
+    """Observables and their properties.
+
+    Each entry of ``values`` is::
+
+        [accept_particles, cpp_parton, cpp_hadron, cpp_reco, unit, nbins, xmin, xmax,
+         cuttable, allow_combination_prefix]
+
+    where ``accept_particles`` tells whether the observable takes particles as
+    arguments, ``cpp_*`` is the C++ expression for each running mode (empty if the
+    observable is not available), ``nbins/xmin/xmax`` are the default binning,
+    ``cuttable`` tells whether cuts can be applied and ``allow_combination_prefix``
+    whether the ``s``/``v``/``d``/``r`` prefixes of
+    :class:`~madanalysis.enumeration.combination_type.CombinationType` are accepted.
+    """
 
     # name : accept_particles 
     values = { 'UNKNOWN' : [False,'','','','',0,0,0,False,False],\
